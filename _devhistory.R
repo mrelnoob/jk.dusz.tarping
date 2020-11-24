@@ -30,4 +30,10 @@ usethis::use_git(message = ":tada: Initial commit") # For a reason I don't under
 # address):
 # git config --global user.name "fanf"
 # git config --global user.email "francois.martin74190@gmail.com"
-# You can now, rerun the previous line.
+# You can now, rerun the previous line, and restart RStudio (otherwise, the Git tab won't appear)!!!
+
+# If, like me today, you are using a MacOS, you should also do this:
+usethis::use_git_ignore(".DS_Store")
+usethis::use_build_ignore(".DS_Store")
+# It will ignore the .DS_Store hidden file which is specific to MacOS and should not be part of a package.
+
