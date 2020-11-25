@@ -69,26 +69,52 @@ usethis::use_r("import_raw_data")
 # contain R scripts for functions and NOTHING ELSE!!! Yet, RStudio may sometimes put other things in it,
 # so it is a good idea to go and see once in a while.
 
-# To use pipes everywhere in the package without loading the "magrittr" package:
-usethis::use_pipe() # Creates automatically a pipe function (and associated R script in the R folder)
+# To use pipes everywhere in the package without explicitly loading the "magrittr" package:
+usethis::use_pipe() # Automatically creates a pipe function (and associated R file in the R folder),
+# while updating the DESCRIPTION file to tell R that it should import the "magrittr" package.
 
 # Before writing my function to import my data, I need to add my data files in the project folder.
 # So I create a "data" folder and copy-paste my data in it (manually):
 dir.create("data")
 usethis::use_git(message = ":zap: Created a data and imported data in it")
 
-# Now I can write my function in the associated R file while keeping in mind that:
-# *** I need to create a roxygen skeleton to write the documentation;
-# *** I need to add the packages I used in my functions within the "Imports" field of the DESCRIPTION;
-# *** I should NOT SOURCE my functions (i.e. I should save my function's file but do not run the
-# code in it and create "manually" the function you just wrote)! Because we will do it like that
-# to avoid conflicts:
+
+
+### Now I can write my function in the associated R file while keeping in mind that:
+#  --> I need to create a roxygen skeleton to write the documentation.
+#  --> I should NOT SOURCE my functions (i.e. I should save my function's file but do not run the
+#    code in it and create "manually" the function you just wrote) to avoid conflicts, see below!
+# IMPORTANT NOTE: if a function uses functions from other packages, you need to tell it to R by updating
+# the NAMESPACE file. It will be done automatically by devtools when we produce our documentation if we
+# have previously listed the dependencies (packages) in the Roxygen2 header of the functions thanks to the
+# tags (#' @import package OR #' @importFrom package function)! So we do this and add in our function's
+# Roxygen2 header the required tags and packages, and we DO NOT FORGET to also add these
+# dependencies in the "Imports" field of the DESCRIPTION:
+usethis::use_package("readr")
+usethis::use_package("here")
+# REMINDER: The NAMESPACE controls what happens when our package is loaded but not when it's installed.
+# This is the role of DESCRIPTION!
+
+# To load our functions, we will thus use:
 devtools::load_all() # Now, all functions in the R folder are available!
 usethis::use_git(message = ":metal: New functions: import_raw_data and pipes")
 
 devtools::document() # To create the functions' documentation in the "man" folder, and to update the
 # NAMESPACE file of the package (that should NEVER be edited manually).
 usethis::use_git(message = ":bulb: Update documentation")
+
+
+
+### To test our functions, we will use the "testthat" package:
+usethis::use_testthat()
+usethis::use_git(message = ":white_check_mark: Setup testthat")
+
+# Now, we could create some "unit tests" to test our import_raw_data.R function, but we won't modify it.
+usethis::use_test("import_raw_data")
+# Here, we don't want to do real tests because we know our function works as we want it to. For other
+# functions and purposes, we should look more closely into that (cf. lesson from N.Casajus FRB-Cesab on
+# package building)!
+# NOTE: All tests files are stored in tests/testthat/ and their names must start with test-*
 
 
 
@@ -101,18 +127,5 @@ devtools::check() # It gives me 2 warnings (one because I did not declared the "
 
 # To finally install the package
 devtools::install()
-
-
-
-### To test our functions, we will use the "testthat" package:
-usethis::use_testthat()
-usethis::use_git(message = ":white_check_mark: Setup testthat")
-
-# Now, we could create some "unit tests" to test our import_raw_data.R function, but we won't.
-# usethis::use_test("import_raw_data")
-# Here, we don't need to do that because we know our function works as we want it to. For other functions
-# and purposes, we should look more closely into that (cf. lesson from N.Casajus FRB-Cesab on package
-# building)!
-# NOTE: All tests files are stored in tests/testthat/ and their names must start with test-*
 
 usethis::use_git(message = ":bell: Update _devhistory")
