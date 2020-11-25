@@ -77,3 +77,7 @@ usethis::use_git(message = ":zap: Created data folders and imported data in them
 # conflicts:
 devtools::load_all() # Now, all functions in the R folder are available!
 usethis::use_git(message = ":metal: New functions: import_raw_data and pipes")
+
+devtools::document() # To create the functions' documentation in the "man" folder, and to update the
+# NAMESPACE file of the package (that should NEVER be edited manually).
+usethis::use_git(message = ":bulb: Update documentation")
