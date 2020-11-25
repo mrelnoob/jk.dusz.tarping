@@ -19,6 +19,10 @@
 # Here, I do not need to run it because the present script file (the one you are reading) ALREADY IS my
 # development history file!
 # From now, all the command lines will be written in this file.
+# IMPORTANT NOTE: in this case, I started a package project from scratch. If I want to start from a
+# GitHub repository, the workflow is different but some steps will be required so I encourage my future
+# self to carefully review the steps of this workflow anyway. In the end, I would be best if I transformed
+# this R development history file into a Rmd document!!!
 
 
 
@@ -60,8 +64,8 @@ usethis::use_git(message = ":page_facing_up: Add package license")
 
 
 
-# ____________________________________________________________
-##### Writing my first custom functions for this package #####
+# ________________________________________________________________________
+##### How to create my first custom functions and install my package #####
 
 ### To create a R file (script) for my first custom (personalized) function:
 usethis::use_r("import_raw_data")
@@ -137,8 +141,26 @@ usethis::use_git(message = "tada First functions work!")
 
 ### We will now update the version of our package:
 usethis::use_version(which = "minor") # It automatically updates our package version.
-usethis::use_news_md()
+usethis::use_news_md() # Creates a NEWS.md file, that I should maintain updated.
 usethis::use_git(message = ":package: Release v0.1.0")
+
+
+
+
+
+# _____________________________________________________________________________________
+##### How to connect the package to my GitHub account (in a GitHub last workflow) #####
+
+### Get a a GitHub Personal Access Token (PAT) which will allow R to control GitHub (only once):
+usethis::browse_github_token() # First, I generate a token and copy its value, and follow the instructions
+# displayed in the R console (edit the R environment etc.)...
+usethis::edit_r_environ() # ... to manually add the PAT to the R environment, save, close, and restart R...
+# Second, after restarting R, I verify:
+usethis::github_token()
+# OK! So we are ready to connect our local project to a new Github repository:
+usethis::use_github(protocol = "ssh") # I use this option as I have already generated SSH keys
+# for this computer (?). Yet, it will fail, because we need to run the following command:
+system("git push --set-upstream origin master")
 
 
 
