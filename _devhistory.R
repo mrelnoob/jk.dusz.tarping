@@ -68,3 +68,4 @@ usethis::use_r("import_raw_data")
 # So I create a "raw_data" folder inside a "data" folder and copy-paste my data in it (manually):
 dir.create("data")
 dir.create("data/raw_data")
+usethis::use_git(message = ":zap: Created data folders and imported data in them")
