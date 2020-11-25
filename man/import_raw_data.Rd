@@ -10,10 +10,10 @@ import_raw_data()
 A tibble
 }
 \description{
-Import the raw .csv file of the 2020 tarping survey data. \cr To avoid errors, please ensure that there are
-no ";" in the cells of the CSV (e.g. if comments have been made in the table cells) and that strings
-within the table are written in lower cases, without spaces or any special characters (you can write in
-English for instance).
+Import the raw .csv file of the 2020 knotweeds' tarping survey data. \cr To avoid errors, please ensure
+that there are no ";" in the cells of the CSV (e.g. if comments have been made in the table cells) and
+that strings within the table are written in lower cases, without spaces or any special characters
+(you can write in English for instance).
 }
 \examples{
 \dontrun{

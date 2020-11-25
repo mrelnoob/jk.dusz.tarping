@@ -60,8 +60,8 @@ usethis::use_git(message = ":page_facing_up: Add package license")
 
 
 
-# ___________________________________________________
-##### Writing custom functions for this package #####
+# ____________________________________________________________
+##### Writing my first custom functions for this package #####
 
 ### To create a R file (script) for my first custom (personalized) function:
 usethis::use_r("import_raw_data")
@@ -74,9 +74,12 @@ usethis::use_pipe() # Automatically creates a pipe function (and associated R fi
 # while updating the DESCRIPTION file to tell R that it should import the "magrittr" package.
 
 # Before writing my function to import my data, I need to add my data files in the project folder.
-# So I create a "data" folder and copy-paste my data in it (manually):
-dir.create("data")
-usethis::use_git(message = ":zap: Created a data and imported data in it")
+# So I create a "mydata" folder and copy-paste my data in it (manually):
+dir.create("mydata")
+usethis::use_build_ignore("mydata") # Because it is not expected in a regular package root folder (if
+# I don't ignore it, it will cause warnings in my package checks and all kind of craps. I just spent
+# five hours to get read of them, so trust me).
+usethis::use_git(message = ":zap: Created a mydata folder and imported data in it")
 
 
 
@@ -118,14 +121,17 @@ usethis::use_test("import_raw_data")
 
 
 
-### It's time to check the integrity of our package:
-devtools::check() # It gives me 2 warnings (one because I did not declared the "here" and"readr" packages
-# in the dependencies; and one because my dataset is not documented). For now, I disregard them.
+### When everything is ready, it's time to check the integrity of our package:
+devtools::check() # Ok!
+
 # IMPORTANT NOTE: I had a lot of PROBLEMS in my first attempts to create this function because the dataset
 # contained comments in French and English, with special characters and punctuation (;,:[] etc.) and R
-# thought that my punctuation was field separators! Do not put comment in .csv or .txt files!
+# thought that my punctuation was field separators! Do not put comments in .csv or .txt files!
 
-# To finally install the package
+# To finally install the package:
 devtools::install()
+
+usethis::use_git(message = "tada First functions work!")
+
 
 usethis::use_git(message = ":bell: Update _devhistory")
