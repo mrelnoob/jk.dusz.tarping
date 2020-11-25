@@ -136,7 +136,10 @@ usethis::use_git(message = "tada First functions work!")
 
 
 ### We will now update the version of our package:
-usethis::use_version(which = "minor")
+usethis::use_version(which = "minor") # It automatically updates our package version.
+usethis::use_news_md()
+usethis::use_git(message = ":package: Release v0.1.0")
+
 
 
 
