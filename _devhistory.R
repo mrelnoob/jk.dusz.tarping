@@ -16,7 +16,6 @@
 # Here, I do not need to run it because the present script file (the one you are reading) ALREADY IS my
 # development history file!
 # From now, all the command lines will be written in this file.
-# ________________________
 
 
 # As this file is not part of a typical package structure, we need to tell R to ignore it when checking
@@ -38,3 +37,11 @@ usethis::use_build_ignore(".DS_Store")
 # It will ignore the .DS_Store hidden file which is specific to MacOS and should not be part of a package.
 # And we commit this change:
 usethis::use_git(message = ":see_no_evil: Ban .DS_Store files")
+
+# Before we go any further, we will edit some information about our package using the DESCRIPTION file
+usethis::edit_file("DESCRIPTION")
+usethis::use_git(message = ":bulb: Edit package metadata")
+
+# To create the package's documentation:
+usethis::use_package_doc() # It creates a dummy file in the R folder that should NOT be modified!
+devtools::document() # Creates the documentation and the man folder (for "manual").
