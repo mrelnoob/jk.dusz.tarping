@@ -1,6 +1,8 @@
-####################################################
-##### Developement history for jk.dusz.tarping #####
-####################################################
+###################################################
+###################################################
+##### DEVELOPMENT HISTORY FOR jk.dusz.tarping #####
+###################################################
+###################################################
 
 # ________________________
 ##### Project set up #####
@@ -46,3 +48,23 @@ usethis::use_git(message = ":bulb: Edit package metadata")
 usethis::use_package_doc() # It creates a dummy file in the R folder that should NOT be modified!
 devtools::document() # Creates the documentation and the man folder (for "manual").
 usethis::use_git(message = ":bulb: Update documentation")
+
+# To associate a licence to the package
+usethis::use_mit_license(name = "Francois-Marie Martin") # Open-source license
+usethis::use_git(message = ":page_facing_up: Add package license")
+
+
+
+# ___________________________________________________
+##### Writing custom functions for this package #####
+
+# To create a R file (script) for my first custom (personalized) function:
+usethis::use_r("import_raw_data")
+# NOTE: it automatically places the R file in the R folder (as it should be). The R folder should ONLY
+# contain R scripts for functions and NOTHING ELSE!!! Yet, RStudio may sometimes put other things in it,
+# so it is a good idea to go and see once in a while.
+
+# Before writing my function to import my data, I need to add my data files in the project folder.
+# So I create a "raw_data" folder inside a "data" folder and copy-paste my data in it (manually):
+dir.create("data")
+dir.create("data/raw_data")
