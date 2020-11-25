@@ -134,4 +134,11 @@ devtools::install()
 usethis::use_git(message = "tada First functions work!")
 
 
+
+### We will now update the version of our package:
+usethis::use_version(which = "minor")
+
+
+
+
 usethis::use_git(message = ":bell: Update _devhistory")
