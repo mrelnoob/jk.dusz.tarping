@@ -45,3 +45,4 @@ usethis::use_git(message = ":bulb: Edit package metadata")
 # To create the package's documentation:
 usethis::use_package_doc() # It creates a dummy file in the R folder that should NOT be modified!
 devtools::document() # Creates the documentation and the man folder (for "manual").
+usethis::use_git(message = ":bulb: Update documentation")
