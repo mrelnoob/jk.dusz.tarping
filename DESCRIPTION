@@ -20,3 +20,5 @@ Imports:
     here
 Suggests: 
     testthat
+URL: https://github.com/mrelnoob/jk.dusz.tarping
+BugReports: https://github.com/mrelnoob/jk.dusz.tarping/issues
