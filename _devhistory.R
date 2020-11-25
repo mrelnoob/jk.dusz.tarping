@@ -36,4 +36,5 @@ usethis::use_git(message = ":tada: Initial commit") # For a reason I don't under
 usethis::use_git_ignore(".DS_Store")
 usethis::use_build_ignore(".DS_Store")
 # It will ignore the .DS_Store hidden file which is specific to MacOS and should not be part of a package.
-
+# And we commit this change:
+usethis::use_git(message = ":see_no_evil: Ban .DS_Store files")
