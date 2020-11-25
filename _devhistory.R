@@ -135,7 +135,7 @@ devtools::check() # Ok!
 # To finally install the package:
 devtools::install()
 
-usethis::use_git(message = "tada First functions work!")
+usethis::use_git(message = ":tada: First functions work!")
 
 
 
@@ -160,8 +160,9 @@ usethis::github_token()
 # OK! So we are ready to connect our local project to a new Github repository:
 usethis::use_github(protocol = "ssh") # I use this option as I have already generated SSH keys
 # for this computer (?). Yet, it will fail, because we need to run the following command:
-system("git push --set-upstream origin master")
-
+system("git push --set-upstream origin master") # Or without system() but in the Terminal.
+# Now our local project and Github are linked and synchronized (for now). After committing future
+# changes we will be able to push normally (using RStudio git panel or git push).
 
 
 
