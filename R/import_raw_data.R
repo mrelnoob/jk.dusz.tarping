@@ -1,9 +1,12 @@
 
 #' Import the Raw Dataset
 #'
-#' Import the raw CSV file of the 2020 tarping survey data.
+#' Import the raw .csv file of the 2020 tarping survey data. \cr To avoid errors, please ensure that there are
+#' no ";" in the cells of the CSV (e.g. if comments have been made in the table cells) and that strings
+#' within the table are written in lower cases, without spaces or any special characters (you can write in
+#' English for instance).
 #'
-#' @return A dataframe
+#' @return A tibble
 #' @export
 #'
 #' @examples
@@ -11,5 +14,6 @@
 #' mydata <- import_raw_data()
 #' }
 import_raw_data <- function(){
-  readr::read_csv2(file = here::here("data", "raw_data", "data_tarping.csv"), col_names = TRUE)
+  x <- readr::read_delim(here::here("data", "data_tarping_x.csv"), delim = ";", col_names = TRUE)
+  return(x)
 }
