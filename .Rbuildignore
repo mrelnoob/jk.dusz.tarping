@@ -6,3 +6,8 @@
 ^mydata$
 ^README\.Rmd$
 ^README\.html$
+^\.drake$
+^_drake\.R$
+^make\.R$
+^output$
+^text$

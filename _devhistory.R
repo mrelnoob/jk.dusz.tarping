@@ -201,10 +201,51 @@ system("git push")
 # Now, I will try to carry on my data analysis process while and place it into a Drake workflow to ensure
 # the reproducibility, consistency and robustness of my process.I am not sure if I will integrate the
 # following part into my package (because it's fairly time consuming) but I will try.
+# It should not be a problem not to transform everything as a package. As long as I don't use the commends
+# meant for package building (such as devtools::check() or document()), there should be no reasons for
+# errors (I guess)...
+
 
 # ______________________________________________________________
 ##### How to clean my data while starting a Drake project  #####
-usethis::use_r(name = "clean_my_data")
+
+### First, I have to create the scripts for the different elements of my plan:
+usethis::use_r(name = "01_data_cleaning.R")
+usethis::use_r(name = "02_data_preparation.R") # These first 2 scripts are what others call "wrangle"
+usethis::use_r(name = "03_modelling.R")
+usethis::use_r(name = "plan.R") # Do not forget to create the "plan" of your Drake pipeline
+
+# Then I have to create the make.R file (kind of master script) and a "_drake.R" file (but I'm not
+# sure why yet):
+file.create("make.R")
+file.create("_drake.R")
+
+# To create new folders (directories) to store the various kind of results my analysis will produce:
+dir.create("output")
+dir.create("output/plots")
+dir.create("output/text")
+
+# I also need to ignore most of these files:
+usethis::use_build_ignore(".drake")
+usethis::use_build_ignore("_drake.R")
+usethis::use_build_ignore("make.R")
+usethis::use_git_ignore(".drake")
+usethis::use_build_ignore("output/")
+usethis::use_build_ignore("text/") # And not plots/ ?????
+
+
+
+### Second, to analyse my data, I will use various packages (dependencies), so I need to fill-in
+# the DESCRIPTION file about them in order to load them afterwards with devtools:
+usethis::use_package("drake")
+usethis::use_package("dplyr")
+usethis::use_package("ggplot2")
+usethis::use_package("forcats")
+usethis::use_package("fishualize")
+
+usethis::use_git(message = ":boom: Creates first files and folders for Drake + Data Cleaning")
+
+
 
 usethis::use_git(message = ":bell: Update _devhistory")
 system("git push")

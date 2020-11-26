@@ -17,7 +17,11 @@ RoxygenNote: 7.1.1
 Imports: 
     magrittr,
     readr,
-    here
+    here,
+    drake,
+    dplyr,
+    ggplot2,
+    forcats
 Suggests: 
     testthat
 URL: https://github.com/mrelnoob/jk.dusz.tarping
