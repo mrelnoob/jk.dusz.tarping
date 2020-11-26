@@ -242,9 +242,16 @@ usethis::use_package("dplyr")
 usethis::use_package("ggplot2")
 usethis::use_package("forcats")
 usethis::use_package("fishualize")
+devtools::load_all() # Not sure if I truly need to do this...
 
 usethis::use_git(message = ":boom: Creates first files and folders for Drake + Data Cleaning")
+system("git push")
 
+
+
+
+usethis::use_git(message = ":metal: Updated my cleaning script")
+##### FOR DATA WRANGLING: do not forget to EMPTY your environment and DELETE files after wrangling!
 
 
 usethis::use_git(message = ":bell: Update _devhistory")
