@@ -250,7 +250,7 @@ system("git push")
 
 
 
-usethis::use_git(message = ":metal: Updated my cleaning script")
+usethis::use_git(message = ":arrow_up: Updated the dataset (error fixing)")
 ##### FOR DATA WRANGLING: do not forget to EMPTY your environment and DELETE files after wrangling!
 
 

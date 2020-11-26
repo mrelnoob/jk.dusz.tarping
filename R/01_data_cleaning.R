@@ -4,7 +4,7 @@
 
 
 ### Import the raw data
-raw_data <- import_raw_data()
+raw_data <- jk.dusz.tarping::import_raw_data()
 
 
 ### Transform character variables into factors
@@ -81,6 +81,9 @@ raw_data <- dplyr::mutate(raw_data,
 
 ### Description
 summary(raw_data)
+
+
+###
 
 
 # SHOULD I separate my data into several tibbles (response variables, predictors, others)??? But generally
