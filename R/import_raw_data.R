@@ -6,7 +6,8 @@
 #' that strings within the table are written in lower cases, without spaces or any special characters
 #' (you can write in English for instance).
 #'
-#' @return A tibble
+#' @return A tibble (i.e. a kind of improved data.frame). For further information on tibbles, please refer to
+#' the \link[tidyverse]{paper} or \link[readr]{readr} documentation.
 #' @export
 #' @importFrom readr read_delim
 #' @importFrom here here

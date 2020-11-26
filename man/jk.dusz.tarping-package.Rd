@@ -10,6 +10,14 @@ This package project is meant to clean, prepare, and statistically analyse the d
     the 2020 Survey on tarping as a control method for Japanese knotweed s.l. (Reynoutria spp.), launched
     by Marie-Anne Dusz, André Evette, Fanny Dommanget and me.
 }
+\seealso{
+Useful links:
+\itemize{
+  \item \url{https://github.com/mrelnoob/jk.dusz.tarping}
+  \item Report bugs at \url{https://github.com/mrelnoob/jk.dusz.tarping/issues}
+}
+
+}
 \author{
 \strong{Maintainer}: Francois-Marie Martin \email{francois-marie.martin@inrae.fr}
 

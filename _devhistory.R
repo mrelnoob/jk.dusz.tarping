@@ -181,7 +181,8 @@ usethis::use_git_ignore("README.html")
 
 usethis::use_git(message = ":pencil: Edit README")
 system("git push")
-
+# IMPORTANT NOTE: Each time you edit the README.Rmd you will have to update the .md
+# with rmarkdown::render("README.Rmd") and, of course, you should also commit+push it to update GitHub!
 
 
 usethis::use_git(message = ":bell: Update _devhistory")
