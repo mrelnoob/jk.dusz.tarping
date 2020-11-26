@@ -195,11 +195,16 @@ system("git push")
 # Up to this point, I've created a working package called `jk.dusz.tarping` whose sole function is to
 # load the unique CSV file that is stored in the mydata folder. It is not very useful nor compulsory
 # to use have a proper Research Compendium nor to use Drake. But I wanted to have a very clean and well
-# commented "development history" file to help me build future more useful packages.
-#
+# commented "development history" file to help me build future more useful packages. I'll delete it
+# if I finally take the time to change this file into a proper tutorial (in RMarkdown).
+
+# Now, I will try to carry on my data analysis process while and place it into a Drake workflow to ensure
+# the reproducibility, consistency and robustness of my process.I am not sure if I will integrate the
+# following part into my package (because it's fairly time consuming) but I will try.
 
 # ______________________________________________________________
 ##### How to clean my data while starting a Drake project  #####
 usethis::use_r(name = "clean_my_data")
 
 usethis::use_git(message = ":bell: Update _devhistory")
+system("git push")
