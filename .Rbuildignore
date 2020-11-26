@@ -4,3 +4,5 @@
 ^\.DS_Store$
 ^LICENSE\.md$
 ^mydata$
+^README\.Rmd$
+^README\.html$

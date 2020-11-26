@@ -167,4 +167,21 @@ system("git push --set-upstream origin master") # Or without system() but in the
 
 
 
+
+# ____________________________________________________
+##### How to add a README file to our repository #####
+
+usethis::use_readme_rmd() # Creates a README.Rmd and add it automatically to .Rbuildignore (and opens it).
+# After manually editing the file, we need to compile it into a .md document (otherwise, GitHub and
+# the CRAN won't be able to read it and display it on their websites):
+rmarkdown::render("README.Rmd")
+# As render() also produces a .html file that is not useful here, we will ignore it:
+usethis::use_build_ignore("README.html")
+usethis::use_git_ignore("README.html")
+
+usethis::use_git(message = ":pencil: Edit README")
+system("git push")
+
+
+
 usethis::use_git(message = ":bell: Update _devhistory")
