@@ -8,7 +8,7 @@ raw_data <- jk.dusz.tarping::import_raw_data()
 
 
 ### Transform character variables into factors
-raw_data <- dplyr::mutate(raw_data,
+clean_data <- dplyr::mutate(raw_data,
                           xp_id = as.factor(xp_id),
                           country = as.factor(country),
                           goals = as.factor(goals),
@@ -27,7 +27,7 @@ raw_data <- dplyr::mutate(raw_data,
                           latest_regrowth = as.factor(latest_regrowth),
                           latest_months = as.factor(latest_months))
 # As well as boolean variables:
-raw_data <- dplyr::mutate(raw_data,
+clean_data <- dplyr::mutate(clean_data,
                           restoration = as.factor(restoration),
                           multiple_ops = as.factor(multiple_ops),
                           liner_geomem = as.factor(liner_geomem),
@@ -80,10 +80,11 @@ raw_data <- dplyr::mutate(raw_data,
 
 
 ### Description
-summary(raw_data)
+summary(clean_data) # Ok!
 
 
-###
+### Creating a lighter version of the dataset containing only the variables potentially used in the models
+
 
 
 # SHOULD I separate my data into several tibbles (response variables, predictors, others)??? But generally

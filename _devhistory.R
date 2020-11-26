@@ -254,5 +254,5 @@ usethis::use_git(message = ":arrow_up: Updated the dataset (error fixing)")
 ##### FOR DATA WRANGLING: do not forget to EMPTY your environment and DELETE files after wrangling!
 
 
-usethis::use_git(message = ":bell: Update _devhistory")
+usethis::use_git(message = ":bell: Update personal scripts")
 system("git push")
