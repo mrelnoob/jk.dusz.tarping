@@ -183,4 +183,23 @@ system("git push")
 # with rmarkdown::render("README.Rmd") and, of course, you should also commit+push it to update GitHub!
 
 
+
+
+
+####################################
+####################################
+##### Using the Drake workflow #####
+####################################
+####################################
+
+# Up to this point, I've created a working package called `jk.dusz.tarping` whose sole function is to
+# load the unique CSV file that is stored in the mydata folder. It is not very useful nor compulsory
+# to use have a proper Research Compendium nor to use Drake. But I wanted to have a very clean and well
+# commented "development history" file to help me build future more useful packages.
+#
+
+# ______________________________________________________________
+##### How to clean my data while starting a Drake project  #####
+usethis::use_r(name = "clean_my_data")
+
 usethis::use_git(message = ":bell: Update _devhistory")
