@@ -7,7 +7,7 @@
 #' (you can write in English for instance).
 #'
 #' @return A tibble (i.e. a kind of improved data.frame). For further information on tibbles, please refer to
-#' the \link[tidyverse]{paper} or \link[readr]{readr} documentation.
+#' the `tidyverse` or \link[readr]{readr} documentation.
 #' @export
 #' @importFrom readr read_delim
 #' @importFrom here here

@@ -8,7 +8,7 @@ import_raw_data()
 }
 \value{
 A tibble (i.e. a kind of improved data.frame). For further information on tibbles, please refer to
-the \link[tidyverse]{paper} or \link[readr]{readr} documentation.
+the \code{tidyverse} or \link[readr]{readr} documentation.
 }
 \description{
 Import the raw .csv file of the 2020 knotweeds' tarping survey data. \cr To avoid errors, please ensure

@@ -113,11 +113,11 @@ usethis::use_git(message = ":bulb: Update documentation")
 
 
 ### To test our functions, we will use the "testthat" package:
-usethis::use_testthat()
-usethis::use_git(message = ":white_check_mark: Setup testthat")
+#usethis::use_testthat()
+#usethis::use_git(message = ":white_check_mark: Setup testthat")
 
 # Now, we could create some "unit tests" to test our import_raw_data.R function, but we won't modify it.
-usethis::use_test("import_raw_data")
+#usethis::use_test("import_raw_data")
 # Here, we don't want to do real tests because we know our function works as we want it to. For other
 # functions and purposes, we should look more closely into that (cf. lesson from N.Casajus FRB-Cesab on
 # package building)!
@@ -127,14 +127,12 @@ usethis::use_test("import_raw_data")
 
 ### When everything is ready, it's time to check the integrity of our package:
 devtools::check() # Ok!
-
 # IMPORTANT NOTE: I had a lot of PROBLEMS in my first attempts to create this function because the dataset
 # contained comments in French and English, with special characters and punctuation (;,:[] etc.) and R
 # thought that my punctuation was field separators! Do not put comments in .csv or .txt files!
 
 # To finally install the package:
 devtools::install()
-
 usethis::use_git(message = ":tada: First functions work!")
 
 
