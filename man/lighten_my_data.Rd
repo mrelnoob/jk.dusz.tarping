@@ -12,7 +12,7 @@ A tibble.
 \description{
 This function creates a slightly lighter version of the cleaned knotweed's
 tarping survey dataset by removing the variables that will not be used in any of the future models
-(such as purely descritptive variables).
+(such as purely descriptive variables).
 }
 \examples{
 \dontrun{

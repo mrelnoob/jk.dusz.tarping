@@ -2,6 +2,33 @@
 ##### DATA CLEANING #####
 #########################
 
+### IMPORTANT NOTE: to avoid creating notes for unquoted variables, I must add the following code at
+# the beginning of every source file (e.g. R/myscript.R) that uses unquoted variables, so in front of
+# all my scripts doing any kind of analyses (otherwise, I should always assign each variable, e.g.
+# mydata$myvariable, which is quite time consuming and wearisome).
+if(getRversion() >= "2.15.1")  utils::globalVariables(c(
+  "xp_id", "country", "latitude", "longitude", "elevation", "tarping_date", "planned_duration", "goals",
+  "restoration", "operation_type", "multiple_ops", "freq_monitoring", "slope", "difficulty_access",
+  "shade", "forest", "ruggedness", "granulometry", "obstacles", "flood", "environment", "fabric_type",
+  "liner_geomem", "agri_geomem", "woven_geotex", "mulching_geotex", "pla_geotex", "weedsp_geotex",
+  "other_unknown", "grammage", "thickness", "resi_punc", "resi_trac", "season", "maxveg", "preparation",
+  "levelling", "stand_surface", "age", "fully_tarped", "distance", "multi_strips", "strips_overlap",
+  "strips_fixation", "staples_distance", "fabric_fixation", "tarpfix_multimethod", "sedicover_height",
+  "trench", "trench_depth", "pierced_tarpinstall", "plantation", "repairs", "add_control",
+  "add_control_type", "degradation", "pb_fixation", "pb_durability", "pb_trampiercing", "pb_vandalism",
+  "regrowth_during", "reg_staples", "reg_stripoverlaps", "reg_obstacles", "reg_holes", "reg_plantations",
+  "reg_pierced", "reg_edges", "reg_nearby", "untarped_regrowth", "tarping_abandoned", "tarping_completed",
+  "tarping_ongoing", "tarping_duration", "latest_condition", "latest_regrowth", "latest_months",
+  "eff_expansion", "eff_dispersal", "eff_vigour", "eff_eradication"))
+# Alternatively, here's another solution (to insert within a given function) when the number of unquoted
+# variables is low:
+# planned_duration <- age <- plantation <- NULL
+# Avoids potentially problematic NOTE during the R CMD check (i.e. devtools::check()) due to the
+# fact that these 3 variables are un-quoted (also known as non-standard evaluation (NSE)). If you want
+# to find again how I know that, just run a Google search with some of the NOTE message "package: no
+# visible binding for global variable" (I read a r-blogger.com post about it).
+
+
 # _____________________________________________________________________
 ### Creation of function to automatically detect boolean (binary) data:
 #' Find Binary Variables
@@ -53,11 +80,6 @@ clean_my_data <- function(){
   raw_data <- jk.dusz.tarping::import_raw_data()
   # Transform character variables into factors, ordinal variables into ordered factors, and boolean/binary
   # variables into factors:
-  planned_duration <- age <- plantation <- NULL # I need to do this NULL trick because otherwise, there
-  # will be a potentially problematic NOTE during the R CMD check (i.e. devtools::check()) due to the
-  # fact that these 3 variables are un-quoted (also known as non-standard evaluation (NSE)). If you want
-  # to find again how I know that, just run a Google search with some of the NOTE message "package: no
-  # visible binding for global variable" (I read a r-blogger.com post about it).
   raw_data %>%
     dplyr::mutate(planned_duration = factor(x = planned_duration, ordered = TRUE),
                   age = factor(x = age, ordered = TRUE),
@@ -76,12 +98,11 @@ clean_my_data <- function(){
 #'
 #' @description This function creates a slightly lighter version of the cleaned knotweed's
 #' tarping survey dataset by removing the variables that will not be used in any of the future models
-#' (such as purely descritptive variables).
+#' (such as purely descriptive variables).
 #'
 #' @return A tibble.
 #' @export
 #' @importFrom dplyr select
-#' @importFrom utils globalVariables
 #'
 #' @examples
 #' \dontrun{
@@ -90,9 +111,6 @@ clean_my_data <- function(){
 lighten_my_data <- function(){
   # Importation and cleaning
   toto <- clean_my_data()
-
-  # To avoid problems with unquoted variables:
-  globalVariables(names(toto))
 
   # Lighten my data
   toto %>%
@@ -112,4 +130,3 @@ lighten_my_data <- function(){
                   eff_expansion, eff_vigour, eff_eradication) -> tata
   return(tata)
 }
-
