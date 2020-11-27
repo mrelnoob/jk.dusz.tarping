@@ -53,6 +53,11 @@ clean_my_data <- function(){
   raw_data <- jk.dusz.tarping::import_raw_data()
   # Transform character variables into factors, ordinal variables into ordered factors, and boolean/binary
   # variables into factors:
+  planned_duration <- age <- plantation <- NULL # I need to do this NULL trick because otherwise, there
+  # will be a potentially problematic NOTE during the R CMD check (i.e. devtools::check()) due to the
+  # fact that these 3 variables are un-quoted (also known as non-standard evaluation (NSE)). If you want
+  # to find again how I know that, just run a Google search with some of the NOTE message "package: no
+  # visible binding for global variable" (I read a r-blogger.com post about it).
   raw_data %>%
     dplyr::mutate(planned_duration = factor(x = planned_duration, ordered = TRUE),
                   age = factor(x = age, ordered = TRUE),
