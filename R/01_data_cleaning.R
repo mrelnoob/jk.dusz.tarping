@@ -66,3 +66,49 @@ clean_my_data <- function(){
     dplyr::mutate_if(is_binary, factor) -> cleaned_data
   return(cleaned_data)
 }
+
+
+
+
+
+### __________________________
+#' Lighter Version of the Data
+#'
+#' @description This function creates a slightly lighter version of the cleaned knotweed's
+#' tarping survey dataset by removing the variables that will not be used in any of the future models
+#' (such as purely descritptive variables).
+#'
+#' @return A tibble.
+#' @export
+#' @import dplyr
+#'
+#' @examples
+#' \dontrun{
+#' my_light_dataset <- lighten_my_data()
+#' }
+lighten_my_data <- function(){
+  # Importation and cleaning
+  toto <- clean_my_data()
+
+  # To avoid problems with unquoted variables:
+  #globalVariables(names(my_data))
+
+  # Lighten my data
+  toto %>%
+    dplyr::select(xp_id, latitude, longitude, elevation, tarping_date, goals, operation_type, freq_monitoring,
+                  slope, difficulty_access, shade, forest, ruggedness, granulometry, obstacles, flood,
+                  liner_geomem, agri_geomem, woven_geotex, mulching_geotex, pla_geotex, weedsp_geotex,
+                  other_unknown, grammage, thickness, resi_punc, resi_trac,
+                  season, maxveg, preparation, levelling, stand_surface, age, fully_tarped, distance,
+                  multi_strips, strips_overlap, strips_fixation, staples_distance, fabric_fixation,
+                  tarpfix_multimethod, sedicover_height, trench_depth, pierced_tarpinstall, plantation,
+                  repairs, add_control, add_control_type,
+                  degradation, pb_fixation, pb_durability, pb_trampiercing, pb_vandalism,
+                  reg_staples, reg_stripoverlaps, reg_obstacles, reg_holes, reg_plantations, reg_pierced,
+                  reg_edges, reg_nearby,
+                  tarping_abandoned, tarping_completed, tarping_ongoing, tarping_duration, latest_condition,
+                  latest_regrowth, latest_months,
+                  eff_expansion, eff_vigour, eff_eradication) -> tata
+  return(tata)
+}
+
