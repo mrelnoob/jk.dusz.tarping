@@ -104,7 +104,7 @@ usethis::use_package("here")
 
 # To load our functions, we will thus use:
 devtools::load_all() # Now, all functions in the R folder are available!
-usethis::use_git(message = ":metal: New functions: import_raw_data and pipes")
+usethis::use_git(message = ":metal: New functions: is_binary")
 
 devtools::document() # To create the functions' documentation in the "man" folder, and to update the
 # NAMESPACE file of the package (that should NEVER be edited manually).
@@ -250,7 +250,6 @@ system("git push")
 
 
 
-usethis::use_git(message = ":arrow_up: Updated the dataset (error fixing)")
 ##### FOR DATA WRANGLING: do not forget to EMPTY your environment and DELETE files after wrangling!
 
 
