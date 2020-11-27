@@ -80,7 +80,8 @@ clean_my_data <- function(){
 #'
 #' @return A tibble.
 #' @export
-#' @import dplyr
+#' @importFrom dplyr select
+#' @importFrom utils globalVariables
 #'
 #' @examples
 #' \dontrun{
