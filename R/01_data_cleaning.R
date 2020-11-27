@@ -91,7 +91,7 @@ lighten_my_data <- function(){
   toto <- clean_my_data()
 
   # To avoid problems with unquoted variables:
-  #globalVariables(names(my_data))
+  globalVariables(names(toto))
 
   # Lighten my data
   toto %>%
