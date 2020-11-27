@@ -206,10 +206,11 @@ system("git push")
 # errors (I guess)...
 
 
-# ______________________________________________________________
-##### How to clean my data while starting a Drake project  #####
 
-### First, I have to create the scripts for the different elements of my plan:
+# _____________________________________________________
+##### STEP 1 - Preparing the Drake project set up #####
+
+### I have to create the scripts for the different elements of my plan:
 usethis::use_r(name = "01_data_cleaning.R")
 usethis::use_r(name = "02_data_preparation.R") # These first 2 scripts are what others call "wrangle"
 usethis::use_r(name = "03_modelling.R")
@@ -235,23 +236,33 @@ usethis::use_build_ignore("text/") # And not plots/ ?????
 
 
 
-### Second, to analyse my data, I will use various packages (dependencies), so I need to fill-in
-# the DESCRIPTION file about them in order to load them afterwards with devtools:
+
+
+# ________________________________________________________
+##### STEP 2 - Populating my data processing scripts #####
+
+### To analyse my data, I will use various packages (dependencies), so I need to fill-in the DESCRIPTION
+# file about them in order to load them afterwards with devtools (in case I don't carry on with the
+# package creation:
 usethis::use_package("drake")
 usethis::use_package("dplyr")
 usethis::use_package("ggplot2")
 usethis::use_package("forcats")
 usethis::use_package("fishualize")
-devtools::load_all() # Not sure if I truly need to do this...
+#devtools::load_all() # Not sure if I truly need to do this...
 
-usethis::use_git(message = ":boom: Creates first files and folders for Drake + Data Cleaning")
+
+
+### Up to this point, I have created the "cleaning" functions for the first part of my data processing.
+# So my 01_data_cleaning.R file is populated with some functions and the package works. So NOW, I need
+# to start addressing my data preparation step and start keeping tracks of my data wrangling and data
+# future analyses in a .Rmd report.
+# Therefore, I create such .Rmd manually because file.create(... = "output/text/test.Rmd") does not
+# insert the skeleton within the file (YAML etc.) and I'm running late...
+usethis::use_git(message = ":boom: Creates data_preparation_report.Rmd")
 system("git push")
-
 
 
 
 ##### FOR DATA WRANGLING: do not forget to EMPTY your environment and DELETE files after wrangling!
 
-
-usethis::use_git(message = ":bell: Update personal scripts")
-system("git push")
