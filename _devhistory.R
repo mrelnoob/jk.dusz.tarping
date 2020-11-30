@@ -259,7 +259,7 @@ usethis::use_package("fishualize")
 # future analyses in a .Rmd report.
 # Therefore, I create such .Rmd manually because file.create(... = "output/text/test.Rmd") does not
 # insert the skeleton within the file (YAML etc.) and I'm running late...
-usethis::use_git(message = ":boom: Creates data_preparation_report.Rmd")
+usethis::use_git(message = ":arrow_up: Creates jk.d.tarp.data_preparation_report.Rmd + Update data (new data)")
 system("git push")
 
 
