@@ -26,10 +26,10 @@ sessionInfo()
 # - Data visualisation and exploration  
 ## - Data summary
 
-First, let's take a look at our dataset. For the meaning of the variables, please refer to the attached **documentation**.
+First, let's take a quick look at our dataset. For the meaning of the variables, please refer to the attached **documentation**.
 
 ```{r data import and summary, message=FALSE, comment=NA}
-
+library(jk.dusz.tarping)
 zzz_mydata_cleaned <- jk.dusz.tarping::clean_my_data()
 
 summary(zzz_mydata_cleaned)
@@ -39,14 +39,23 @@ summary(zzz_mydata_cleaned)
 
 
 
-## - Data exploration following Zuur *et al.* (2020)
-### - Looking for outliers
+## - Data exploration following Zuur *et al.* (2010)
+
+In order to build valid and meaningful models to explain or predict the success/failure of tarping operations for the control of Japanese knotweed *s.l.*, we need first to learn more about our data. Therefore, we thoroughly examined our variables (e.g. outliers, distribution, interactions, colinearity, variance homogeneity, observation independence) following the protocol presented by Zuur *et al.* (2010) for each of our **7 response variables**: *eff_eradication*, *eff_expansion*, *eff_vigour*, *latest_reg_edges*, *reg_overlaps*, *latest_condition*, and *pb_fixation*.
+
+
+### - For the *eradication efficiency* response variable
+
+```{r erad import, include=FALSE}
+erad <- jk.dusz.tarping::model_datasets(response.var = "efficiency")
+erad %>% dplyr::select(-eff_expansion, -eff_vigour, -goals) %>%
+  dplyr::filter(eff_eradication != "NA") -> erad
+```
+
+
+#### - Looking for outliers
 
 We will look for potential outliers in the data using **boxplots** and **Cleveland dotplots**.
-
-```{r}
-
-```
 
     
 

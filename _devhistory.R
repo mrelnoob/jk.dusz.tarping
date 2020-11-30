@@ -250,6 +250,8 @@ usethis::use_package("dplyr")
 usethis::use_package("ggplot2")
 usethis::use_package("forcats")
 usethis::use_package("fishualize")
+usethis::use_package("Hmisc")
+usethis::use_package("ggcorrplot")
 #devtools::load_all() # Not sure if I truly need to do this...
 
 
@@ -260,7 +262,7 @@ usethis::use_package("fishualize")
 # future analyses in a .Rmd report.
 # Therefore, I create such .Rmd manually because file.create(... = "output/text/test.Rmd") does not
 # insert the skeleton within the file (YAML etc.) and I'm running late...
-usethis::use_git(message = ":boom: Creates function model_datasets()")
+usethis::use_git(message = ":octocat: Progresses saved!")
 system("git push")
 
 

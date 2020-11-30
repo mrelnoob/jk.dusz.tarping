@@ -22,7 +22,9 @@ Imports:
     dplyr,
     ggplot2,
     forcats,
-    stringr
+    stringr,
+    Hmisc,
+    ggcorrplot
 Suggests: 
     testthat
 URL: https://github.com/mrelnoob/jk.dusz.tarping
