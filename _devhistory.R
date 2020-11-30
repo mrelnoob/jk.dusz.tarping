@@ -99,6 +99,7 @@ usethis::use_git(message = ":zap: Created a mydata folder and imported data in i
 # dependencies in the "Imports" field of the DESCRIPTION:
 usethis::use_package("readr")
 usethis::use_package("here")
+usethis::use_package("stringr")
 # REMINDER: The NAMESPACE controls what happens when our package is loaded but not when it's installed.
 # This is the role of DESCRIPTION!
 
@@ -259,7 +260,7 @@ usethis::use_package("fishualize")
 # future analyses in a .Rmd report.
 # Therefore, I create such .Rmd manually because file.create(... = "output/text/test.Rmd") does not
 # insert the skeleton within the file (YAML etc.) and I'm running late...
-usethis::use_git(message = ":arrow_up: Creates jk.d.tarp.data_preparation_report.Rmd + Update data (new data)")
+usethis::use_git(message = ":boom: Creates function model_datasets()")
 system("git push")
 
 

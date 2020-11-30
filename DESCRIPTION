@@ -21,7 +21,8 @@ Imports:
     drake,
     dplyr,
     ggplot2,
-    forcats
+    forcats,
+    stringr
 Suggests: 
     testthat
 URL: https://github.com/mrelnoob/jk.dusz.tarping
