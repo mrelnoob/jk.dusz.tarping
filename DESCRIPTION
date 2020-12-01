@@ -24,7 +24,10 @@ Imports:
     forcats,
     stringr,
     Hmisc,
-    ggcorrplot
+    ggcorrplot,
+    ade4,
+    FactoMineR,
+    factoextra
 Suggests: 
     testthat
 URL: https://github.com/mrelnoob/jk.dusz.tarping

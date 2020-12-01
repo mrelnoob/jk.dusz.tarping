@@ -252,6 +252,9 @@ usethis::use_package("forcats")
 usethis::use_package("fishualize")
 usethis::use_package("Hmisc")
 usethis::use_package("ggcorrplot")
+usethis::use_package("ade4")
+usethis::use_package("FactoMineR")
+usethis::use_package("factoextra")
 #devtools::load_all() # Not sure if I truly need to do this...
 
 

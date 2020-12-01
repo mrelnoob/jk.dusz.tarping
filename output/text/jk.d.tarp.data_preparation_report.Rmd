@@ -43,6 +43,8 @@ summary(zzz_mydata_cleaned)
 
 In order to build valid and meaningful models to explain or predict the success/failure of tarping operations for the control of Japanese knotweed *s.l.*, we need first to learn more about our data. Therefore, we thoroughly examined our variables (e.g. outliers, distribution, interactions, colinearity, variance homogeneity, observation independence) following the protocol presented by Zuur *et al.* (2010) for each of our **7 response variables**: *eff_eradication*, *eff_expansion*, *eff_vigour*, *latest_reg_edges*, *reg_overlaps*, *latest_condition*, and *pb_fixation*.
 
+As our global dataset contains many variables (*n* = 81), it would be interesting to reduce their number in order to spare time for further exploration and analyses. As such, the first steps of our data exploration for each response variable will aim at reducing the dimensionality of the data. First, we will try and see if the *environmental variables* can be coerced into a synthetic variable (e.g. through a PCA). Second, we will investigate correlations among variables as well as potential colinearity. This should bear the twofold advantage of improve our understanding of the data and enable us to remove colinear and too strongly correlated variables.
+
 
 ### - For the *eradication efficiency* response variable
 
@@ -52,8 +54,42 @@ erad %>% dplyr::select(-eff_expansion, -eff_vigour, -goals) %>%
   dplyr::filter(eff_eradication != "NA") -> erad
 ```
 
+#### - Investigation of correlation structures
+##### - Multivariate analyses of environmental variables
 
-#### - Looking for outliers
+We performed a **normed-PCA** on some of our environmental variables for which we do not have strong hypotheses (i.e. *difficulty_access*, *shade*, *forest*, *ruggedness*, *granulometry*) but we keep *slope*, *obstacles*, and *flood* because we suspect they might have a major influence on the success/failure of tarping.
+
+```{r erad PCAs, include=TRUE}
+xxx <- erad[,5:12] %>% dplyr::select(-freq_monitoring, -slope) # I use this un-convenient form to be able to call "eff_eradication" in the PCA function of FactoMineR (column n°1 in the following formula):
+res.pca <- FactoMineR::PCA(X = xxx, scale.unit = TRUE, quali.sup = 1, graph = FALSE)
+eig.val <- factoextra::get_eigenvalue(res.pca)
+factoextra::fviz_eig(res.pca, addlabels = TRUE, ylim = c(0, 50))
+# To get the correlation circle for this PCA, with a variable coloration according to their contribution to the first 2 principal components:
+factoextra::fviz_pca_var(res.pca, col.var = "contrib",
+             gradient.cols = c("#00AFBB", "#E7B800", "#FC4E07"), repel = TRUE)
+
+# As the first axis (PC) of my PCA satisfactorily synthesizes a large amount of the variance of my 5 variables (38.2%), I will use the coordinates of the tarping operations on this axis as a synthetic variable:
+ttt <- res.pca$ind$coord[,1] 
+erad %>% dplyr::select(-difficulty_access, -shade, -forest, -ruggedness) %>%
+  dplyr::rename(coarse_env = "granulometry") -> erad
+erad$coarse_env <- ttt # And I use this occasion to reduce the dataset and replace one variable with my new synthetic variable.
+rm(res.pca, xxx, ttt)
+```
+
+
+##### - Correlation among variables and potential colinearity
+
+Let's take a look at the correlation matrix of our dataset. We will thus use the KUYLUHGLKHLHGLGL
+
+```{r}
+corr <- round(cor(mtcars), 1)
+corr_erad <- round(stats::cor(erad), 1)
+
+```
+
+
+
+##### - Looking for outliers
 
 We will look for potential outliers in the data using **boxplots** and **Cleveland dotplots**.
 
