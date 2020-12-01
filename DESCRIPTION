@@ -27,7 +27,8 @@ Imports:
     ggcorrplot,
     ade4,
     FactoMineR,
-    factoextra
+    factoextra,
+    gridExtra
 Suggests: 
     testthat
 URL: https://github.com/mrelnoob/jk.dusz.tarping

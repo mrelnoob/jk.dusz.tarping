@@ -16,6 +16,7 @@ knitr::opts_chunk$set(echo = FALSE)
 ## - System information for my session  
 
 ```{r session information}
+rm(list=ls())
 sessionInfo()
 ```
   
@@ -43,7 +44,7 @@ summary(zzz_mydata_cleaned)
 
 In order to build valid and meaningful models to explain or predict the success/failure of tarping operations for the control of Japanese knotweed *s.l.*, we need first to learn more about our data. Therefore, we thoroughly examined our variables (e.g. outliers, distribution, interactions, colinearity, variance homogeneity, observation independence) following the protocol presented by Zuur *et al.* (2010) for each of our **7 response variables**: *eff_eradication*, *eff_expansion*, *eff_vigour*, *latest_reg_edges*, *reg_overlaps*, *latest_condition*, and *pb_fixation*.
 
-As our global dataset contains many variables (*n* = 81), it would be interesting to reduce their number in order to spare time for further exploration and analyses. As such, the first steps of our data exploration for each response variable will aim at reducing the dimensionality of the data. First, we will try and see if the *environmental variables* can be coerced into a synthetic variable (e.g. through a PCA). Second, we will investigate correlations among variables as well as potential colinearity. This should bear the twofold advantage of improve our understanding of the data and enable us to remove colinear and too strongly correlated variables.
+As our global dataset contains many variables (*n* = 81), it would be interesting to reduce their number in order to spare time for further exploration and analyses. As such, the first steps of our data exploration for each response variable will aim at reducing the dimensionality of the data. Firstly, we will try and see if the *environmental variables* can be coerced into a synthetic variable (e.g. through a PCA). Secondly, we will also see if we can get meaningful synthetic variables for the *fabric-related variables* (as they are 9 of them). Finally, we will investigate correlations among variables as well as potential colinearity. This should bear the twofold advantage of improve our understanding of the data and enable us to remove colinear and too strongly correlated variables.
 
 
 ### - For the *eradication efficiency* response variable
@@ -55,15 +56,22 @@ erad %>% dplyr::select(-eff_expansion, -eff_vigour, -goals) %>%
 ```
 
 #### - Investigation of correlation structures
-##### - Multivariate analyses of environmental variables
+##### - Multivariate synthesis of environmental variables
 
-We performed a **normed-PCA** on some of our environmental variables for which we do not have strong hypotheses (i.e. *difficulty_access*, *shade*, *forest*, *ruggedness*, *granulometry*) but we keep *slope*, *obstacles*, and *flood* because we suspect they might have a major influence on the success/failure of tarping.
+We performed a **normed-PCA** on some of our environmental variables for which we do not have strong hypotheses (i.e. *difficulty_access*, *shade*, *forest*, *ruggedness*, *granulometry*) but we kept *slope*, *obstacles*, and *flood* because we suspected they might have a major influence on the success/failure of tarping. In order to get optimum results, we imputed missing values using the *Regularised Iterative PCA algorithm* (Josse & Husson, 2013) of the `missMDA` package (Josse & Husson, 2016). 
 
-```{r erad PCAs, include=TRUE}
-xxx <- erad[,5:12] %>% dplyr::select(-freq_monitoring, -slope) # I use this un-convenient form to be able to call "eff_eradication" in the PCA function of FactoMineR (column n°1 in the following formula):
-res.pca <- FactoMineR::PCA(X = xxx, scale.unit = TRUE, quali.sup = 1, graph = FALSE)
-eig.val <- factoextra::get_eigenvalue(res.pca)
-factoextra::fviz_eig(res.pca, addlabels = TRUE, ylim = c(0, 50))
+```{r erad env PCAs, warning=FALSE, fig.align='center', fig.cap="**Figure 1.** Correlation plot of the normed-PCA on environmental variables for the *eradication efficiency* dataset"}
+xxx <- erad[,6:12] %>% dplyr::select(-freq_monitoring, -slope) 
+
+# As there are missing values in some variables, we will impute them using the missPCA() function.
+# But first, we need to estimate how many components are required to correctly impute the missing values:
+nb <- missMDA::estim_ncpPCA(xxx, ncp.max=5) # Can be time consuming. Here, the best result is 0 but we will take 2 as it is (almost) the second best option.
+# Then we impute the missing values and extract the imputed dataset:
+res.imput <- missMDA::imputePCA(X = xxx, method = "Regularized", scale = TRUE, ncp = 2)
+xxx <- res.imput$completeObs # Gives the completed dataset!
+
+# Normed-PCA:
+res.pca <- FactoMineR::PCA(X = xxx, scale.unit = TRUE, graph = FALSE)
 # To get the correlation circle for this PCA, with a variable coloration according to their contribution to the first 2 principal components:
 factoextra::fviz_pca_var(res.pca, col.var = "contrib",
              gradient.cols = c("#00AFBB", "#E7B800", "#FC4E07"), repel = TRUE)
@@ -73,20 +81,82 @@ ttt <- res.pca$ind$coord[,1]
 erad %>% dplyr::select(-difficulty_access, -shade, -forest, -ruggedness) %>%
   dplyr::rename(coarse_env = "granulometry") -> erad
 erad$coarse_env <- ttt # And I use this occasion to reduce the dataset and replace one variable with my new synthetic variable.
-rm(res.pca, xxx, ttt)
+
+# To plot side by side:
+#gridExtra::grid.arrange(FIG_1, FIG_2, ncol = 2)
+rm(res.pca, res.imput, xxx, ttt, nb)
 ```
+
+As the first axis (PC) of our PCA satisfactorily synthesizes a large amount (38.2%) of the variance of the 5 environmental variables, we will use operations' coordinates on this axis to build a synthetic variable to summarize their environment. This new variable will be named **coarse_env** and will thus replace the other 5 variables in the dataset. Operations with *positive values* for this variable are located in sites that tend to be forested (and thus shaded), difficult to access, with uneven ground and a coarse soil texture (and vice-versa).
+
+
+##### - Multivariate analyses of fabric-related variables
+
+We performed a BBHPAIZUHPZIUDHAPZIUDHAZPUIDHAZPDOIUHA
+
+In order to get optimum results, we imputed missing values using the *regularised Iterative FAMD algorithm* (Audigier *et al.*, 2013) of the `missMDA` package (Josse & Husson, 2016). 
+
+```{r erad fabric FAMD, warning=FALSE, fig.align='center', fig.cap="**Figure 2.** Correlation plot of the normed-PCA on environmental variables for the *eradication efficiency* dataset"}
+xxx <- erad[,11:19]
+
+# As there are missing values in some variables, we will impute them using the missFAMD() function.
+# But first, we need to estimate how many components are required to correctly impute the missing values:
+#nb <- missMDA::estim_ncpFAMD(don = xxx, ncp.max = 5) # Is VERY time consuming. Here, the best result is 4!
+# Then we impute the missing values and extract the imputed dataset:
+res.imput <- missMDA::imputeFAMD(X = xxx, method = "Regularized", ncp = 4)
+yyy <- res.imput$completeObs # Gives the completed dataset!
+xxx <- res.imput$tab.disj
+
+# Factor Analysis for Mixed Data:
+res.famd <- FactoMineR::FAMD(base = yyy, tab.disj = xxx)
+FactoMineR::summary.FAMD(object = res.famd, nb.dec = 2)
+
+
+
+# To get the correlation circle for this PCA, with a variable coloration according to their contribution to the first 2 principal components:
+factoextra::fviz_pca_var(res.pca, col.var = "contrib",
+             gradient.cols = c("#00AFBB", "#E7B800", "#FC4E07"), repel = TRUE)
+
+# As the first axis (PC) of my PCA satisfactorily synthesizes a large amount of the variance of my 5 variables (38.2%), I will use the coordinates of the tarping operations on this axis as a synthetic variable:
+ttt <- res.pca$ind$coord[,1] 
+erad %>% dplyr::select(-difficulty_access, -shade, -forest, -ruggedness) %>%
+  dplyr::rename(coarse_env = "granulometry") -> erad
+erad$coarse_env <- ttt # And I use this occasion to reduce the dataset and replace one variable with my new synthetic variable.
+
+# To plot side by side:
+#gridExtra::grid.arrange(FIG_1, FIG_2, ncol = 2)
+rm(res.famd, res.imput, xxx, ttt, nb)
+```
+
+As the first axis (PC) of our PCA satisfactorily synthesizes a large amount (38.2%) of the variance of the 5 environmental variables, we will use operations' coordinates on this axis to build a synthetic variable to summarize their environment. This new variable will be named **coarse_env** and will thus replace the other 5 variables in the dataset. Operations with *positive values* for this variable are located in sites that tend to be forested (and thus shaded), difficult to access, with uneven ground and a coarse soil texture (and vice-versa).
 
 
 ##### - Correlation among variables and potential colinearity
 
-Let's take a look at the correlation matrix of our dataset. We will thus use the KUYLUHGLKHLHGLGL
+To investigate potential correlations and colinearity among our variables, we will start by computing a **correlation matrix** of the data. As most of our factors are either ordered factors (i.e. ordinal variables) or binary factors (i.e. boolean), we can use them in a correlation matrix. To do that however, computations will be based on *Spearman*'s rank correlation coefficient.
 
-```{r}
-corr <- round(cor(mtcars), 1)
-corr_erad <- round(stats::cor(erad), 1)
+```{r erad corrplot, fig.align='center', fig.cap="**Figure 3.** Correlation matrix displaying *Spearman*'s $\\rho$ for the numeric variables and ordered factors of the *eradication efficiency* dataset", warning=FALSE}
+# To convert all ordered factors into numeric variables usable in a correlation matrix:
+erad %>% dplyr::select(-xp_id, -season, -preparation, -add_control_type) -> num.erad
+num.erad <-  dplyr::mutate_if(.tbl = num.erad, .predicate = is.factor, .funs = as.character)
+num.erad <-  dplyr::mutate_if(.tbl = num.erad, .predicate = is.character, .funs = as.numeric) # I use this double conversion-trick because, for an unknown reason, I failed to do it any other way!
+#num.erad <- erad[, sapply(erad, is.numeric)] # Select only numeric columns.
 
+
+# To compute the correlation matrix:
+res.cor.erad <- round(stats::cor(num.erad, use = "complete.obs", method = "spearman"), 2)
+# To compute a matrix of correlation p-values:
+res.pcor.erad <- ggcorrplot::cor_pmat(num.erad)
+
+ggcorrplot::ggcorrplot(res.cor.erad, type = "upper",
+   outline.col = "white",
+   ggtheme = ggplot2::theme_gray,
+   colors = c("#6D9EC1", "white", "#E46726"))
+
+rm(num.erad, res.cor.erad, res.pcor.erad)
 ```
 
+Many interesting patterns can be observed in this correlation matrix. Among them, we can see that *eff_eradication* seems to be (quite strongly) positively correlated with *tarping_duration*, *sedicover_height*, *distance*, and *fully_tarped* and negatively with *repairs*. Actually, *repairs* is strongly correlated with various other variables. BLABLABLA
 
 
 ##### - Looking for outliers

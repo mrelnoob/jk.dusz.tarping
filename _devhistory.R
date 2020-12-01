@@ -255,6 +255,7 @@ usethis::use_package("ggcorrplot")
 usethis::use_package("ade4")
 usethis::use_package("FactoMineR")
 usethis::use_package("factoextra")
+usethis::use_package("gridExtra")
 #devtools::load_all() # Not sure if I truly need to do this...
 
 
