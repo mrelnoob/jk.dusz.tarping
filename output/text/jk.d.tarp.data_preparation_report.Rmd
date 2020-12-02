@@ -44,14 +44,14 @@ summary(zzz_mydata_cleaned)
 
 In order to build valid and meaningful models to explain or predict the success/failure of tarping operations for the control of Japanese knotweed *s.l.*, we need first to learn more about our data. Therefore, we thoroughly examined our variables (e.g. outliers, distribution, interactions, colinearity, variance homogeneity, observation independence) following the protocol presented by Zuur *et al.* (2010) for each of our **7 response variables**: *eff_eradication*, *eff_expansion*, *eff_vigour*, *latest_reg_edges*, *reg_overlaps*, *latest_condition*, and *pb_fixation*.
 
-As our global dataset contains many variables (*n* = 81), it would be interesting to reduce their number in order to spare time for further exploration and analyses. As such, the first steps of our data exploration for each response variable will aim at reducing the dimensionality of the data. Firstly, we will try and see if the *environmental variables* can be coerced into a synthetic variable (e.g. through a PCA). Secondly, we will also see if we can get meaningful synthetic variables for the *fabric-related variables* (as they are 9 of them). Finally, we will investigate correlations among variables as well as potential colinearity. This should bear the twofold advantage of improve our understanding of the data and enable us to remove colinear and too strongly correlated variables.
+As our global dataset contains many variables (*n* = 81), it would be interesting to reduce their number in order to spare time for further exploration and analyses. As such, the first steps of our data exploration for each response variable will aim at reducing the dimensionality of the data. First, we will try and see if the *environmental variables* can be coerced into a synthetic variable (e.g. through a PCA). Then, we will investigate correlations among variables as well as potential colinearity. This should bear the twofold advantage of improve our understanding of the data and enable us to remove colinear and too strongly correlated variables.
 
 
 ### - For the *eradication efficiency* response variable
 
 ```{r erad import, include=FALSE}
 erad <- jk.dusz.tarping::model_datasets(response.var = "efficiency")
-erad %>% dplyr::select(-eff_expansion, -eff_vigour, -goals) %>%
+erad %>% dplyr::select(-eff_expansion, -eff_vigour, -goals, -woven_geotex, -thickness) %>%
   dplyr::filter(eff_eradication != "NA") -> erad
 ```
 
@@ -90,52 +90,11 @@ rm(res.pca, res.imput, xxx, ttt, nb)
 As the first axis (PC) of our PCA satisfactorily synthesizes a large amount (38.2%) of the variance of the 5 environmental variables, we will use operations' coordinates on this axis to build a synthetic variable to summarize their environment. This new variable will be named **coarse_env** and will thus replace the other 5 variables in the dataset. Operations with *positive values* for this variable are located in sites that tend to be forested (and thus shaded), difficult to access, with uneven ground and a coarse soil texture (and vice-versa).
 
 
-##### - Multivariate analyses of fabric-related variables
-
-We performed a BBHPAIZUHPZIUDHAPZIUDHAZPUIDHAZPDOIUHA
-
-In order to get optimum results, we imputed missing values using the *regularised Iterative FAMD algorithm* (Audigier *et al.*, 2013) of the `missMDA` package (Josse & Husson, 2016). 
-
-```{r erad fabric FAMD, warning=FALSE, fig.align='center', fig.cap="**Figure 2.** Correlation plot of the normed-PCA on environmental variables for the *eradication efficiency* dataset"}
-xxx <- erad[,11:19]
-
-# As there are missing values in some variables, we will impute them using the missFAMD() function.
-# But first, we need to estimate how many components are required to correctly impute the missing values:
-#nb <- missMDA::estim_ncpFAMD(don = xxx, ncp.max = 5) # Is VERY time consuming. Here, the best result is 4!
-# Then we impute the missing values and extract the imputed dataset:
-res.imput <- missMDA::imputeFAMD(X = xxx, method = "Regularized", ncp = 4)
-yyy <- res.imput$completeObs # Gives the completed dataset!
-xxx <- res.imput$tab.disj
-
-# Factor Analysis for Mixed Data:
-res.famd <- FactoMineR::FAMD(base = yyy, tab.disj = xxx)
-FactoMineR::summary.FAMD(object = res.famd, nb.dec = 2)
-
-
-
-# To get the correlation circle for this PCA, with a variable coloration according to their contribution to the first 2 principal components:
-factoextra::fviz_pca_var(res.pca, col.var = "contrib",
-             gradient.cols = c("#00AFBB", "#E7B800", "#FC4E07"), repel = TRUE)
-
-# As the first axis (PC) of my PCA satisfactorily synthesizes a large amount of the variance of my 5 variables (38.2%), I will use the coordinates of the tarping operations on this axis as a synthetic variable:
-ttt <- res.pca$ind$coord[,1] 
-erad %>% dplyr::select(-difficulty_access, -shade, -forest, -ruggedness) %>%
-  dplyr::rename(coarse_env = "granulometry") -> erad
-erad$coarse_env <- ttt # And I use this occasion to reduce the dataset and replace one variable with my new synthetic variable.
-
-# To plot side by side:
-#gridExtra::grid.arrange(FIG_1, FIG_2, ncol = 2)
-rm(res.famd, res.imput, xxx, ttt, nb)
-```
-
-As the first axis (PC) of our PCA satisfactorily synthesizes a large amount (38.2%) of the variance of the 5 environmental variables, we will use operations' coordinates on this axis to build a synthetic variable to summarize their environment. This new variable will be named **coarse_env** and will thus replace the other 5 variables in the dataset. Operations with *positive values* for this variable are located in sites that tend to be forested (and thus shaded), difficult to access, with uneven ground and a coarse soil texture (and vice-versa).
-
-
 ##### - Correlation among variables and potential colinearity
 
 To investigate potential correlations and colinearity among our variables, we will start by computing a **correlation matrix** of the data. As most of our factors are either ordered factors (i.e. ordinal variables) or binary factors (i.e. boolean), we can use them in a correlation matrix. To do that however, computations will be based on *Spearman*'s rank correlation coefficient.
 
-```{r erad corrplot, fig.align='center', fig.cap="**Figure 3.** Correlation matrix displaying *Spearman*'s $\\rho$ for the numeric variables and ordered factors of the *eradication efficiency* dataset", warning=FALSE}
+```{r erad corrplot, fig.align='center', fig.cap="**Figure 2.** Correlation matrix displaying *Spearman*'s $\\rho$ for the numeric variables and ordered factors of the *eradication efficiency* dataset. Only significant correlations are displayed (with $\\alpha$ = 0.05)", warning=FALSE}
 # To convert all ordered factors into numeric variables usable in a correlation matrix:
 erad %>% dplyr::select(-xp_id, -season, -preparation, -add_control_type) -> num.erad
 num.erad <-  dplyr::mutate_if(.tbl = num.erad, .predicate = is.factor, .funs = as.character)
@@ -146,23 +105,74 @@ num.erad <-  dplyr::mutate_if(.tbl = num.erad, .predicate = is.character, .funs 
 # To compute the correlation matrix:
 res.cor.erad <- round(stats::cor(num.erad, use = "complete.obs", method = "spearman"), 2)
 # To compute a matrix of correlation p-values:
-res.pcor.erad <- ggcorrplot::cor_pmat(num.erad)
+res.pcor.erad <- ggcorrplot::cor_pmat(x = num.erad, method = "spearman")
 
 ggcorrplot::ggcorrplot(res.cor.erad, type = "upper",
    outline.col = "white",
    ggtheme = ggplot2::theme_gray,
-   colors = c("#6D9EC1", "white", "#E46726"))
+   colors = c("#6D9EC1", "white", "#E46726"), p.mat = res.pcor.erad, insig = "blank")
 
 rm(num.erad, res.cor.erad, res.pcor.erad)
 ```
 
-Many interesting patterns can be observed in this correlation matrix. Among them, we can see that *eff_eradication* seems to be (quite strongly) positively correlated with *tarping_duration*, *sedicover_height*, *distance*, and *fully_tarped* and negatively with *repairs*. Actually, *repairs* is strongly correlated with various other variables. BLABLABLA
+Many interesting patterns can be observed in this correlation matrix. Among them, we can see that:
+
+* *eff_eradication* seems to be mildly positively correlated with *tarping_duration*, *sedicover_height*, *distance*, and *fully_tarped* and negatively with *obstacles*. 
+* *add_control*, *rapairs* and *plantation* display a relatively similar pattern of positive correlation with *coarse_env* and negative correlation with *weedsp_geotex* and *maxveg*. However, this pattern certainly bears the mark of our own tarping experiments in Chalon that were installed in June and where we did not repaired set ups nor performed additional controls nor planted anything (most correlations with *weedsp_geotex* should also be influenced by our experiments).
+* *pb_fixation* seems to be strongly positively correlated with *pla_geotex*.
+* *stand_surface* seems to be strongly positively correlated with *flood*.
+
+It is worth reminding that these correlations are just correlations (not **causation**) and only bivariate. Accounting for multivariate relationships and interactions will certainly give very different patterns.
 
 
 ##### - Looking for outliers
 
-We will look for potential outliers in the data using **boxplots** and **Cleveland dotplots**.
+We will look for potential outliers in the data using **boxplots** and **Cleveland dotplots** on our quantitative variables. 
 
-    
+```{r erad boxplot outliers, fig.align='center', fig.cap="**Figure 3.** Boxplots for all quantitative variables of the *eradication efficiency* dataset", warning=FALSE}
+### IMPORTANT NOTE: as ggplot2 requires data in the long format to be able to do multi-panels plots (known as facets), we need to transform our data using the pivot_longer() function of {tidyr}. 
+# To keep only numeric columns: num.erad <- erad[, sapply(erad, is.numeric)]; or we can do:
 
+# With ggplot2, it is time-consuming!
+#erad %>%
+  #purrr::keep(is.numeric) %>% # Keep only numeric columns
+  #tidyr::pivot_longer(cols = tidyselect::everything()) %>% # Pivot every columns
+  #ggplot2::ggplot(ggplot2::aes(x = name, y = value)) +
+  #ggplot2::geom_boxplot(fill = "lightsalmon") +
+  #ggplot2::theme_minimal() -> ppp
+#ppp + ggplot2::facet_wrap( ~ name, scales = "free")
 
+#RColorBrewer::display.brewer.all() To display all the colors in {RColorBrewer}
+
+num.erad <- erad[, sapply(erad, is.numeric)]
+nam <- names(num.erad)
+
+par(mfrow= c (4,4), mar=c(0.5,4,1.5,0.5), cex.lab = 1.3, bty = "n", col.axis = "gray15", cex = 0.9)
+for (i in c(1:ncol(num.erad))) {
+  boxplot(num.erad[,i],ylab =(nam[i]), type = "n", border = "lightsalmon4", col = "lightsalmon", pch = 19) }
+
+rm(aa, num.erad, i, nam)
+```
+
+```{r erad dotplot, fig.align='center', fig.cap="**Figure 4.** Cleveland dotplots for all quantitative variables of the *eradication efficiency* dataset"}
+num.erad <- erad[, sapply(erad, is.numeric)]
+
+lattice::dotplot(x = as.matrix(num.erad), groups = FALSE,
+        strip = lattice::strip.custom(bg = 'white',
+                             par.strip.text = list(cex = 0.8)),
+        scales = list(x = list(relation = "free"),
+                      y = list(relation = "free"),
+                      draw = FALSE),
+        col="lightsalmon", cex  = 0.6, pch = 16,
+        xlab = "Observation's value",
+        ylab = "Observation's order")
+
+rm(num.erad)
+```
+
+By the look of these graphs, it is clear that we have many *extreme values* (possible outliers) and non-Normal variables. Yet, extreme values are not necessarily **true outliers**:
+
+* The variables *slope* and *coarse_env*  look fine.
+* The variables *obstacles*, *flood*, *distance*, *strips_overlap*, *trench_depth*, and *tarping_duration* may require mild transformations to be normalized but do not seem to contain too extreme values.
+* The variables *elevation*, *freq_monitoring*, *grammage*, *sedicover_height*, and *pierced_install* may require important transformations to be normalized. It would be interesting to see if their extreme values are too far from what could be expected from a Normal distribution (see next section).
+* The variables *latitude*, *longitude*, and *stand_surface* contain problematic patterns/outliers. As latitude and longitude are supposed to be used as ***random effects*** in our models, I do not know what would the consequences of extreme values BLABLABLA§§§§§§§§§
