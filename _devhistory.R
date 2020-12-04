@@ -266,7 +266,7 @@ usethis::use_package("gridExtra")
 # future analyses in a .Rmd report.
 # Therefore, I create such .Rmd manually because file.create(... = "output/text/test.Rmd") does not
 # insert the skeleton within the file (YAML etc.) and I'm running late...
-usethis::use_git(message = ":octocat: Progresses saved!")
+usethis::use_git(message = ":arrow_up: Data updated!")
 system("git push")
 
 
