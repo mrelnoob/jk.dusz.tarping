@@ -147,9 +147,21 @@ We will look for potential outliers in the data using **boxplots** and **Clevela
 num.erad <- erad[, sapply(erad, is.numeric)]
 nam <- names(num.erad)
 
-par(mfrow= c (4,4), mar=c(0.5,4,1.5,0.5), cex.lab = 1.3, bty = "n", col.axis = "gray15", cex = 0.9)
+par(mfrow= c (4,4), mar=c(0.3,3.8,1.1,1), cex.lab = 0.9, bty = "n", col.axis = "gray15", cex = 0.9)
 for (i in c(1:ncol(num.erad))) {
-  boxplot(num.erad[,i],ylab =(nam[i]), type = "n", border = "lightsalmon4", col = "lightsalmon", pch = 19) }
+  boxplot(num.erad[,i],ylab =(nam[i]), type = "n", border = "lightsalmon3", col = "beige", pch = 19) }
+
+
+
+par(mfrow=c(1,3), font.lab = 3, font.axis = 2, bty = "n", col.axis = "gray15", cex = 0.9, mar = c(2.1, 4.1, 3.5, 0.5))
+      ff1 <- sdata[grep(".sc.", sdata$Type_ouvrage),]
+      ff <- as.data.frame(ff1[,3])
+      gr <- ff1$position
+      boxplot(ff[,1]~gr, data = ff, ylim = c(0,200), type = "n", ann = FALSE, border = "gray10", col = c("darkolivegreen3", "darkgreen", "darkolivegreen4"), boxwex = 0.7)
+      mtext(text = "Fascine site \nriverbanks", side = 3, line = 1, outer = FALSE, cex = 1.2, font = 2)
+      mtext(text = "Slope (%)", side = 2, line = 2.5, outer = FALSE, cex = 1.2, font = 2)
+
+
 
 rm(aa, num.erad, i, nam)
 ```
@@ -175,4 +187,4 @@ By the look of these graphs, it is clear that we have many *extreme values* (pos
 * The variables *slope* and *coarse_env*  look fine.
 * The variables *obstacles*, *flood*, *distance*, *strips_overlap*, *trench_depth*, and *tarping_duration* may require mild transformations to be normalized but do not seem to contain too extreme values.
 * The variables *elevation*, *freq_monitoring*, *grammage*, *sedicover_height*, and *pierced_install* may require important transformations to be normalized. It would be interesting to see if their extreme values are too far from what could be expected from a Normal distribution (see next section).
-* The variables *latitude*, *longitude*, and *stand_surface* contain problematic patterns/outliers. As latitude and longitude are supposed to be used as ***random effects*** in our models, I do not know what would the consequences of extreme values BLABLABLA§§§§§§§§§
+* The variables *latitude*, *longitude*, and *stand_surface* contain problematic patterns/outliers. As latitude and longitude are supposed to be used as ***random effects*** in our models, I do not know (yet) what would be the consequences of extreme values or bimodal distributions (but I guess it is not good).
