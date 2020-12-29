@@ -68,7 +68,7 @@ usethis::use_git(message = ":page_facing_up: Add package license")
 ##### How to create my first custom functions and install my package #####
 
 ### To create a R file (script) for my first custom (personalized) function:
-usethis::use_r("import_raw_data")
+usethis::use_r("00_import_raw_data")
 # NOTE: it automatically places the R file in the R folder (as it should be). The R folder should ONLY
 # contain R scripts for functions and NOTHING ELSE!!! Yet, RStudio may sometimes put other things in it,
 # so it is a good idea to go and see once in a while.
@@ -117,7 +117,7 @@ usethis::use_git(message = ":bulb: Update documentation")
 #usethis::use_testthat()
 #usethis::use_git(message = ":white_check_mark: Setup testthat")
 
-# Now, we could create some "unit tests" to test our import_raw_data.R function, but we won't modify it.
+# Now, we could create some "unit tests" to test our 00_import_raw_data.R function, but we won't modify it.
 #usethis::use_test("import_raw_data")
 # Here, we don't want to do real tests because we know our function works as we want it to. For other
 # functions and purposes, we should look more closely into that (cf. lesson from N.Casajus FRB-Cesab on
@@ -266,7 +266,7 @@ usethis::use_package("gridExtra")
 # future analyses in a .Rmd report.
 # Therefore, I create such .Rmd manually because file.create(... = "output/text/test.Rmd") does not
 # insert the skeleton within the file (YAML etc.) and I'm running late...
-usethis::use_git(message = ":arrow_up: Report updated!")
+usethis::use_git(message = ":octocat: Slight function updates")
 system("git push")
 
 

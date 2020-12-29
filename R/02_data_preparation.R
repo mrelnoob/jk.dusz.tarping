@@ -147,3 +147,22 @@ model_datasets <- function(response.var = c("efficiency", "edges", "overlaps",
   }
   return(tapioca)
 }
+
+
+
+
+
+
+# uni.boxplot <- function(){
+#   num.erad <- erad[, sapply(erad, is.numeric)]
+#   nam <- names(num.erad)
+#
+#   par(mfrow= c (4,4), mar=c(0.5,4.1,1.1,1.5), cex.lab = 1, font.lab=2, bty = "n", fg = "gray35",
+#       col.axis = "gray35", col.lab = "gray20", cex = 0.8, tcl = -0.3,
+#       mgp = c(2.4, 0.6, 0), oma = c(1, 0, 0, 0))
+#   for (i in c(1:ncol(num.erad))) {
+#     boxplot(num.erad[,i],ylab =(nam[i]), type = "n", border = "lightcoral", col = "moccasin",
+#             lty = 1, staplewex = 0, whisklwd = 2, boxwex=0.7, boxlwd=0.1, medlwd=2.6, pch = 19, cex = 0.7) }
+#
+# }
+
