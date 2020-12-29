@@ -152,17 +152,74 @@ model_datasets <- function(response.var = c("efficiency", "edges", "overlaps",
 
 
 
+# _________________________________________
+### Creation of a function that draws univariate boxplots for all numeric variables in a given dataset:
 
-# uni.boxplot <- function(){
-#   num.erad <- erad[, sapply(erad, is.numeric)]
-#   nam <- names(num.erad)
-#
-#   par(mfrow= c (4,4), mar=c(0.5,4.1,1.1,1.5), cex.lab = 1, font.lab=2, bty = "n", fg = "gray35",
-#       col.axis = "gray35", col.lab = "gray20", cex = 0.8, tcl = -0.3,
-#       mgp = c(2.4, 0.6, 0), oma = c(1, 0, 0, 0))
-#   for (i in c(1:ncol(num.erad))) {
-#     boxplot(num.erad[,i],ylab =(nam[i]), type = "n", border = "lightcoral", col = "moccasin",
-#             lty = 1, staplewex = 0, whisklwd = 2, boxwex=0.7, boxlwd=0.1, medlwd=2.6, pch = 19, cex = 0.7) }
-#
-# }
+#' Univariate boxplots
+#'
+#' @description The `uni.boxplot` function draws, within a single panel, an independent boxplot for each
+#' numeric (continuous or discrete) variable in a given dataset. It is particularly useful for data
+#' exploration (e.g. Zuur \emph{et al.}, 2010). For instance, to simultaneously observe the
+#' distributions of all numeric variables or \strong{to detect their univariate outliers}.
+#'
+#' @details The `uni.boxplot` function only modifies the graphical parameters of the
+#' \code{\link[graphics:boxplot]{boxplot}} function in the `graphics` package to match some predefined
+#' preferences. Therefore, default values of `uni.boxplot` create nice looking boxplots but retain
+#' default \emph{heuristic} aspects of `boxplot` (such as the length of whiskers or the plotting of
+#' outliers). These aspects can however be changed as in \code{\link[graphics:boxplot]{boxplot}}. \cr
+#' On the other hand, panel parameters are internally controlled using `par`. However, to avoid unforeseen
+#' conflicts with other internal parameters, it is not possible to tune panel parameters as we would
+#' do with `par`. Instead, parametrization is only possible with the given subset of parameters.
+#'
+#' @param dataset
+#' @param mar
+#' @param cex.lab
+#' @param font.lab
+#' @param bty
+#' @param fg
+#' @param col.axis
+#' @param col.lab
+#' @param cex.par
+#' @param tcl
+#' @param mgp
+#' @param oma
+#' @param type
+#' @param border
+#' @param col
+#' @param lty
+#' @param staplewex
+#' @param whisklwd
+#' @param boxwex
+#' @param boxlwd
+#' @param medlwd
+#' @param pch
+#' @param cex
+#' @param ...
+#'
+#' @return
+#' @export
+#' @import graphics
+#'
+#' @examples
+#' \dontrun{
+#' data(TRUC)
+#' etc.
+#' }
+uni.boxplot <- function(dataset, mar=c(0.5,4.1,1.1,1.5), cex.lab=1, font.lab=2, bty = "n", fg = "gray35",
+                        col.axis = "gray35", col.lab = "gray20", cex.par = 0.8, tcl = -0.3,
+                        mgp = c(2.4, 0.6, 0), oma = c(1, 0, 0, 0),
+                        type = "n", border = "lightcoral", col = "moccasin",  lty = 1, staplewex = 0,
+                        whisklwd = 2, boxwex = 0.7, boxlwd = 0.1, medlwd = 2.6, pch = 19, cex = cex, ...){
+  num.data <- dataset[, sapply(dataset, is.numeric)]
+  nam <- names(num.data)
+  ncol.data <- ncol(num.data)
+  ncol.adjust <- ceiling(x = ncol.data/4) # Round to the next integer (e.g. ceiling(x = 7.12) returns 8)!
+
+  graphics::par(mfrow= c(ncol.adjust,4), mar=mar, cex.lab=cex.lab, font.lab=font.lab, bty=bty, fg=fg,
+      col.axis=col.axis, col.lab=col.lab, cex=cex.par, tcl=tcl, mgp=mgp, oma=oma)
+  for (i in c(1:ncol.data)) {
+    graphics::boxplot(num.data[,i],ylab =(nam[i]), type=type, border=border, col = col,
+            lty=lty, staplewex=staplewex, whisklwd=whisklwd, boxwex=boxwex, boxlwd=boxlwd,
+            medlwd=medlwd, pch=pch, cex=cex, ...) }
+  }
 
