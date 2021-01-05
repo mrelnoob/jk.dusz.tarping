@@ -134,7 +134,9 @@ devtools::check() # Ok!
 
 # To finally install the package:
 devtools::install()
-usethis::use_git(message = ":tada: First functions work!")
+usethis::use_git(message = ":tada: New functions installed!")
+system("git push")
+
 
 
 
