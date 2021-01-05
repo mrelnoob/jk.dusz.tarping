@@ -259,6 +259,19 @@ uni.boxplots <- function(dataset, MAR=c(0.5,4.1,1.1,1.5), CEX.LAB=1, FONT.LAB=2,
 #' to simultaneously observe the distributions of all numeric variables or \strong{to detect their
 #' univariate outliers}.
 #'
+#' @details The `uni.dotplots` function only modifies the graphical parameters of the
+#' \code{\link[graphics:plot.default]{plot}} function in the `graphics` package to match some predefined
+#' preferences. Therefore, default values of `uni.dotplots` create nice looking dotplots but retain
+#' some aspects of the original `plot` function. These aspects can however be changed as in
+#' \code{\link[graphics:plot.default]{plot}}. \cr
+#' On the other hand, panel parameters are internally controlled using `par`. However, to avoid unforeseen
+#' conflicts with other internal parameters, it is not possible to tune panel parameters as we would
+#' do with `par`. Instead, parametrization is only possible with the given subset of parameters.
+#'
+#' @note To avoid \emph{recursive argument errors}, internal arguments should be called using upper case
+#' letters (e.g. CEX.LAB = 0.9) whereas other arguments from the `boxplot` function should be called with
+#' their normal case writing (e.g. outline = FALSE)!
+#'
 #' @param dataset The input dataset containing all variables to be plotted. It may contain all kinds of
 #' variables, the `uni.dotplots` function will automatically detect and plot numeric variables (columns).
 #' @param MAR MAR A numerical vector of the form `c(bottom, left, top, right)` which gives the number of lines
@@ -294,6 +307,7 @@ uni.boxplots <- function(dataset, MAR=c(0.5,4.1,1.1,1.5), CEX.LAB=1, FONT.LAB=2,
 #' @param NX The number of lines for the grid in x. Default value is 5.
 #' @param NY The number of lines for the grid in Y. Default value is 9.
 #' @param LTY The type of lines to be drawn in the background grid. Default value is 6.
+#' @param ... Any other parameter that can be incorporated in \code{\link[graphics:plot.default]{plot}}.
 #'
 #' @return A panel of univariate dotplots.
 #' @export
@@ -305,7 +319,8 @@ uni.boxplots <- function(dataset, MAR=c(0.5,4.1,1.1,1.5), CEX.LAB=1, FONT.LAB=2,
 uni.dotplots <- function(dataset, MAR=c(3,2,0.5,1.5), CEX.LAB = 1.2, FONT.LAB = 2, BTY = "n",
                          FG = "gray35", COL.AXIS = "gray35", COL.LAB = "gray20", CEX.PAR = 0.6,
                          TCL = -0.3, MGP = c(1.7, 0.6, 0.1), OMA = c(1, 0, 1, 0), LAB = c(5, 10, 7),
-                         COL.PCH = "lightcoral", PCH = 19, COL.GRID = "lavender", NX = 5, NY = 9, LTY = 6){
+                         COL.PCH = "lightcoral", PCH = 19, COL.GRID = "lavender", NX = 5, NY = 9, LTY = 6,
+                         ...){
   num.data <- dataset[, sapply(dataset, is.numeric)]
   nam <- names(num.data)
   ncol.data <- ncol(num.data)
@@ -319,7 +334,7 @@ uni.dotplots <- function(dataset, MAR=c(3,2,0.5,1.5), CEX.LAB = 1.2, FONT.LAB = 
     graphics::plot(x = num.data[,i], y = 1:length(num.data[,i]), type = "p", xlab = nam[i], ylab = "",
          col = COL.PCH, pch = PCH, panel.first = {
            grid(col=COL.GRID,nx = NX,ny = NY, lty = LTY)
-         }) }
+         }, ...) }
   # Here, the argument panel.first={} is used to draw the grid first, so behind the points!
 }
 

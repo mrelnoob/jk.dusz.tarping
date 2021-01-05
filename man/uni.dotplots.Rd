@@ -23,7 +23,8 @@ uni.dotplots(
   COL.GRID = "lavender",
   NX = 5,
   NY = 9,
-  LTY = 6
+  LTY = 6,
+  ...
 )
 }
 \arguments{
@@ -80,6 +81,8 @@ for possible values and their interpretation.}
 \item{NY}{The number of lines for the grid in Y. Default value is 9.}
 
 \item{LTY}{The type of lines to be drawn in the background grid. Default value is 6.}
+
+\item{...}{Any other parameter that can be incorporated in \code{\link[graphics:plot.default]{plot}}.}
 }
 \value{
 A panel of univariate dotplots.
@@ -90,6 +93,21 @@ The \code{uni.dotplots} function draws, within a single panel, an independent Cl
 dataset. It is particularly useful for data exploration (e.g. Zuur \emph{et al.}, 2010). For instance,
 to simultaneously observe the distributions of all numeric variables or \strong{to detect their
 univariate outliers}.
+}
+\details{
+The \code{uni.dotplots} function only modifies the graphical parameters of the
+\code{\link[graphics:plot.default]{plot}} function in the \code{graphics} package to match some predefined
+preferences. Therefore, default values of \code{uni.dotplots} create nice looking dotplots but retain
+some aspects of the original \code{plot} function. These aspects can however be changed as in
+\code{\link[graphics:plot.default]{plot}}. \cr
+On the other hand, panel parameters are internally controlled using \code{par}. However, to avoid unforeseen
+conflicts with other internal parameters, it is not possible to tune panel parameters as we would
+do with \code{par}. Instead, parametrization is only possible with the given subset of parameters.
+}
+\note{
+To avoid \emph{recursive argument errors}, internal arguments should be called using upper case
+letters (e.g. CEX.LAB = 0.9) whereas other arguments from the \code{boxplot} function should be called with
+their normal case writing (e.g. outline = FALSE)!
 }
 \examples{
 data("mtcars")
