@@ -158,7 +158,6 @@ rm(num.erad, i, nam)
 ```
 
 ```{r erad dotplot, fig.align='center', fig.cap="**Figure 4.** Cleveland dotplots for all quantitative variables of the *eradication efficiency* dataset"}
-## Methode moi
 num.erad <- erad[, sapply(erad, is.numeric)]
 nam <- names(num.erad)
 num.erad <- as.matrix(num.erad)

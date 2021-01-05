@@ -157,14 +157,14 @@ model_datasets <- function(response.var = c("efficiency", "edges", "overlaps",
 
 #' Univariate boxplots
 #'
-#' @description The `uni.boxplot` function draws, within a single panel, an independent boxplot for each
+#' @description The `uni.boxplots` function draws, within a single panel, an independent boxplot for each
 #' numeric (continuous or discrete) variable in a given dataset. It is particularly useful for data
 #' exploration (e.g. Zuur \emph{et al.}, 2010). For instance, to simultaneously observe the
 #' distributions of all numeric variables or \strong{to detect their univariate outliers}.
 #'
-#' @details The `uni.boxplot` function only modifies the graphical parameters of the
+#' @details The `uni.boxplots` function only modifies the graphical parameters of the
 #' \code{\link[graphics:boxplot]{boxplot}} function in the `graphics` package to match some predefined
-#' preferences. Therefore, default values of `uni.boxplot` create nice looking boxplots but retain
+#' preferences. Therefore, default values of `uni.boxplots` create nice looking boxplots but retain
 #' default \emph{heuristic} aspects of `boxplot` (such as the length of whiskers or the plotting of
 #' outliers). These aspects can however be changed as in \code{\link[graphics:boxplot]{boxplot}}. \cr
 #' On the other hand, panel parameters are internally controlled using `par`. However, to avoid unforeseen
@@ -176,7 +176,7 @@ model_datasets <- function(response.var = c("efficiency", "edges", "overlaps",
 #' their normal case writing (e.g. outline = FALSE)!
 #'
 #' @param dataset The input dataset containing all variables to be plotted. It may contain all kinds of
-#' variables, the `uni.boxplot` function will automatically detect and plot numeric variables (columns).
+#' variables, the `uni.boxplots` function will automatically detect and plot numeric variables (columns).
 #' @param ... Any other parameter that can be incorporated in \code{\link[graphics:boxplot]{boxplot}}.
 #' @param MAR A numerical vector of the form `c(bottom, left, top, right)` which gives the number of lines
 #' of margin to be specified on the four sides of the plot. The default is `c(0.5,4.1,1.1,1.5)`.
@@ -222,8 +222,8 @@ model_datasets <- function(response.var = c("efficiency", "edges", "overlaps",
 #'
 #' @examples
 #' data("mtcars")
-#' uni.boxplot(dataset = mtcars)
-uni.boxplot <- function(dataset, MAR=c(0.5,4.1,1.1,1.5), CEX.LAB=1, FONT.LAB=2, BTY = "n", FG = "gray35",
+#' uni.boxplots(dataset = mtcars)
+uni.boxplots <- function(dataset, MAR=c(0.5,4.1,1.1,1.5), CEX.LAB=1, FONT.LAB=2, BTY = "n", FG = "gray35",
                         COL.AXIS = "gray35", COL.LAB = "gray20", CEX.PAR = 0.8, TCL = -0.3,
                         MGP = c(2.4, 0.6, 0), OMA = c(1, 0, 0, 0),
                         TYPE = "n", BORDER = "lightcoral", COL = "moccasin",  LTY = 1, STAPLEWEX = 0,
@@ -239,5 +239,90 @@ uni.boxplot <- function(dataset, MAR=c(0.5,4.1,1.1,1.5), CEX.LAB=1, FONT.LAB=2, 
     graphics::boxplot(num.data[,i],ylab =(nam[i]), type=TYPE, border=BORDER, col = COL,
             lty=LTY, staplewex=STAPLEWEX, whisklwd=WHISKLWD, boxwex=BOXWEX, boxlwd=BOXLWD,
             medlwd=MEDLWD, pch=PCH, cex=0.7, ...) }
-  }
+}
+
+
+
+
+
+# _________________________________________
+### Creation of a function that draws univariate Cleveland dotplots for all numeric variables in a
+### given dataset:
+
+
+
+#' Univariate Cleveland dotplots
+#'
+#' @description The `uni.dotplots` function draws, within a single panel, an independent Cleveland dotplot
+#' (i.e. plotting value against rank) for each numeric (continuous or discrete) variable in a given
+#' dataset. It is particularly useful for data exploration (e.g. Zuur \emph{et al.}, 2010). For instance,
+#' to simultaneously observe the distributions of all numeric variables or \strong{to detect their
+#' univariate outliers}.
+#'
+#' @param dataset The input dataset containing all variables to be plotted. It may contain all kinds of
+#' variables, the `uni.dotplots` function will automatically detect and plot numeric variables (columns).
+#' @param MAR MAR A numerical vector of the form `c(bottom, left, top, right)` which gives the number of lines
+#' of margin to be specified on the four sides of the plot. The default is `c(0.5,4.1,1.1,1.5)`.
+#' @param CEX.LAB The magnification to be used for x and y labels relative to the current setting
+#' of `CEX.PAR`.
+#' @param FONT.LAB The font to be used for x and y labels.
+#' @param BTY A character string which determined the type of box which is drawn about plots. If `BTY` is
+#' one of "o", "l", "7", "c", "u", or "]" the resulting box resembles the corresponding upper
+#' case letter. A value of "n" suppresses the box (the default).
+#' @param FG The color to be used for the foreground of plots. This is the default color used for things
+#' like axes and boxes around plots (defaults to "gray35").
+#' @param COL.AXIS The color to be used for axis annotation. Defaults to "gray35".
+#' @param COL.LAB The color to be used for x and y labels. Defaults to "gray20".
+#' @param CEX.PAR A numerical value giving the amount by which plotting text and symbols should be
+#' magnified relative to the default (for `par`, the panel manager). This starts as 1 when a device
+#' is opened, and is reset when the layout is changed, e.g. by setting `mfrow`. Defaults to 0.8.
+#' @param TCL The length of tick marks as a fraction of the height of a line of text. The default
+#' value is -0.3.
+#' @param MGP The margin line (in `mex` units) for the axis title, axis labels and axis line.
+#' Note that `mgp[1]` affects title whereas `mgp[2:3]` affect axis. The default is c(2.4, 0.6, 0).
+#' @param OMA A vector of the form `c(bottom, left, top, right)` giving the size of the outer margins
+#' in lines of text.
+#' @param LAB A numerical vector of the form `c(x, y, len)` which modifies the default way that axes
+#' are annotated. The values of `x` and `y` give the (approximate) number of tickmarks on the x and y
+#' axes and len specifies the label length. The default is `c(5, 5, 7)`. Note that this only affects
+#' the way the parameters xaxp and yaxp are set when the user coordinate system is set up, and is
+#' not consulted when axes are drawn. `len` is unimplemented in `R`.
+#' @param COL.PCH The color to be used for points. Default is "lightcoral".
+#' @param PCH The type of points to be drawn. Default is 19. See \code{\link[graphics:points]{points}}
+#' for possible values and their interpretation.
+#' @param COL.GRID The color of the background grid. Default is "lavender".
+#' @param NX The number of lines for the grid in x. Default value is 5.
+#' @param NY The number of lines for the grid in Y. Default value is 9.
+#' @param LTY The type of lines to be drawn in the background grid. Default value is 6.
+#'
+#' @return A panel of univariate dotplots.
+#' @export
+#' @import graphics
+#'
+#' @examples
+#' data("mtcars")
+#' uni.dotplots(dataset = mtcars, COL.GRID = "lightblue", LTY = 1, NX = 10, NY = 20)
+uni.dotplots <- function(dataset, MAR=c(3,2,0.5,1.5), CEX.LAB = 1.2, FONT.LAB = 2, BTY = "n",
+                         FG = "gray35", COL.AXIS = "gray35", COL.LAB = "gray20", CEX.PAR = 0.6,
+                         TCL = -0.3, MGP = c(1.7, 0.6, 0.1), OMA = c(1, 0, 1, 0), LAB = c(5, 10, 7),
+                         COL.PCH = "lightcoral", PCH = 19, COL.GRID = "lavender", NX = 5, NY = 9, LTY = 6){
+  num.data <- dataset[, sapply(dataset, is.numeric)]
+  nam <- names(num.data)
+  ncol.data <- ncol(num.data)
+  ncol.adjust <- ceiling(x = ncol.data/4) # Round to the next integer (e.g. ceiling(x = 7.12) returns 8)!
+  num.data <- as.matrix(num.data)
+
+  graphics::par(mfrow= c (ncol.adjust,4), mar=MAR, cex.lab = CEX.LAB, font.lab=FONT.LAB, bty = BTY, fg = FG,
+      col.axis = COL.AXIS, col.lab = COL.LAB, cex = CEX.PAR, tcl = TCL,
+      mgp = MGP, oma = OMA, lab = LAB)
+  for (i in c(1:ncol(num.data))) {
+    graphics::plot(x = num.data[,i], y = 1:length(num.data[,i]), type = "p", xlab = nam[i], ylab = "",
+         col = COL.PCH, pch = PCH, panel.first = {
+           grid(col=COL.GRID,nx = NX,ny = NY, lty = LTY)
+         }) }
+  # Here, the argument panel.first={} is used to draw the grid first, so behind the points!
+}
+
+
+
 
