@@ -105,7 +105,7 @@ usethis::use_package("stringr")
 
 # To load our functions, we will thus use:
 devtools::load_all() # Now, all functions in the R folder are available!
-usethis::use_git(message = ":metal: New functions: lighten_my_data")
+usethis::use_git(message = ":metal: New functions: uni.boxplot")
 
 devtools::document() # To create the functions' documentation in the "man" folder, and to update the
 # NAMESPACE file of the package (that should NEVER be edited manually).
