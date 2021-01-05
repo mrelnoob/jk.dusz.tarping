@@ -60,7 +60,7 @@ is opened, and is reset when the layout is changed, e.g. by setting \code{mfrow}
 value is -0.3.}
 
 \item{MGP}{The margin line (in \code{mex} units) for the axis title, axis labels and axis line.
-Note that mgp\link{1} affects title whereas mgp\link{2:3} affect axis. The default is c(2.4, 0.6, 0).}
+Note that \code{mgp[1]} affects title whereas \code{mgp[2:3]} affect axis. The default is c(2.4, 0.6, 0).}
 
 \item{OMA}{A vector of the form \code{c(bottom, left, top, right)} giving the size of the outer margins
 in lines of text.}

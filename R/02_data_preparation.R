@@ -195,7 +195,7 @@ model_datasets <- function(response.var = c("efficiency", "edges", "overlaps",
 #' @param TCL The length of tick marks as a fraction of the height of a line of text. The default
 #' value is -0.3.
 #' @param MGP The margin line (in `mex` units) for the axis title, axis labels and axis line.
-#' Note that mgp[1] affects title whereas mgp[2:3] affect axis. The default is c(2.4, 0.6, 0).
+#' Note that `mgp[1]` affects title whereas `mgp[2:3]` affect axis. The default is c(2.4, 0.6, 0).
 #' @param OMA A vector of the form `c(bottom, left, top, right)` giving the size of the outer margins
 #' in lines of text.
 #' @param TYPE The type of boxplot to draw. Default is "n".
