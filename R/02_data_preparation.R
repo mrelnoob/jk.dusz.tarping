@@ -269,8 +269,8 @@ uni.boxplots <- function(dataset, MAR=c(0.5,4.1,1.1,1.5), CEX.LAB=1, FONT.LAB=2,
 #' do with `par`. Instead, parametrization is only possible with the given subset of parameters.
 #'
 #' @note To avoid \emph{recursive argument errors}, internal arguments should be called using upper case
-#' letters (e.g. CEX.LAB = 0.9) whereas other arguments from the `boxplot` function should be called with
-#' their normal case writing (e.g. outline = FALSE)!
+#' letters (e.g. CEX.LAB = 0.9) whereas other arguments from the `plot` function should be called with
+#' their normal case writing (e.g. sub = "My subtitle")!
 #'
 #' @param dataset The input dataset containing all variables to be plotted. It may contain all kinds of
 #' variables, the `uni.dotplots` function will automatically detect and plot numeric variables (columns).

@@ -106,8 +106,8 @@ do with \code{par}. Instead, parametrization is only possible with the given sub
 }
 \note{
 To avoid \emph{recursive argument errors}, internal arguments should be called using upper case
-letters (e.g. CEX.LAB = 0.9) whereas other arguments from the \code{boxplot} function should be called with
-their normal case writing (e.g. outline = FALSE)!
+letters (e.g. CEX.LAB = 0.9) whereas other arguments from the \code{plot} function should be called with
+their normal case writing (e.g. sub = "My subtitle")!
 }
 \examples{
 data("mtcars")
