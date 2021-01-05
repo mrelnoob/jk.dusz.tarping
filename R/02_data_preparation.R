@@ -171,55 +171,72 @@ model_datasets <- function(response.var = c("efficiency", "edges", "overlaps",
 #' conflicts with other internal parameters, it is not possible to tune panel parameters as we would
 #' do with `par`. Instead, parametrization is only possible with the given subset of parameters.
 #'
-#' @param dataset
-#' @param mar
-#' @param cex.lab
-#' @param font.lab
-#' @param bty
-#' @param fg
-#' @param col.axis
-#' @param col.lab
-#' @param cex.par
-#' @param tcl
-#' @param mgp
-#' @param oma
-#' @param type
-#' @param border
-#' @param col
-#' @param lty
-#' @param staplewex
-#' @param whisklwd
-#' @param boxwex
-#' @param boxlwd
-#' @param medlwd
-#' @param pch
-#' @param cex
-#' @param ...
+#' @note To avoid \emph{recursive argument errors}, internal arguments should be called using upper case
+#' letters (e.g. CEX.LAB = 0.9) whereas other arguments from the `boxplot` function should be called with
+#' their normal case writing (e.g. outline = FALSE)!
 #'
-#' @return
+#' @param dataset The input dataset containing all variables to be plotted. It may contain all kinds of
+#' variables, the `uni.boxplot` function will automatically detect and plot numeric variables (columns).
+#' @param ... Any other parameter that can be incorporated in \code{\link[graphics:boxplot]{boxplot}}.
+#' @param MAR A numerical vector of the form `c(bottom, left, top, right)` which gives the number of lines
+#' of margin to be specified on the four sides of the plot. The default is `c(0.5,4.1,1.1,1.5)`.
+#' @param CEX.LAB The magnification to be used for x and y labels relative to the current setting of `cex`.
+#' @param FONT.LAB The font to be used for x and y labels.
+#' @param BTY A character string which determined the type of box which is drawn about plots. If `BTY` is
+#' one of "o", "l", "7", "c", "u", or "]" the resulting box resembles the corresponding upper
+#' case letter. A value of "n" suppresses the box (the default).
+#' @param FG The color to be used for the foreground of plots. This is the default color used for things
+#' like axes and boxes around plots (defaults to "gray35").
+#' @param COL.AXIS The color to be used for axis annotation. Defaults to "gray35".
+#' @param COL.LAB The color to be used for x and y labels. Defaults to "gray20".
+#' @param CEX.PAR A numerical value giving the amount by which plotting text and symbols should be
+#' magnified relative to the default (for `par`, the panel manager). This starts as 1 when a device
+#' is opened, and is reset when the layout is changed, e.g. by setting `mfrow`. Defaults to 0.8.
+#' @param TCL The length of tick marks as a fraction of the height of a line of text. The default
+#' value is -0.3.
+#' @param MGP The margin line (in `mex` units) for the axis title, axis labels and axis line.
+#' Note that mgp[1] affects title whereas mgp[2:3] affect axis. The default is c(2.4, 0.6, 0).
+#' @param OMA A vector of the form `c(bottom, left, top, right)` giving the size of the outer margins
+#' in lines of text.
+#' @param TYPE The type of boxplot to draw. Default is "n".
+#' @param BORDER An optional vector of colors for the outlines of the boxplots. The values in border
+#' are recycled if the length of border is less than the number of plots. Default is "lightcoral".
+#' @param COL If col is non-null it is assumed to contain colors to be used to colour the bodies of
+#' the boxplots. Default is "moccasin".
+#' @param LTY The line type. Line types can either be specified as an integer (0=blank, 1=solid (default),
+#' 2=dashed, 3=dotted, 4=dotdash, 5=longdash, 6=twodash) or as one of the character strings "blank",
+#' "solid", "dashed", "dotted", "dotdash", "longdash", or "twodash", where "blank" uses ‘invisible lines’
+#' (i.e., does not draw them).
+#' @param STAPLEWEX Staple line width expansion, proportional to box width. Default is 0.
+#' @param WHISKLWD Whisker line width expansion. Default is 2.
+#' @param BOXWEX A scale factor to be applied to all boxes. When there are only a few groups, the
+#' appearance of the plot can be improved by making the boxes narrower. Default is 0.7.
+#' @param BOXLWD Width of boxplot outer lines. Default is 0.1.
+#' @param MEDLWD Width of the median line. Default is 2.6.
+#' @param PCH The type of points to be drawn for outliers. Default is 19. See \code{\link[graphics:points]{points}}
+#' for possible values and their interpretation.
+#'
+#' @return A panel of univariate boxplots.
 #' @export
 #' @import graphics
 #'
 #' @examples
-#' \dontrun{
-#' data(TRUC)
-#' etc.
-#' }
-uni.boxplot <- function(dataset, mar=c(0.5,4.1,1.1,1.5), cex.lab=1, font.lab=2, bty = "n", fg = "gray35",
-                        col.axis = "gray35", col.lab = "gray20", cex.par = 0.8, tcl = -0.3,
-                        mgp = c(2.4, 0.6, 0), oma = c(1, 0, 0, 0),
-                        type = "n", border = "lightcoral", col = "moccasin",  lty = 1, staplewex = 0,
-                        whisklwd = 2, boxwex = 0.7, boxlwd = 0.1, medlwd = 2.6, pch = 19, cex = cex, ...){
+#' data("mtcars")
+#' uni.boxplot(dataset = mtcars)
+uni.boxplot <- function(dataset, MAR=c(0.5,4.1,1.1,1.5), CEX.LAB=1, FONT.LAB=2, BTY = "n", FG = "gray35",
+                        COL.AXIS = "gray35", COL.LAB = "gray20", CEX.PAR = 0.8, TCL = -0.3,
+                        MGP = c(2.4, 0.6, 0), OMA = c(1, 0, 0, 0),
+                        TYPE = "n", BORDER = "lightcoral", COL = "moccasin",  LTY = 1, STAPLEWEX = 0,
+                        WHISKLWD = 2, BOXWEX = 0.7, BOXLWD = 0.1, MEDLWD = 2.6, PCH = 19, ...){
   num.data <- dataset[, sapply(dataset, is.numeric)]
   nam <- names(num.data)
   ncol.data <- ncol(num.data)
   ncol.adjust <- ceiling(x = ncol.data/4) # Round to the next integer (e.g. ceiling(x = 7.12) returns 8)!
 
-  graphics::par(mfrow= c(ncol.adjust,4), mar=mar, cex.lab=cex.lab, font.lab=font.lab, bty=bty, fg=fg,
-      col.axis=col.axis, col.lab=col.lab, cex=cex.par, tcl=tcl, mgp=mgp, oma=oma)
+  graphics::par(mfrow= c(ncol.adjust,4), mar=MAR, cex.lab=CEX.LAB, font.lab=FONT.LAB, bty=BTY, fg=FG,
+      col.axis=COL.AXIS, col.lab=COL.LAB, cex=CEX.PAR, tcl=TCL, mgp=MGP, oma=OMA)
   for (i in c(1:ncol.data)) {
-    graphics::boxplot(num.data[,i],ylab =(nam[i]), type=type, border=border, col = col,
-            lty=lty, staplewex=staplewex, whisklwd=whisklwd, boxwex=boxwex, boxlwd=boxlwd,
-            medlwd=medlwd, pch=pch, cex=cex, ...) }
+    graphics::boxplot(num.data[,i],ylab =(nam[i]), type=TYPE, border=BORDER, col = COL,
+            lty=LTY, staplewex=STAPLEWEX, whisklwd=WHISKLWD, boxwex=BOXWEX, boxlwd=BOXLWD,
+            medlwd=MEDLWD, pch=PCH, cex=0.7, ...) }
   }
-
