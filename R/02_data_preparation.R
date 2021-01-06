@@ -378,7 +378,8 @@ uni.dotplots <- function(dataset, MAR=c(3,2,0.5,1.5), CEX.LAB = 1.2, FONT.LAB = 
 #'
 #' @return A panel of `p`*5 plots, where `p` is the number of variables in `simu.var`.
 #' @export
-#' @import stats graphics
+#' @import graphics
+#' @importFrom stats na.omit sd rnorm rlnorm rpois
 #'
 #' @examples
 #' uni.simudistrib(simu.var = iris[,1:4], distribution = "normal")
@@ -405,7 +406,7 @@ uni.simudistrib <- function(simu.var, distribution){
 
     if (distribution == "normal") {
       for (j in 1:5) {
-        rrr[[j]] <- rnorm(n = n, mean = mu, sd = std)
+        rrr[[j]] <- stats::rnorm(n = n, mean = mu, sd = std)
         graphics::plot(x = rrr[[j]], y = 1:length(rrr[[j]]), type = "p",
                        xlab = paste("rnorm based on", nam[i], sep = " "), ylab = "", col = "hotpink3",
                        pch = 19, panel.first = {grid(col="lavender",nx = 9,ny = 3, lty = 6)})}
@@ -413,7 +414,7 @@ uni.simudistrib <- function(simu.var, distribution){
 
     if (distribution == "log-normal") {
       for (j in 1:5) {
-        rrr[[j]] <- rlnorm(n = n,
+        rrr[[j]] <- stats::rlnorm(n = n,
                            meanlog = log(mu^2 / sqrt(std^2 + mu^2)),
                            sdlog = sqrt(log(1 + (std^2 / mu^2)))) # That's how you use rlnorm!!!!!!
         graphics::plot(x = rrr[[j]], y = 1:length(rrr[[j]]), type = "p",
@@ -423,7 +424,7 @@ uni.simudistrib <- function(simu.var, distribution){
 
     if (distribution == "poisson") {
       for (j in 1:5) {
-        rrr[[j]] <- rpois(n = n, lambda = mu)
+        rrr[[j]] <- stats::rpois(n = n, lambda = mu)
         graphics::plot(x = rrr[[j]], y = 1:length(rrr[[j]]), type = "p",
                        xlab = paste("rpois based on", nam[i], sep = " "), ylab = "", col = "hotpink3",
                        pch = 19, panel.first = {grid(col="lavender",nx = 9,ny = 3, lty = 6)})}
