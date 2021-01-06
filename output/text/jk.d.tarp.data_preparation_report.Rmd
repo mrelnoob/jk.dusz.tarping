@@ -42,7 +42,7 @@ summary(zzz_mydata_cleaned)
 
 ## - Data exploration following Zuur *et al.* (2010)
 
-In order to build valid and meaningful models to explain or predict the success/failure of tarping operations for the control of Japanese knotweed *s.l.*, we need first to learn more about our data. Therefore, we thoroughly examined our variables (e.g. outliers, distribution, interactions, colinearity, variance homogeneity, observation independence) following the protocol presented by Zuur *et al.* (2010) for each of our **7 response variables**: *eff_eradication*, *eff_expansion*, *eff_vigour*, *latest_reg_edges*, *reg_overlaps*, *latest_condition*, and *pb_fixation*.
+In order to build valid and meaningful models to explain or predict the success/failure of tarping operations for the control of Japanese knotweed *s.l.*, we need first to learn more about our data. Therefore, we thoroughly examined our variables (e.g. outliers, distribution, interactions, colinearity, variance homogeneity, observation independence) mostly following the protocol presented by Zuur *et al.* (2010) for each of our **7 response variables**: *eff_eradication*, *eff_expansion*, *eff_vigour*, *latest_reg_edges*, *reg_overlaps*, *latest_condition*, and *pb_fixation*.
 
 As our global dataset contains many variables (*n* = 81), it would be interesting to reduce their number in order to spare time for further exploration and analyses. As such, the first steps of our data exploration for each response variable will aim at reducing the dimensionality of the data. First, we will try and see if the *environmental variables* can be coerced into a synthetic variable (e.g. through a PCA). Then, we will investigate correlations among variables as well as potential colinearity. This should bear the twofold advantage of improve our understanding of the data and enable us to remove colinear and too strongly correlated variables.
 
@@ -144,40 +144,75 @@ We will look for potential outliers in the data using **boxplots** and **Clevela
 
 #RColorBrewer::display.brewer.all() To display all the colors in {RColorBrewer}
 
-num.erad <- erad[, sapply(erad, is.numeric)]
-nam <- names(num.erad)
-
-par(mfrow= c (4,4), mar=c(0.5,4.1,1.1,1.5), cex.lab = 1, font.lab=2, bty = "n", fg = "gray35",
-    col.axis = "gray35", col.lab = "gray20", cex = 0.8, tcl = -0.3,
-    mgp = c(2.4, 0.6, 0), oma = c(1, 0, 0, 0))
-for (i in c(1:ncol(num.erad))) {
-  boxplot(num.erad[,i],ylab =(nam[i]), type = "n", border = "lightcoral", col = "moccasin", 
-          lty = 1, staplewex = 0, whisklwd = 2, boxwex=0.7, boxlwd=0.1, medlwd=2.6, pch = 19, cex = 0.7) }
-
-rm(num.erad, i, nam)
+jk.dusz.tarping::uni.boxplots(dataset = erad)
 ```
 
 ```{r erad dotplot, fig.align='center', fig.cap="**Figure 4.** Cleveland dotplots for all quantitative variables of the *eradication efficiency* dataset"}
-num.erad <- erad[, sapply(erad, is.numeric)]
-nam <- names(num.erad)
-num.erad <- as.matrix(num.erad)
-
-par(mfrow= c (4,4), mar=c(3,2,0.5,1.5), cex.lab = 1.2, font.lab=2, bty = "n", fg = "gray35",
-    col.axis = "gray35", col.lab = "gray20", cex = 0.6, tcl = -0.3,
-    mgp = c(1.7, 0.6, 0.1), oma = c(1, 0, 1, 0), lab = c(5, 10, 7))
-for (i in c(1:ncol(num.erad))) {
-  plot(x = num.erad[,i], y = 1:length(num.erad[,i]), type = "p", xlab = nam[i], ylab = "", 
-       col = "lightcoral", pch = 19, panel.first = {
-         grid(col="lavender",nx = 5,ny = 9, lty = 6)
-       }) }
-# Here, the argument panel.first={} is used to draw the grid first, so behind the points!
-
-rm(num.erad, i, nam)
+jk.dusz.tarping::uni.dotplots(dataset = erad)
 ```
 
 By the look of these graphs, it is clear that we have many *extreme values* (possible outliers) and non-Normal variables. Yet, extreme values are not necessarily **true outliers**:
 
 * The variables *slope* and *coarse_env*  look fine.
 * The variables *obstacles*, *flood*, *distance*, *strips_overlap*, *trench_depth*, and *tarping_duration* may require mild transformations to be normalized but do not seem to contain too extreme values.
-* The variables *elevation*, *freq_monitoring*, *grammage*, *sedicover_height*, and *pierced_install* may require important transformations to be normalized. It would be interesting to see if their extreme values are too far from what could be expected from a Normal distribution (see next section).
+* The variables *elevation*, *freq_monitoring*, *grammage*, *sedicover_height*, and *pierced_install* may require important transformations to be normalized. It would be interesting to see if their extreme values are too far from what could be expected from a Normal or a Poisson distribution (see below).
 * The variables *latitude*, *longitude*, and *stand_surface* contain problematic patterns/outliers. As latitude and longitude are supposed to be used as ***random effects*** in our models, I do not know (yet) what would be the consequences of extreme values or bimodal distributions (but I guess it is not good).
+
+For variables where doubt subsists regarding the *extremeness* of some values, we will simulate data with Normal and Poisson distributions with the parameters of our variables to determine if these values are *too extreme* to be benign in models.
+
+```{r erad simu.distrib, }
+simu.var <- dplyr::select(.data = erad, elevation, freq_monitoring, grammage, stand_surface, distance, strips_overlap, sedicover_height, trench_depth, pierced_tarpinstall, tarping_duration)
+
+uni.simudistrib <- function(simu.var, distribution){
+  if (!is.data.frame(simu.var) && !is.matrix(simu.var)) {
+    warning("The input dataset (i.e. simu.var) must either be a data.frame or a matrix!")
+  }
+  if(missing(distribution)){
+    stop("Please specify the desired distribution. See ?uni.simudistrib for details.")
+  }
+
+  ncol.data <- ncol(simu.var)
+  nam <- names(simu.var)
+  num.data <- as.matrix(simu.var)
+
+  graphics::par(mfrow = c(ncol.data,5), mar = c(3,2,0.1,1.5), cex.lab = 1, font.lab=2, bty = "n", 
+                fg = "gray35", col.axis = "gray35", col.lab = "gray20", cex = 0.6, tcl = -0.3,
+                mgp = c(1.8, 0.6, 0.1), oma = c(0.2, 0.2, 0, 0), lab = c(5, 10, 7))
+  for (i in c(1:ncol(num.data))) {
+    mu <- mean(stats::na.omit(num.data[,i]))
+    std <- stats::sd(stats::na.omit(num.data[,i]))
+    n <- length(num.data[,i])
+    rrr <- NULL
+    
+    if (distribution == "normal") {
+      for (j in 1:5) {
+      rrr[[j]] <- rnorm(n = n, mean = mu, sd = std)
+      graphics::plot(x = rrr[[j]], y = 1:length(rrr[[j]]), type = "p", 
+                     xlab = paste("rnorm based on", nam[i], sep = " "), ylab = "", col = "hotpink3", 
+                     pch = 19, panel.first = {grid(col="lavender",nx = 9,ny = 3, lty = 6)})}
+    }
+    
+    if (distribution == "log-normal") {
+      for (j in 1:5) {
+      rrr[[j]] <- rlnorm(n = n, 
+                         meanlog = log(mu^2 / sqrt(std^2 + mu^2)), 
+                         sdlog = sqrt(log(1 + (std^2 / mu^2)))) # That's how you use rlnorm!!!
+      graphics::plot(x = rrr[[j]], y = 1:length(rrr[[j]]), type = "p", 
+                     xlab = paste("rlnorm based on", nam[i], sep = " "), ylab = "", col = "hotpink3", 
+                     pch = 19, panel.first = {grid(col="lavender",nx = 9,ny = 3, lty = 6)})}
+    }
+    
+    if (distribution == "poisson") {
+      for (j in 1:5) {
+      rrr[[j]] <- rpois(n = n, lambda = mu)
+      graphics::plot(x = rrr[[j]], y = 1:length(rrr[[j]]), type = "p", 
+                     xlab = paste("rpois based on", nam[i], sep = " "), ylab = "", col = "hotpink3", 
+                     pch = 19, panel.first = {grid(col="lavender",nx = 9,ny = 3, lty = 6)})}
+    }
+  }
+}
+uni.simudistrib(simu.var = simu.var, distribution = "log-normal")
+rm(simu.var)
+
+```
+

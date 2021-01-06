@@ -249,8 +249,6 @@ uni.boxplots <- function(dataset, MAR=c(0.5,4.1,1.1,1.5), CEX.LAB=1, FONT.LAB=2,
 ### Creation of a function that draws univariate Cleveland dotplots for all numeric variables in a
 ### given dataset:
 
-
-
 #' Univariate Cleveland dotplots
 #'
 #' @description The `uni.dotplots` function draws, within a single panel, an independent Cleveland dotplot
@@ -341,3 +339,94 @@ uni.dotplots <- function(dataset, MAR=c(3,2,0.5,1.5), CEX.LAB = 1.2, FONT.LAB = 
 
 
 
+
+# _________________________________________
+### Creation of a function that generate random samples from various distributions based on my variables
+### parameters:
+
+#' Random sample simulation
+#'
+#' @description The `uni.simudistrib` function **automatically generates 5 Cleveland dotplots** of random
+#' samples from different distributions (either `normal`, `log-normal`, or `poisson`) based on the
+#' parameters of the variables in the input `data.frame` or `matrix` (see \emph{Details}).  \cr
+#' This function is useful to see whether variables' extreme values are actual outliers or whether they
+#' lie in a range of values possible for a random sample drawn from a `normal`, `log-normal`, or a `poisson`
+#' distribution. \emph{In fine}, it may help determine if the original variable can be approximated by
+#' these distribution with or without a transformation.
+#'
+#' @details The `uni.simudistrib` function extracts some key parameters from the input variables (sample
+#' size, mean and standard deviation) and generates random samples based on these parameters. For instance,
+#' if `simu.var` contains \emph{i} variables `X1`, `X2`, ... `Xi` and if `distribution = "normal`, the function
+#' will return a panel of 3x5 plots:
+#'
+#' * The 1st row will contain five dotplots for five random samples with \emph{n} = `length(X1)` and drawn
+#' from a Normal distribution with the same mean and standard deviation as `X1`.
+#' * The 2nd row will contain five dotplots for five random samples with \emph{n} = `length(X2)` and drawn
+#' from a Normal distribution with the same mean and standard deviation as `X2`.
+#' * Etc.
+#'
+#' \strong{Warning}: the function may fail for `log-normal` and `poisson` distributions if input
+#' variables contain negative values (because these distributions are by definition positive). Additionally,
+#' if `distribution = "poisson"`, the resulting plots will return \strong{integer} values as Poisson
+#' is a discrete probability distribution.
+#'
+#' @param simu.var A `data.frame` or a `matrix`. For obvious layout and readability reasons, `simu.var`
+#' should not include too many variables (`p` < 12 is advised) if the plot is to be printed in a page
+#' or window of limited dimensions. For any use in HTML documents (e.g. with `RMarkdown`), the number of
+#' input variables should not be a problem.
+#' @param distribution Either `"normal"`, `"log-normal"` or `"poisson"` (case sensitive).
+#'
+#' @return A panel of `p`*5 plots, where `p` is the number of variables in `simu.var`.
+#' @export
+#' @import stats graphics
+#'
+#' @examples
+#' uni.simudistrib(simu.var = iris[,1:4], distribution = "normal")
+uni.simudistrib <- function(simu.var, distribution){
+  if (!is.data.frame(simu.var) && !is.matrix(simu.var)) {
+    warning("The input dataset (i.e. simu.var) must either be a data.frame or a matrix!")
+  }
+  if(missing(distribution)){
+    stop("Please specify the desired distribution. See ?uni.simudistrib for details.")
+  }
+
+  ncol.data <- ncol(simu.var)
+  nam <- names(simu.var)
+  num.data <- as.matrix(simu.var)
+
+  graphics::par(mfrow = c(ncol.data,5), mar = c(3,2,0.1,1.5), cex.lab = 1, font.lab=2, bty = "n",
+                fg = "gray35", col.axis = "gray35", col.lab = "gray20", cex = 0.6, tcl = -0.3,
+                mgp = c(1.8, 0.6, 0.1), oma = c(0.2, 0.2, 0, 0), lab = c(5, 10, 7))
+  for (i in c(1:ncol(num.data))) {
+    mu <- mean(stats::na.omit(num.data[,i]))
+    std <- stats::sd(stats::na.omit(num.data[,i]))
+    n <- length(num.data[,i])
+    rrr <- NULL
+
+    if (distribution == "normal") {
+      for (j in 1:5) {
+        rrr[[j]] <- rnorm(n = n, mean = mu, sd = std)
+        graphics::plot(x = rrr[[j]], y = 1:length(rrr[[j]]), type = "p",
+                       xlab = paste("rnorm based on", nam[i], sep = " "), ylab = "", col = "hotpink3",
+                       pch = 19, panel.first = {grid(col="lavender",nx = 9,ny = 3, lty = 6)})}
+    }
+
+    if (distribution == "log-normal") {
+      for (j in 1:5) {
+        rrr[[j]] <- rlnorm(n = n,
+                           meanlog = log(mu^2 / sqrt(std^2 + mu^2)),
+                           sdlog = sqrt(log(1 + (std^2 / mu^2)))) # That's how you use rlnorm!!!!!!
+        graphics::plot(x = rrr[[j]], y = 1:length(rrr[[j]]), type = "p",
+                       xlab = paste("rlnorm based on", nam[i], sep = " "), ylab = "", col = "hotpink3",
+                       pch = 19, panel.first = {grid(col="lavender",nx = 9,ny = 3, lty = 6)})}
+    }
+
+    if (distribution == "poisson") {
+      for (j in 1:5) {
+        rrr[[j]] <- rpois(n = n, lambda = mu)
+        graphics::plot(x = rrr[[j]], y = 1:length(rrr[[j]]), type = "p",
+                       xlab = paste("rpois based on", nam[i], sep = " "), ylab = "", col = "hotpink3",
+                       pch = 19, panel.first = {grid(col="lavender",nx = 9,ny = 3, lty = 6)})}
+    }
+  }
+}
