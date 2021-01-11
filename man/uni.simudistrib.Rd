@@ -29,8 +29,8 @@ these distribution with or without a transformation.
 \details{
 The \code{uni.simudistrib} function extracts some key parameters from the input variables (sample
 size, mean and standard deviation) and generates random samples based on these parameters. For instance,
-if \code{simu.var} contains \emph{i} variables \code{X1}, \code{X2}, ... \code{Xi} and if \verb{distribution = "normal}, the function
-will return a panel of 3x5 plots:
+if \code{simu.var} contains \emph{i} variables \code{X1}, \code{X2}, ... \code{Xi} and if \code{distribution = "normal"}, the
+function will return a panel of \emph{i}x5 plots:
 \itemize{
 \item The 1st row will contain five dotplots for five random samples with \emph{n} = \code{length(X1)} and drawn
 from a Normal distribution with the same mean and standard deviation as \code{X1}.

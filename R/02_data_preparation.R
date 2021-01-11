@@ -356,8 +356,8 @@ uni.dotplots <- function(dataset, MAR=c(3,2,0.5,1.5), CEX.LAB = 1.2, FONT.LAB = 
 #'
 #' @details The `uni.simudistrib` function extracts some key parameters from the input variables (sample
 #' size, mean and standard deviation) and generates random samples based on these parameters. For instance,
-#' if `simu.var` contains \emph{i} variables `X1`, `X2`, ... `Xi` and if `distribution = "normal`, the function
-#' will return a panel of 3x5 plots:
+#' if `simu.var` contains \emph{i} variables `X1`, `X2`, ... `Xi` and if `distribution = "normal"`, the
+#' function will return a panel of \emph{i}x5 plots:
 #'
 #' * The 1st row will contain five dotplots for five random samples with \emph{n} = `length(X1)` and drawn
 #' from a Normal distribution with the same mean and standard deviation as `X1`.
