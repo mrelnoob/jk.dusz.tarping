@@ -86,6 +86,10 @@ clean_my_data <- function(){
                   plantation = factor(x = plantation, ordered = TRUE)) %>%
     dplyr::mutate_if(is.character, factor) %>%
     dplyr::mutate_if(is_binary, factor) -> cleaned_data
+  cleaned_data <- cleaned_data %>%
+    dplyr::mutate(geomem = ifelse(grepl("geomem$", fabric_type) | grepl("tarp$", fabric_type) |
+                                    grepl("mixed", fabric_type) | grepl("unknown", fabric_type), 1, 0)) %>%
+    dplyr::mutate(geotex = ifelse(grepl("geotex$", fabric_type) | grepl("mixed", fabric_type), 1, 0))
   return(cleaned_data)
 }
 
@@ -127,6 +131,6 @@ lighten_my_data <- function(){
                   reg_edges, reg_nearby,
                   tarping_abandoned, tarping_completed, tarping_ongoing, tarping_duration, latest_condition,
                   latest_regrowth, latest_months,
-                  eff_expansion, eff_vigour, eff_eradication) -> tata
+                  eff_expansion, eff_dispersal, eff_vigour, eff_eradication) -> tata
   return(tata)
 }

@@ -32,7 +32,7 @@ uni.dotplots(
 at least 2 variables). It may contain all kinds of columns, the \code{uni.dotplots} function will
 automatically detect and plot numeric variables (columns).}
 
-\item{MAR}{MAR A numerical vector of the form \code{c(bottom, left, top, right)} which gives the number of lines
+\item{MAR}{A numerical vector of the form \code{c(bottom, left, top, right)} which gives the number of lines
 of margin to be specified on the four sides of the plot. The default is \code{c(0.5,4.1,1.1,1.5)}.}
 
 \item{CEX.LAB}{The magnification to be used for x and y labels relative to the current setting

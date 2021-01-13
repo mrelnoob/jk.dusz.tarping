@@ -30,7 +30,7 @@ sessionInfo()
 First, let's take a quick look at our dataset. For the meaning of the variables, please refer to the attached **documentation**.
 
 ```{r data import and summary, message=FALSE, comment=NA}
-library(jk.dusz.tarping)
+#library(jk.dusz.tarping)
 zzz_mydata_cleaned <- jk.dusz.tarping::clean_my_data()
 
 summary(zzz_mydata_cleaned)
@@ -42,17 +42,19 @@ summary(zzz_mydata_cleaned)
 
 ## - Data exploration following Zuur *et al.* (2010)
 
-In order to build valid and meaningful models to explain or predict the success/failure of tarping operations for the control of Japanese knotweed *s.l.*, we need first to learn more about our data. Therefore, we thoroughly examined our variables (e.g. outliers, distribution, interactions, colinearity, variance homogeneity, observation independence) mostly following the protocol presented by Zuur *et al.* (2010) for each of our **7 response variables**: *eff_eradication*, *eff_expansion*, *eff_vigour*, *latest_reg_edges*, *reg_overlaps*, *latest_condition*, and *pb_fixation*.
+In order to build valid and meaningful models to explain or predict the success/failure of tarping operations for the control of Japanese knotweed *s.l.*, we need first to learn more about our data. Therefore, we thoroughly examined our variables (e.g. outliers, distribution, interactions, colinearity, variance homogeneity, observation independence) mostly following the protocol presented by Zuur *et al.* (2010) for each of our **6 response variables**: *eff_eradication*, *efficiency*, *latest_reg_edges*, *reg_overlaps*, *latest_condition*, and *pb_fixation*.
 
-As our global dataset contains many variables (*n* = 81), it would be interesting to reduce their number in order to spare time for further exploration and analyses. As such, the first steps of our data exploration for each response variable will aim at reducing the dimensionality of the data. First, we will try and see if the *environmental variables* can be coerced into a synthetic variable (e.g. through a PCA). Then, we will investigate correlations among variables as well as potential colinearity. This should bear the twofold advantage of improve our understanding of the data and enable us to remove colinear and too strongly correlated variables.
+As our global dataset contains many variables (*n* = 81), it would be interesting to reduce their number in order to spare time for further exploration and analyses. As such, the first steps of our data exploration for each response variable will aim at reducing the dimensionality of the data. First, we will try and see if the *environmental variables* can be coerced into a synthetic variable (e.g. through a PCA). Then, we will investigate correlations among variables as well as potential colinearity. This should have the twofold advantage of improving our understanding of the data and enabling us to remove colinear and too strongly correlated variables.
 
 
 
-### - For the *eradication efficiency* response variable
+### - For *eff_eradication* and *efficiency* response variables
 
 ```{r erad import, include=FALSE}
 erad <- jk.dusz.tarping::model_datasets(response.var = "efficiency")
-erad %>% dplyr::select(-eff_expansion, -eff_vigour, -goals, -woven_geotex, -thickness) %>%
+erad <- 
+
+erad %>% dplyr::select(-goals, -woven_geotex, -thickness) %>%
   dplyr::filter(eff_eradication != "NA") -> erad
 ```
 
@@ -142,7 +144,13 @@ Many interesting patterns can be observed in this correlation matrix. Among them
 It is worth reminding that these correlations are just correlations (not **causation**) and only bivariate. Accounting for multivariate relationships and interactions will certainly give very different patterns.
 
 
+   
+##### - Multicolinearity
+
+
+
     
+#### - Distributions and dispersion parameters
 ##### - Looking for outliers
 
 We will look for potential outliers in the data using **boxplots** and **Cleveland dotplots** on our quantitative variables. 
