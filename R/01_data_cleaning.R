@@ -84,12 +84,12 @@ clean_my_data <- function(){
     dplyr::mutate(planned_duration = factor(x = planned_duration, ordered = TRUE),
                   age = factor(x = age, ordered = TRUE),
                   plantation = factor(x = plantation, ordered = TRUE)) %>%
-    dplyr::mutate_if(is.character, factor) %>%
-    dplyr::mutate_if(is_binary, factor) -> cleaned_data
-  cleaned_data <- cleaned_data %>%
     dplyr::mutate(geomem = ifelse(grepl("geomem$", fabric_type) | grepl("tarp$", fabric_type) |
                                     grepl("mixed", fabric_type) | grepl("unknown", fabric_type), 1, 0)) %>%
-    dplyr::mutate(geotex = ifelse(grepl("geotex$", fabric_type) | grepl("mixed", fabric_type), 1, 0))
+    dplyr::mutate(geotex = ifelse(grepl("geotex$", fabric_type) | grepl("mixed", fabric_type), 1, 0)) %>%
+    dplyr::mutate_if(is.character, factor) %>%
+    dplyr::mutate_if(is_binary, factor) -> cleaned_data
+
   return(cleaned_data)
 }
 
