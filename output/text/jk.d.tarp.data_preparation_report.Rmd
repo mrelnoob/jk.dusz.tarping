@@ -47,6 +47,7 @@ In order to build valid and meaningful models to explain or predict the success/
 As our global dataset contains many variables (*n* = 81), it would be interesting to reduce their number in order to spare time for further exploration and analyses. As such, the first steps of our data exploration for each response variable will aim at reducing the dimensionality of the data. First, we will try and see if the *environmental variables* can be coerced into a synthetic variable (e.g. through a PCA). Then, we will investigate correlations among variables as well as potential colinearity. This should bear the twofold advantage of improve our understanding of the data and enable us to remove colinear and too strongly correlated variables.
 
 
+
 ### - For the *eradication efficiency* response variable
 
 ```{r erad import, include=FALSE}
@@ -54,6 +55,7 @@ erad <- jk.dusz.tarping::model_datasets(response.var = "efficiency")
 erad %>% dplyr::select(-eff_expansion, -eff_vigour, -goals, -woven_geotex, -thickness) %>%
   dplyr::filter(eff_eradication != "NA") -> erad
 ```
+
 
 #### - Investigation of correlation structures
 ##### - Multivariate synthesis of environmental variables
@@ -90,7 +92,22 @@ rm(res.pca, res.imput, xxx, ttt, nb)
 As the first axis (PC) of our PCA satisfactorily synthesizes a large amount (38.2%) of the variance of the 5 environmental variables, we will use operations' coordinates on this axis to build a synthetic variable to summarize their environment. This new variable will be named **coarse_env** and will thus replace the other 5 variables in the dataset. Operations with *positive values* for this variable are located in sites that tend to be forested (and thus shaded), difficult to access, with uneven ground and a coarse soil texture (and vice-versa).
 
 
-##### - Correlation among variables and potential colinearity
+```{r, eval=FALSE, include=FALSE}
+# PEUT ETRE INTERESSANT POUR D'AUTRES MODELES???????? mouais...
+# pb <- zzz_mydata_cleaned[, c(59,60,64,66,68)] #PB+REG (2dim = 53%)
+# pb <- na.omit(object = pb) # To have no obs. with NAs!
+# summary(pb)
+# 
+# 
+# #MCA
+# acm <- FactoMineR::MCA(X = pb, ncp = 5,graph = FALSE)
+# acm$eig
+# plot(acm, label = "var")
+# plot(acm, choix = "var")
+```
+
+  
+##### - Correlation among variables
 
 To investigate potential correlations and colinearity among our variables, we will start by computing a **correlation matrix** of the data. As most of our factors are either ordered factors (i.e. ordinal variables) or binary factors (i.e. boolean), we can use them in a correlation matrix. To do that however, computations will be based on *Spearman*'s rank correlation coefficient.
 
@@ -125,6 +142,7 @@ Many interesting patterns can be observed in this correlation matrix. Among them
 It is worth reminding that these correlations are just correlations (not **causation**) and only bivariate. Accounting for multivariate relationships and interactions will certainly give very different patterns.
 
 
+    
 ##### - Looking for outliers
 
 We will look for potential outliers in the data using **boxplots** and **Cleveland dotplots** on our quantitative variables. 
@@ -171,4 +189,34 @@ rm(simu.var)
 
 After analysing random samples drawn from log-normal distributions (based on the parameters of our potentially problematic variables), we have good reason to believe that only *latitude*, *longitude*, and *stand_surface* should be problematic. The other variables do not have distribution that a log-transformation could not fix.
 
-THINK ABOUT SCALING PROBLEMS?????? e.g. strip overlap (cm vs. m ???)
+
+   
+##### - Homogeneity of variances
+
+```{r}
+dataset <- erad[, sapply(erad, is.numeric)]
+dataset <- scale(x = dataset, center = T, scale = T)
+#jk.dusz.tarping::uni.dotplots(dataset = dataset)
+
+num.data <- dataset[, sapply(dataset, is.numeric)]
+  nam <- names(num.data)
+  ncol.data <- ncol(num.data)
+  ncol.adjust <- ceiling(x = ncol.data/4) # Round to the next integer (e.g. ceiling(x = 7.12) returns 8)!
+  num.data <- as.matrix(num.data)
+
+  graphics::par(mfrow= c (ncol.adjust,4), mar=MAR, cex.lab = CEX.LAB, font.lab=FONT.LAB, bty = BTY, fg = FG,
+      col.axis = COL.AXIS, col.lab = COL.LAB, cex = CEX.PAR, tcl = TCL,
+      mgp = MGP, oma = OMA, lab = LAB)
+  for (i in c(1:ncol(num.data))) {
+    graphics::plot(x = num.data[,i], y = 1:length(num.data[,i]), type = "p", xlab = nam[i], ylab = "",
+         col = COL.PCH, pch = PCH, panel.first = {
+           grid(col=COL.GRID,nx = NX,ny = NY, lty = LTY)
+         }, ...) }
+
+```
+
+
+
+Regarding scaling:
+I will standardize my predictors, so there should be no problems (it is especially important when I use interactions terms: cf. "standardization" post on CV in my MacBook favorites)!
+BTW, if I create an averaged variable (e.g. efficacy), I should perhaps standardise variables first to avoid giving to much weight to the variable with the largest values!

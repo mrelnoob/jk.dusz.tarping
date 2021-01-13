@@ -28,8 +28,9 @@ uni.dotplots(
 )
 }
 \arguments{
-\item{dataset}{The input dataset containing all variables to be plotted. It may contain all kinds of
-variables, the \code{uni.dotplots} function will automatically detect and plot numeric variables (columns).}
+\item{dataset}{The input dataset containing all variables to be plotted (must be a \code{data.frame} with
+at least 2 variables). It may contain all kinds of columns, the \code{uni.dotplots} function will
+automatically detect and plot numeric variables (columns).}
 
 \item{MAR}{MAR A numerical vector of the form \code{c(bottom, left, top, right)} which gives the number of lines
 of margin to be specified on the four sides of the plot. The default is \code{c(0.5,4.1,1.1,1.5)}.}

@@ -270,8 +270,9 @@ uni.boxplots <- function(dataset, MAR=c(0.5,4.1,1.1,1.5), CEX.LAB=1, FONT.LAB=2,
 #' letters (e.g. CEX.LAB = 0.9) whereas other arguments from the `plot` function should be called with
 #' their normal case writing (e.g. sub = "My subtitle")!
 #'
-#' @param dataset The input dataset containing all variables to be plotted. It may contain all kinds of
-#' variables, the `uni.dotplots` function will automatically detect and plot numeric variables (columns).
+#' @param dataset The input dataset containing all variables to be plotted (must be a `data.frame` with
+#' at least 2 variables). It may contain all kinds of columns, the `uni.dotplots` function will
+#' automatically detect and plot numeric variables (columns).
 #' @param MAR MAR A numerical vector of the form `c(bottom, left, top, right)` which gives the number of lines
 #' of margin to be specified on the four sides of the plot. The default is `c(0.5,4.1,1.1,1.5)`.
 #' @param CEX.LAB The magnification to be used for x and y labels relative to the current setting
