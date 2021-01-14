@@ -71,17 +71,27 @@ model_datasets <- function(response.var = c("efficiency", "edges", "overlaps",
 
   ### For the 3 "efficiency" models
   if (response.var == "efficiency") {
+    qqq <- dplyr::mutate(.data = qqq,
+                         high_eff = ifelse(stringr::str_detect(latest_regrowth, stringr::regex("few.", dotall = TRUE)) |
+                                                          eff_eradication == "1", 1, 0)) %>%
+      dplyr::mutate_if(is_binary, factor)
+    # With str_detect and regex, I matched all obs. with latest_regrowth that begins with "few"
+    # (quite similar to grep)!
+
+    qqq <- dplyr::mutate(.data = qqq,
+                         efficiency = rowMeans(x = qqq[,79:81], na.rm = FALSE))
+
+
     tapioca <- qqq[,c("xp_id", "latitude", "longitude", "elevation", "goals",
-                  "eff_expansion", "eff_dispersal","eff_vigour", "eff_eradication", "latest_regrowth",
-                  "freq_monitoring", "slope", "difficulty_access", "shade", "forest", "ruggedness", "granulometry",
-                  "obstacles", "flood",
+                  "efficiency", "eff_eradication", "high_eff",
+                  "freq_monitoring", "slope", "difficulty_access", "shade", "forest", "ruggedness",
+                  "granulometry", "obstacles", "flood",
                   "geomem", "geotex", "liner_geomem", "agri_geomem", "woven_geotex", "mulching_geotex",
                   "pla_geotex", "weedsp_geotex", "other_unknown", "grammage", "thickness",
-                  "maxveg", "preparation", "stand_surface", "age", "fully_tarped", "distance",
+                  "maxveg", "preparation", "stand_surface", "age", "fully_tarped", "distance", "tarping_duration",
                   "strips_overlap", "tarpfix_multimethod", "sedicover_height", "trench_depth",
                   "pierced_tarpinstall", "plantation", "repairs", "add_control", "add_control_type",
-                  "degradation", "pb_fixation", "pb_durability",
-                  "tarping_duration")]
+                  "degradation", "pb_fixation", "pb_durability")]
   }
 
   ### For the "latest_reg_edges" model
@@ -98,12 +108,11 @@ model_datasets <- function(response.var = c("efficiency", "edges", "overlaps",
       "obstacles", "flood",
       "geomem", "geotex",
       "season", "preparation",
-      "stand_surface", "age", "fully_tarped", "distance", "strips_overlap",
+      "stand_surface", "age", "fully_tarped", "distance", "tarping_duration", "strips_overlap",
       "fabric_fixation", "tarpfix_multimethod", "sedicover_height", "trench_depth", "plantation",
       "repairs", "add_control", "add_control_type",
       "degradation", "pb_fixation", "pb_durability",
-      "reg_elsewhere",
-      "tarping_duration")]
+      "reg_elsewhere")]
   }
 
   ### For the "overlaps" model
@@ -117,9 +126,9 @@ model_datasets <- function(response.var = c("efficiency", "edges", "overlaps",
       "obstacles", "flood",
       "geomem", "geotex",
       "season", "preparation",
-      "stand_surface", "age", "fully_tarped", "distance",
+      "stand_surface", "age", "fully_tarped", "distance","tarping_duration",
       "strips_overlap", "strips_fixation", "staples_distance", "fabric_fixation", "sedicover_height", "plantation",
-      "reg_elsewhere","tarping_duration")]
+      "reg_elsewhere")]
   }
 
   ### For the "latest_condition" model
@@ -129,10 +138,10 @@ model_datasets <- function(response.var = c("efficiency", "edges", "overlaps",
       "obstacles", "flood",
       "geomem", "geotex", "liner_geomem", "agri_geomem", "woven_geotex", "mulching_geotex", "pla_geotex", "weedsp_geotex",
       "other_unknown", "grammage", "thickness", "resi_punc", "resi_trac",
-      "preparation", "levelling", "stand_surface", "age", "fully_tarped", "distance", "strips_overlap",
-      "strips_fixation", "staples_distance", "fabric_fixation", "sedicover_height",
+      "preparation", "levelling", "stand_surface", "age", "fully_tarped", "distance", "tarping_duration",
+      "strips_overlap", "strips_fixation", "staples_distance", "fabric_fixation", "sedicover_height",
       "pierced_tarpinstall", "plantation", "repairs", "add_control",
-      "degradation", "regrowth_during", "tarping_duration")]
+      "degradation", "regrowth_during")]
   }
 
   ### For the "fixation" model
@@ -142,10 +151,11 @@ model_datasets <- function(response.var = c("efficiency", "edges", "overlaps",
       "obstacles", "flood",
       "geomem", "geotex", "liner_geomem", "agri_geomem", "woven_geotex", "mulching_geotex", "pla_geotex", "weedsp_geotex",
       "other_unknown", "grammage", "thickness",
-      "preparation", "levelling", "stand_surface", "age", "fully_tarped", "distance", "multi_strips",
-      "strips_overlap", "strips_fixation", "staples_distance", "fabric_fixation", "tarpfix_multimethod",
-      "sedicover_height", "trench_depth", "plantation", "repairs", "pb_durability", "pb_trampiercing",
-      "regrowth_during", "tarping_duration")]
+      "preparation", "levelling", "stand_surface", "age", "fully_tarped", "distance", "tarping_duration",
+      "multi_strips", "strips_overlap", "strips_fixation", "staples_distance", "fabric_fixation",
+      "tarpfix_multimethod", "sedicover_height", "trench_depth", "plantation",
+      "repairs", "pb_durability", "pb_trampiercing",
+      "regrowth_during")]
   }
   return(tapioca)
 }

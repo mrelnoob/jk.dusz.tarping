@@ -48,19 +48,23 @@ As our global dataset contains many variables (*n* = 81), it would be interestin
 
 
 
-### - For *eff_eradication* and *efficiency* response variables
+### - For the response variables related to tarping *efficiency*
 
-The first thing to do here is to prepare the sub-dataset that will be used to model the responses of the **efficiency variables**. To do so, the following steps have been performed:
-* We selected a subset of variables for which we have hypotheses regarding tarping efficiency;
+The first thing to do here is to prepare the sub-dataset that will be used to model the responses of the *efficiency variables* (i.e. **efficiency**, **eff_eradication** and **high_eff**). To do so, the following steps have been performed:
 
-*eff_eradication* and *efficiency*. Of course, we also have to create the *efficiency* variable that does not exist yet. We will do it by averaging the three following variables: *eff_expansion*, *eff_dispersal*, and *eff_vigour*.
+* We selected the subset of predictors and covariates that will be used to model tarping's efficiency;
+* We left out the observations that were too recent (installed less than 2 growing seasons ago) and those for which we could not obtain an *efficiency score* (i.e. NA);
+* We also deleted an outlier (spotted thanks to subsequent exploration) which had a stand surface of 5000 m^2^.
+
 
 ```{r erad import, include=FALSE}
 erad <- jk.dusz.tarping::model_datasets(response.var = "efficiency")
 
 erad %>% dplyr::select(-liner_geomem, -agri_geomem,-woven_geotex, -mulching_geotex, -pla_geotex, -other_unknown, -grammage, -age, -thickness, -pierced_tarpinstall, -add_control_type) %>%
-  dplyr::filter(eff_eradication != "NA") -> erad
+  dplyr::filter(eff_eradication != "NA") %>%
+  dplyr::filter(tarping_duration >= 2) -> erad
 
+erad <- erad[-(which.max(erad$stand_surface)),]
 ```
 
 
@@ -70,7 +74,7 @@ erad %>% dplyr::select(-liner_geomem, -agri_geomem,-woven_geotex, -mulching_geot
 We performed a **normed-PCA** on some of our environmental variables for which we do not have strong hypotheses (i.e. *difficulty_access*, *shade*, *forest*, *ruggedness*, *granulometry*) but we kept *slope*, *obstacles*, and *flood* because we suspected they might have a major influence on the success/failure of tarping. In order to get optimum results, we imputed missing values using the *Regularised Iterative PCA algorithm* (Josse & Husson, 2013) of the `missMDA` package (Josse & Husson, 2016). 
 
 ```{r erad env PCAs, warning=FALSE, fig.align='center', fig.cap="**Figure 1.** Correlation plot of the normed-PCA on environmental variables for the *eradication efficiency* dataset"}
-xxx <- erad[,12:16]
+xxx <- erad[,11:15]
 
 # As there are missing values in some variables, we will impute them using the missPCA() function.
 # But first, we need to estimate how many components are required to correctly impute the missing values:
