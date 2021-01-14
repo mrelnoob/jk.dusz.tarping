@@ -72,12 +72,12 @@ model_datasets <- function(response.var = c("efficiency", "edges", "overlaps",
   ### For the 3 "efficiency" models
   if (response.var == "efficiency") {
     tapioca <- qqq[,c("xp_id", "latitude", "longitude", "elevation", "goals",
-                  "eff_expansion", "eff_dispersal","eff_vigour", "eff_eradication",
+                  "eff_expansion", "eff_dispersal","eff_vigour", "eff_eradication", "latest_regrowth",
                   "freq_monitoring", "slope", "difficulty_access", "shade", "forest", "ruggedness", "granulometry",
                   "obstacles", "flood",
                   "geomem", "geotex", "liner_geomem", "agri_geomem", "woven_geotex", "mulching_geotex",
                   "pla_geotex", "weedsp_geotex", "other_unknown", "grammage", "thickness",
-                  "season", "maxveg", "preparation", "stand_surface", "age", "fully_tarped", "distance",
+                  "maxveg", "preparation", "stand_surface", "age", "fully_tarped", "distance",
                   "strips_overlap", "tarpfix_multimethod", "sedicover_height", "trench_depth",
                   "pierced_tarpinstall", "plantation", "repairs", "add_control", "add_control_type",
                   "degradation", "pb_fixation", "pb_durability",
@@ -432,5 +432,88 @@ uni.simudistrib <- function(simu.var, distribution){
                        xlab = paste("rpois based on", nam[i], sep = " "), ylab = "", col = "hotpink3",
                        pch = 19, panel.first = {grid(col="lavender",nx = 9,ny = 3, lty = 6)})}
     }
+  }
+}
+
+
+
+
+
+# _________________________________________
+### Creation of a function that generate histograms for each numeric variable:
+
+#' Histogram Panel
+#'
+#' @description The `uni.histograms` function draws, within a single panel, an independent histogram
+#' or each numeric (continuous or discrete) variable in a given dataset. It is particularly useful
+#' for data exploration (e.g. Zuur \emph{et al.}, 2010). For instance, to simultaneously observe
+#' the distributions of all numeric variables and determine which one will require transformation.
+#'
+#' @param dataset The input dataset containing all variables to be plotted (must be a `data.frame` with
+#' at least 2 variables). It may contain all kinds of columns, the `uni.histograms` function will
+#' automatically detect and plot numeric variables (columns).
+#' @param MAR A numerical vector of the form `c(bottom, left, top, right)` which gives the number of lines
+#' of margin to be specified on the four sides of the plot. The default is `c(0.5,4.1,1.1,1.5)`.
+#' @param CEX.LAB The magnification to be used for x and y labels relative to the current setting
+#' of `CEX.PAR`.
+#' @param FONT.LAB The font to be used for x and y labels.
+#' @param BTY A character string which determined the type of box which is drawn about plots. If `BTY` is
+#' one of "o", "l", "7", "c", "u", or "]" the resulting box resembles the corresponding upper
+#' case letter. A value of "n" suppresses the box (the default).
+#' @param FG The color to be used for the foreground of plots. This is the default color used for things
+#' like axes and boxes around plots (defaults to "gray35").
+#' @param COL.AXIS The color to be used for axis annotation. Defaults to "gray35".
+#' @param COL.LAB The color to be used for x and y labels. Defaults to "gray20".
+#' @param CEX.PAR A numerical value giving the amount by which plotting text and symbols should be
+#' magnified relative to the default (for `par`, the panel manager). This starts as 1 when a device
+#' is opened, and is reset when the layout is changed, e.g. by setting `mfrow`. Defaults to 0.8.
+#' @param TCL The length of tick marks as a fraction of the height of a line of text. The default
+#' value is -0.3.
+#' @param MGP The margin line (in `mex` units) for the axis title, axis labels and axis line.
+#' Note that `mgp[1]` affects title whereas `mgp[2:3]` affect axis. The default is c(2.4, 0.6, 0).
+#' @param OMA A vector of the form `c(bottom, left, top, right)` giving the size of the outer margins
+#' in lines of text.
+#' @param LAB A numerical vector of the form `c(x, y, len)` which modifies the default way that axes
+#' are annotated. The values of `x` and `y` give the (approximate) number of tickmarks on the x and y
+#' axes and len specifies the label length. The default is `c(5, 5, 7)`. Note that this only affects
+#' the way the parameters xaxp and yaxp are set when the user coordinate system is set up, and is
+#' not consulted when axes are drawn. `len` is unimplemented in `R`.
+#' @param BREAKS One of:
+#' * a vector giving the breakpoints between histogram cells,
+#' * a function to compute the vector of breakpoints,
+#' * a single number giving the number of cells for the histogram,
+#' * a character string naming an algorithm to compute the number of cells (see
+#' \code{\link[graphics:hist]{hist}}),
+#' * a function to compute the number of cells.
+#'
+#' In the last three cases the number is a suggestion only; as the breakpoints will be set to pretty
+#' values, the number is limited to 1e6 (with a warning if it was larger). If breaks is a function,
+#' the x vector is supplied to it as the only argument (and the number of breaks is only limited by
+#' the amount of available memory).
+#' @param COL The color of the bar of the histograms (bins).
+#' @param BORDER The color of the border of the bars.
+#'
+#' @return A panel of histograms.
+#' @import graphics
+#' @export
+#'
+#' @examples
+#' uni.histograms(dataset = iris[,1:4])
+uni.histograms <- function(dataset, MAR=c(3,2,0.5,1.5), CEX.LAB = 1.2, FONT.LAB = 2, BTY = "n",
+                     FG = "gray35", COL.AXIS = "gray35", COL.LAB = "gray20", CEX.PAR = 0.6,
+                     TCL = -0.3, MGP = c(1.7, 0.6, 0.1), OMA = c(1, 0, 1, 0), LAB = c(5, 10, 7),
+                     BREAKS = 10, COL = "moccasin", BORDER = "white"){
+  num.data <- dataset[, sapply(dataset, is.numeric)]
+  nam <- names(num.data)
+  ncol.data <- ncol(num.data)
+  ncol.adjust <- ceiling(x = ncol.data/4) # Round to the next integer (e.g. ceiling(x = 7.12) returns 8)!
+  num.data <- as.matrix(num.data)
+
+  graphics::par(mfrow= c (ncol.adjust,4), mar=MAR, cex.lab = CEX.LAB, font.lab=FONT.LAB, bty = BTY, fg = FG,
+                col.axis = COL.AXIS, col.lab = COL.LAB, cex = CEX.PAR, tcl = TCL,
+                mgp = MGP, oma = OMA, lab = LAB)
+  for (i in c(1:ncol(num.data))) {
+    graphics::hist(num.data[,i], breaks = BREAKS, col = COL, border = BORDER,
+                   main = "", xlab = nam[i], ylab = "")
   }
 }

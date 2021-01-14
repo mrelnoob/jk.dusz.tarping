@@ -30,7 +30,7 @@ sessionInfo()
 First, let's take a quick look at our dataset. For the meaning of the variables, please refer to the attached **documentation**.
 
 ```{r data import and summary, message=FALSE, comment=NA}
-#library(jk.dusz.tarping)
+library(jk.dusz.tarping)
 zzz_mydata_cleaned <- jk.dusz.tarping::clean_my_data()
 
 summary(zzz_mydata_cleaned)
@@ -50,12 +50,17 @@ As our global dataset contains many variables (*n* = 81), it would be interestin
 
 ### - For *eff_eradication* and *efficiency* response variables
 
+The first thing to do here is to prepare the sub-dataset that will be used to model the responses of the **efficiency variables**. To do so, the following steps have been performed:
+* We selected a subset of variables for which we have hypotheses regarding tarping efficiency;
+
+*eff_eradication* and *efficiency*. Of course, we also have to create the *efficiency* variable that does not exist yet. We will do it by averaging the three following variables: *eff_expansion*, *eff_dispersal*, and *eff_vigour*.
+
 ```{r erad import, include=FALSE}
 erad <- jk.dusz.tarping::model_datasets(response.var = "efficiency")
-erad <- 
 
-erad %>% dplyr::select(-goals, -woven_geotex, -thickness) %>%
+erad %>% dplyr::select(-liner_geomem, -agri_geomem,-woven_geotex, -mulching_geotex, -pla_geotex, -other_unknown, -grammage, -age, -thickness, -pierced_tarpinstall, -add_control_type) %>%
   dplyr::filter(eff_eradication != "NA") -> erad
+
 ```
 
 
@@ -65,7 +70,7 @@ erad %>% dplyr::select(-goals, -woven_geotex, -thickness) %>%
 We performed a **normed-PCA** on some of our environmental variables for which we do not have strong hypotheses (i.e. *difficulty_access*, *shade*, *forest*, *ruggedness*, *granulometry*) but we kept *slope*, *obstacles*, and *flood* because we suspected they might have a major influence on the success/failure of tarping. In order to get optimum results, we imputed missing values using the *Regularised Iterative PCA algorithm* (Josse & Husson, 2013) of the `missMDA` package (Josse & Husson, 2016). 
 
 ```{r erad env PCAs, warning=FALSE, fig.align='center', fig.cap="**Figure 1.** Correlation plot of the normed-PCA on environmental variables for the *eradication efficiency* dataset"}
-xxx <- erad[,6:12] %>% dplyr::select(-freq_monitoring, -slope) 
+xxx <- erad[,12:16]
 
 # As there are missing values in some variables, we will impute them using the missPCA() function.
 # But first, we need to estimate how many components are required to correctly impute the missing values:
@@ -115,7 +120,7 @@ To investigate potential correlations and colinearity among our variables, we wi
 
 ```{r erad corrplot, fig.align='center', fig.cap="**Figure 2.** Correlation matrix displaying *Spearman*'s $\\rho$ for the numeric variables and ordered factors of the *eradication efficiency* dataset. Only significant correlations are displayed (with $\\alpha$ = 0.05)", warning=FALSE}
 # To convert all ordered factors into numeric variables usable in a correlation matrix:
-erad %>% dplyr::select(-xp_id, -season, -preparation, -add_control_type) -> num.erad
+erad %>% dplyr::select(-xp_id, -goals, -preparation) -> num.erad
 num.erad <-  dplyr::mutate_if(.tbl = num.erad, .predicate = is.factor, .funs = as.character)
 num.erad <-  dplyr::mutate_if(.tbl = num.erad, .predicate = is.character, .funs = as.numeric) # I use this double conversion-trick because, for an unknown reason, I failed to do it any other way!
 #num.erad <- erad[, sapply(erad, is.numeric)] # Select only numeric columns.
@@ -199,30 +204,17 @@ After analysing random samples drawn from log-normal distributions (based on the
 
 
    
-##### - Homogeneity of variances
+##### - Normality
 
-```{r}
-dataset <- erad[, sapply(erad, is.numeric)]
-dataset <- scale(x = dataset, center = T, scale = T)
-#jk.dusz.tarping::uni.dotplots(dataset = dataset)
+We already got a pretty good idea of the distribution of our variables and not all statistical methods involve a Normality assumption. Still, it's interesting and often useful to have a precise view of variables distributions, even for predictors and covariates. 
 
-num.data <- dataset[, sapply(dataset, is.numeric)]
-  nam <- names(num.data)
-  ncol.data <- ncol(num.data)
-  ncol.adjust <- ceiling(x = ncol.data/4) # Round to the next integer (e.g. ceiling(x = 7.12) returns 8)!
-  num.data <- as.matrix(num.data)
-
-  graphics::par(mfrow= c (ncol.adjust,4), mar=MAR, cex.lab = CEX.LAB, font.lab=FONT.LAB, bty = BTY, fg = FG,
-      col.axis = COL.AXIS, col.lab = COL.LAB, cex = CEX.PAR, tcl = TCL,
-      mgp = MGP, oma = OMA, lab = LAB)
-  for (i in c(1:ncol(num.data))) {
-    graphics::plot(x = num.data[,i], y = 1:length(num.data[,i]), type = "p", xlab = nam[i], ylab = "",
-         col = COL.PCH, pch = PCH, panel.first = {
-           grid(col=COL.GRID,nx = NX,ny = NY, lty = LTY)
-         }, ...) }
-
+```{r erad histo, fig.align='center', fig.cap="**Figure 5.** Histograms for all quantitative variables of the *eradication efficiency* dataset"}
+uni.histograms(dataset = erad)
 ```
 
+
+FAIRE efficiency§§§§§§§§§§§§§§§ + retirer les expés trop récentes!!
+§§§§§§§§§§§§§§§§§§§§§§§
 
 
 Regarding scaling:
