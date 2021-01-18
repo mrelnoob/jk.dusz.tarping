@@ -19,32 +19,22 @@ knitr::opts_chunk$set(echo = FALSE)
 rm(list=ls())
 sessionInfo()
 ```
-  
-  
 
+
+  
 
 
 # - Data visualisation and exploration  
-## - Data summary
+## - Data exploration following Zuur *et al.* (2010)
 
-First, let's take a quick look at our dataset. For the meaning of the variables, please refer to the attached **documentation**.
-
-```{r data import and summary, message=FALSE, comment=NA}
+```{r data import and summary, include=FALSE}
 library(jk.dusz.tarping)
 zzz_mydata_cleaned <- jk.dusz.tarping::clean_my_data()
-
-summary(zzz_mydata_cleaned)
 ```
-
-
-
-
-
-## - Data exploration following Zuur *et al.* (2010)
 
 In order to build valid and meaningful models to explain or predict the success/failure of tarping operations for the control of Japanese knotweed *s.l.*, we need first to learn more about our data. Therefore, we thoroughly examined our variables (e.g. outliers, distribution, interactions, colinearity, variance homogeneity, observation independence) mostly following the protocol presented by Zuur *et al.* (2010) for each of our **6 response variables**: *eff_eradication*, *efficiency*, *latest_reg_edges*, *reg_overlaps*, *latest_condition*, and *pb_fixation*.
 
-As our global dataset contains many variables (*n* = 81), it would be interesting to reduce their number in order to spare time for further exploration and analyses. As such, the first steps of our data exploration for each response variable will aim at reducing the dimensionality of the data. First, we will try and see if the *environmental variables* can be coerced into a synthetic variable (e.g. through a PCA). Then, we will investigate correlations among variables as well as potential colinearity. This should have the twofold advantage of improving our understanding of the data and enabling us to remove colinear and too strongly correlated variables.
+As our global dataset contains many variables (*p* = 81), it would be interesting to reduce their number in order to spare time for further exploration and analyses. As such, the first steps of our data exploration for each response variable will aim at reducing the dimensionality of the data. First, we will try and see if the *environmental variables* can be coerced into a synthetic variable (e.g. through a PCA). Then, we will investigate correlations among variables as well as potential colinearity. This should have the twofold advantage of improving our understanding of the data and enabling us to remove colinear and too strongly correlated variables.
 
 
 
@@ -52,12 +42,13 @@ As our global dataset contains many variables (*n* = 81), it would be interestin
 
 The first thing to do here is to prepare the sub-dataset that will be used to model the responses of the *efficiency variables* (i.e. **efficiency**, **eff_eradication** and **high_eff**). To do so, the following steps have been performed:
 
-* We selected the subset of predictors and covariates that will be used to model tarping's efficiency;
+* We selected the subset of predictors and covariates that will be used to model tarping efficiency;
 * We left out the observations that were too recent (installed less than 2 growing seasons ago) and those for which we could not obtain an *efficiency score* (i.e. NA);
 * We also deleted an outlier (spotted thanks to subsequent exploration) which had a stand surface of 5000 m^2^.
 
+Now, let's take a quick look at our dataset. For the meaning of the variables, please refer to the attached **documentation**.
 
-```{r erad import, include=FALSE}
+```{r erad import, include=TRUE, message=FALSE, comment=NA}
 erad <- jk.dusz.tarping::model_datasets(response.var = "efficiency")
 
 erad %>% dplyr::select(-liner_geomem, -agri_geomem,-woven_geotex, -mulching_geotex, -pla_geotex, -other_unknown, -grammage, -age, -thickness, -pierced_tarpinstall, -add_control_type) %>%
@@ -65,6 +56,8 @@ erad %>% dplyr::select(-liner_geomem, -agri_geomem,-woven_geotex, -mulching_geot
   dplyr::filter(tarping_duration >= 2) -> erad
 
 erad <- erad[-(which.max(erad$stand_surface)),]
+
+summary(erad)
 ```
 
 
@@ -73,7 +66,7 @@ erad <- erad[-(which.max(erad$stand_surface)),]
 
 We performed a **normed-PCA** on some of our environmental variables for which we do not have strong hypotheses (i.e. *difficulty_access*, *shade*, *forest*, *ruggedness*, *granulometry*) but we kept *slope*, *obstacles*, and *flood* because we suspected they might have a major influence on the success/failure of tarping. In order to get optimum results, we imputed missing values using the *Regularised Iterative PCA algorithm* (Josse & Husson, 2013) of the `missMDA` package (Josse & Husson, 2016). 
 
-```{r erad env PCAs, warning=FALSE, fig.align='center', fig.cap="**Figure 1.** Correlation plot of the normed-PCA on environmental variables for the *eradication efficiency* dataset"}
+```{r erad env PCAs, warning=FALSE, fig.align='center', fig.cap="**Figure 1.** Correlation plot of the normed-PCA on environmental variables for the *tarping efficiency* dataset"}
 xxx <- erad[,11:15]
 
 # As there are missing values in some variables, we will impute them using the missPCA() function.
@@ -97,10 +90,9 @@ erad$coarse_env <- ttt # And I use this occasion to reduce the dataset and repla
 
 # To plot side by side:
 #gridExtra::grid.arrange(FIG_1, FIG_2, ncol = 2)
-rm(res.pca, res.imput, xxx, ttt, nb)
 ```
 
-As the first axis (PC) of our PCA satisfactorily synthesizes a large amount (38.2%) of the variance of the 5 environmental variables, we will use operations' coordinates on this axis to build a synthetic variable to summarize their environment. This new variable will be named **coarse_env** and will thus replace the other 5 variables in the dataset. Operations with *positive values* for this variable are located in sites that tend to be forested (and thus shaded), difficult to access, with uneven ground and a coarse soil texture (and vice-versa).
+As the first axis (PC) of our PCA satisfactorily synthesizes a large amount (`r round(res.pca$eig[1,2],1)`%) of the variance of the 5 environmental variables, we will use operations' coordinates on this axis to build a synthetic variable to summarize their environment. This new variable will be named **coarse_env** and will thus replace the other 5 variables in the dataset. Operations with *positive values* for this variable are located in sites that tend to be forested (and thus shaded), difficult to access, with uneven ground and a coarse soil texture (and vice-versa).
 
 
 ```{r, eval=FALSE, include=FALSE}
@@ -122,7 +114,9 @@ As the first axis (PC) of our PCA satisfactorily synthesizes a large amount (38.
 
 To investigate potential correlations and colinearity among our variables, we will start by computing a **correlation matrix** of the data. As most of our factors are either ordered factors (i.e. ordinal variables) or binary factors (i.e. boolean), we can use them in a correlation matrix. To do that however, computations will be based on *Spearman*'s rank correlation coefficient.
 
-```{r erad corrplot, fig.align='center', fig.cap="**Figure 2.** Correlation matrix displaying *Spearman*'s $\\rho$ for the numeric variables and ordered factors of the *eradication efficiency* dataset. Only significant correlations are displayed (with $\\alpha$ = 0.05)", warning=FALSE}
+```{r erad corrplot, fig.align='center', fig.cap="**Figure 2.** Correlation matrix displaying *Spearman*'s $\\rho$ for the numeric variables and ordered factors of the *tarping efficiency* dataset. Only significant correlations are displayed (with $\\alpha$ = 0.05)", warning=FALSE}
+rm(res.pca, res.imput, xxx, ttt, nb)
+
 # To convert all ordered factors into numeric variables usable in a correlation matrix:
 erad %>% dplyr::select(-xp_id, -goals, -preparation) -> num.erad
 num.erad <-  dplyr::mutate_if(.tbl = num.erad, .predicate = is.factor, .funs = as.character)
@@ -145,9 +139,9 @@ rm(num.erad, res.cor.erad, res.pcor.erad)
 
 Many interesting patterns can be observed in this correlation matrix. Among them, we can see that:
 
-* *eff_eradication* seems to be mildly positively correlated with *tarping_duration*, *sedicover_height*, *distance*, and *fully_tarped* and negatively with *obstacles*. 
-* *add_control*, *rapairs* and *plantation* display a relatively similar pattern of positive correlation with *coarse_env* and negative correlation with *weedsp_geotex* and *maxveg*. However, this pattern certainly bears the mark of our own tarping experiments in Chalon that were installed in June and where we did not repaired set ups nor performed additional controls nor planted anything (most correlations with *weedsp_geotex* should also be influenced by our experiments).
-* *pb_fixation* seems to be strongly positively correlated with *pla_geotex*.
+* One or several of the *efficiency* variables seem to be mildly positively correlated with *distance*, and *fully_tarped* and negatively with *obstacles*, *add_control* and *pb_durability*. 
+* *add_control*, *rapairs* and *plantation* display a relatively similar pattern of positive correlation with *slope*, *coarse_env*, *flood* and *geomem*, and negative correlation with *geotex*, *weedsp_geotex* and *maxveg*. However, this pattern certainly bears the mark of our own tarping experiments in Chalon that were installed in June and where we did not repaired set ups nor performed additional controls nor planted anything (most correlations with *weedsp_geotex* should also be influenced by our experiments).
+* *pb_fixation* seems to be strongly positively correlated with *stand_surface*.
 * *stand_surface* seems to be strongly positively correlated with *flood*.
 
 It is worth reminding that these correlations are just correlations (not **causation**) and only bivariate. Accounting for multivariate relationships and interactions will certainly give very different patterns.
@@ -155,6 +149,7 @@ It is worth reminding that these correlations are just correlations (not **causa
 
    
 ##### - Multicolinearity
+
 
 
 
@@ -210,15 +205,13 @@ After analysing random samples drawn from log-normal distributions (based on the
    
 ##### - Normality
 
-We already got a pretty good idea of the distribution of our variables and not all statistical methods involve a Normality assumption. Still, it's interesting and often useful to have a precise view of variables distributions, even for predictors and covariates. 
+We already got a pretty good idea of the distribution of our variables and not all statistical methods involve a Normality assumption (for instance, multiple linear regressions assume that residuals are normally distributed, not the variable themselves). Still, it's interesting and often useful to have a precise view of variables distributions, even for predictors and covariates. 
 
 ```{r erad histo, fig.align='center', fig.cap="**Figure 5.** Histograms for all quantitative variables of the *eradication efficiency* dataset"}
 uni.histograms(dataset = erad)
 ```
 
 
-FAIRE efficiency§§§§§§§§§§§§§§§ + retirer les expés trop récentes!!
-§§§§§§§§§§§§§§§§§§§§§§§
 
 
 Regarding scaling:
