@@ -52,6 +52,34 @@ is_binary <- function(x) {
 
 
 
+# ________________________________________________________________________________________
+### Creation of a function to automatically convert a factor into its exact numeric value:
+#' Convert factor values as exact numeric values
+#'
+#' @description Automatically convert the input `x (factor)` into a `numeric` vector while keeping the
+#' exact value of `x`.
+#' @details  In \strong{R}, \emph{numeric factors} should be coded as `character` but it is rarely the
+#' case because most functions actually prefer `factors`. It's one of the shortcomings of \strong{R}.
+#' Consequently, there is no \strong{R} function that converts a \emph{numeric factor} (e.g. a binary
+#' variable with only zeros and ones) into a `numeric` vector while keeping the correct value (if you use
+#' `as.numeric(myfactor)`, you will get the underlying level codes, not the values as numbers), hence the
+#' usefulness of `as.numfactor`.
+#'
+#' @param x A `factor` variable (may contain NAs).
+#'
+#' @return A `numeric` vector.
+#' @export
+#'
+#' @examples
+#' f <- as.factor(cars$speed)
+#' as.numeric(f) # Converts the values into level ranks.
+#' as.numfactor(f) # Works!
+as.numfactor <- function(x){as.numeric(levels(x))[x]}
+
+
+
+
+
 ###________________
 #' Clean Data Types
 #'

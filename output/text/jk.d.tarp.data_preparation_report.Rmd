@@ -6,6 +6,7 @@ output:
    html_document:
      number_sections: yes
      toc: yes
+     toc_depth: 5
 ---
 
 ```{r setup, include=FALSE}
@@ -43,8 +44,7 @@ As our global dataset contains many variables (*p* = 81), it would be interestin
 The first thing to do here is to prepare the sub-dataset that will be used to model the responses of the *efficiency variables* (i.e. **efficiency**, **eff_eradication** and **high_eff**). To do so, the following steps have been performed:
 
 * We selected the subset of predictors and covariates that will be used to model tarping efficiency;
-* We left out the observations that were too recent (installed less than 2 growing seasons ago) and those for which we could not obtain an *efficiency score* (i.e. NA);
-* We also deleted an outlier (spotted thanks to subsequent exploration) which had a stand surface of 5000 m^2^.
+* We left out the observations that were too recent (installed less than 2 growing seasons ago) and those for which we could not obtain an *efficiency score* (i.e. NA).
 
 Now, let's take a quick look at our dataset. For the meaning of the variables, please refer to the attached **documentation**.
 
@@ -55,10 +55,9 @@ erad %>% dplyr::select(-liner_geomem, -agri_geomem,-woven_geotex, -mulching_geot
   dplyr::filter(eff_eradication != "NA") %>%
   dplyr::filter(tarping_duration >= 2) -> erad
 
-erad <- erad[-(which.max(erad$stand_surface)),]
-
 summary(erad)
 ```
+
 
 
 #### - Investigation of correlation structures
@@ -120,7 +119,9 @@ rm(res.pca, res.imput, xxx, ttt, nb)
 # To convert all ordered factors into numeric variables usable in a correlation matrix:
 erad %>% dplyr::select(-xp_id, -goals, -preparation) -> num.erad
 num.erad <-  dplyr::mutate_if(.tbl = num.erad, .predicate = is.factor, .funs = as.character)
-num.erad <-  dplyr::mutate_if(.tbl = num.erad, .predicate = is.character, .funs = as.numeric) # I use this double conversion-trick because, for an unknown reason, I failed to do it any other way!
+num.erad <-  dplyr::mutate_if(.tbl = num.erad, .predicate = is.character, .funs = as.numeric) # I use this double conversion-trick because, strangely enough (but actually, there is a topic on SO about this), there is not R function to convert a factor into its numeric value! But we could create it like this:
+# as.numeric.factor <- function(x) {as.numeric(levels(x))[x]}
+# But it could not work in a pipe (because you have to specify `x`), so it's not that convenient.
 #num.erad <- erad[, sapply(erad, is.numeric)] # Select only numeric columns.
 
 
@@ -150,7 +151,10 @@ It is worth reminding that these correlations are just correlations (not **causa
    
 ##### - Multicolinearity
 
+I DON't know what to do here§§§§§§§§§§§§§§§§
 
+§§§§§§§§§§§§
+§§§§§§§§§§§§§§§§§§§§§§§
 
 
     
@@ -181,16 +185,16 @@ jk.dusz.tarping::uni.boxplots(dataset = erad)
 jk.dusz.tarping::uni.dotplots(dataset = erad)
 ```
 
-By the look of these graphs, it is clear that we have many *extreme values* (possible outliers) and non-Normal variables. Yet, extreme values are not necessarily **true outliers**:
+By the look of these graphs, it is clear that we have many *extreme values* (possible outliers). Yet, extreme values are not necessarily **true outliers**:
 
-* The variables *slope* and *coarse_env*  look fine.
-* The variables *obstacles*, *flood*, *distance*, *strips_overlap*, *trench_depth*, and *tarping_duration* may require mild transformations to be normalized but do not seem to contain too extreme values.
-* The variables *elevation*, *freq_monitoring*, *grammage*, *sedicover_height*, and *pierced_install* may require important transformations to be normalized. It would be interesting to see if their extreme values are too far from what could be expected from a Normal or a Poisson distribution (see below).
-* The variables *latitude*, *longitude*, and *stand_surface* contain problematic patterns/outliers. As latitude and longitude are supposed to be used as ***random effects*** in our models, I do not know (yet) what would be the consequences of extreme values or bimodal distributions (but I guess it is not good).
+* The variables *latitude*, *slope* and *coarse_env*  look fine.
+* The variables *efficiency*, *obstacles*, *flood*, *distance*, *tarping_duration*, *strips_overlap*, and *trench_depth* may require mild transformations to be normalized but do not seem to contain too extreme values.
+* The variables *elevation*, *freq_monitoring*, and *sedicover_height* may require important transformations to be normalized. It would be interesting to see if their extreme values are too far from what could be expected from a Normal or a Poisson distribution (see below).
+* The variables *longitude*, and *stand_surface* contain problematic patterns/outliers. As longitude is supposed to be used as a ***random effect*** in our models, I am unsure about the consequences of extreme values or bimodal distributions (but I guess it is not good). Still, longitude is unlikely to effectively affect tarping success, so we can consider dropping this variable. 
 
 
 ```{r erad simu.distrib, include=FALSE, eval=FALSE}
-simu.var <- dplyr::select(.data = erad, elevation, freq_monitoring, grammage, stand_surface, distance, strips_overlap, sedicover_height, trench_depth, pierced_tarpinstall, tarping_duration)
+simu.var <- dplyr::select(.data = erad, elevation, freq_monitoring, stand_surface, distance, strips_overlap, sedicover_height, trench_depth, tarping_duration)
 
 jk.dusz.tarping::uni.simudistrib(simu.var = simu.var, distribution = "normal")
 jk.dusz.tarping::uni.simudistrib(simu.var = simu.var, distribution = "log-normal")
@@ -199,7 +203,13 @@ rm(simu.var)
 
 ```
 
-After analysing random samples drawn from log-normal distributions (based on the parameters of our potentially problematic variables), we have good reason to believe that only *latitude*, *longitude*, and *stand_surface* should be problematic. The other variables do not have distribution that a log-transformation could not fix.
+After analysing random samples drawn from log-normal distributions (based on the parameters of our potentially problematic variables), we have good reason to believe that only *longitude* and *stand_surface* should be problematic. Consequently, we choose to delete the outlier spotted for *stand_surface* (i.e. the *stand_surface* of ca. 5000 m^2^) and drop the *longitude* variable.   
+The other variables do not have distribution that a transformation could not fix. We will see later on whether we actually need such transformation (e.g log) or not. 
+
+```{r erad update, include=FALSE}
+erad <- erad[-(which.max(erad$stand_surface)),] %>%
+  dplyr::select(-longitude)
+```
 
 
    
@@ -209,6 +219,44 @@ We already got a pretty good idea of the distribution of our variables and not a
 
 ```{r erad histo, fig.align='center', fig.cap="**Figure 5.** Histograms for all quantitative variables of the *eradication efficiency* dataset"}
 uni.histograms(dataset = erad)
+```
+
+
+
+
+
+#### - Bivariate relationships
+##### - Relationships among variables
+
+The next step in our data exploration is to plot the response variables against each predictors and covariates in order to assess the **linearity** assumption and identify potential **interactions** and **multivariate outliers**. It would be interesting to plot all variables against each other, but we have too many potential predictors and covariates for that.
+
+```{r erad bivariate plot}
+### To plot all variables against each other, we can use pairs() or ggpairs():
+# ggplot2::theme_set(ggplot2::theme_bw())
+# erad %>% dplyr::select(-xp_id, -goals, -preparation) %>% GGally::ggpairs()
+
+### To plot a response variable against all predictors/covariates, we will have to do use a for loop or the facet_wrap function of ggplot (or equivalent).
+# For the "efficiency" variable (bounded continuous variable):
+mydata <- erad %>% dplyr::select(-xp_id, -goals, -eff_eradication, -high_eff, -preparation)
+
+erad %>% dplyr::select(-xp_id, -goals, -eff_eradication, -high_eff, -preparation) %>%
+  dplyr::mutate_if(is.factor, as.numeric.factor) -> mydata
+
+
+predictors <- colnames(mydata)
+# Tidying the data into the long-format for the plot (because we work here within the tidyverse!)
+mydata %>% tidyr::pivot_longer(!efficiency, # It says that all columns of `mydata` need to be reshaped
+                               # except "efficiency" (works as well with the form `-efficiency`, and we
+                               # can place it somewhere else. Actually, it is the `cols =` argument!)
+                               names_to = "Predictor", # Gives the name of the new grouping variable
+                               values_to = "Value", # Gives the name of the variable that will be created
+                               # from the data stored in the cell value
+                               values_transform = list(Value = as.character)) -> mydata
+ggplot2::ggplot(mydata, ggplot2::aes(x = Value, y = efficiency)) +
+  ggplot2::geom_point(size = 0.5, alpha = 0.5) +
+  ggplot2::geom_smooth(method = "loess") + 
+  ggthemes::theme_tufte() + 
+  ggplot2::facet_wrap(~Predictor, scales = "free_y")
 ```
 
 
