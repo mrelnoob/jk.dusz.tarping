@@ -44,7 +44,8 @@ As our global dataset contains many variables (*p* = 81), it would be interestin
 The first thing to do here is to prepare the sub-dataset that will be used to model the responses of the *efficiency variables* (i.e. **efficiency**, **eff_eradication** and **high_eff**). To do so, the following steps have been performed:
 
 * We selected the subset of predictors and covariates that will be used to model tarping efficiency;
-* We left out the observations that were too recent (installed less than 2 growing seasons ago) and those for which we could not obtain an *efficiency score* (i.e. NA).
+* We left out the observations that were too recent (installed less than 2 growing seasons ago) and those for which we could not obtain an *efficiency score* (i.e. NA);
+* We deleted operations that got prematurely interrupted (e.g. because of vandalism) since there failure results from external causes.
 
 Now, let's take a quick look at our dataset. For the meaning of the variables, please refer to the attached **documentation**.
 
@@ -53,7 +54,8 @@ erad <- jk.dusz.tarping::model_datasets(response.var = "efficiency")
 
 erad %>% dplyr::select(-liner_geomem, -agri_geomem,-woven_geotex, -mulching_geotex, -pla_geotex, -other_unknown, -grammage, -age, -thickness, -pierced_tarpinstall, -add_control_type) %>%
   dplyr::filter(eff_eradication != "NA") %>%
-  dplyr::filter(tarping_duration >= 2) -> erad
+  dplyr::filter(tarping_duration >= 2) %>%
+  dplyr::filter(xp_id != "54") -> erad
 
 summary(erad)
 ```
@@ -117,11 +119,8 @@ To investigate potential correlations and colinearity among our variables, we wi
 rm(res.pca, res.imput, xxx, ttt, nb)
 
 # To convert all ordered factors into numeric variables usable in a correlation matrix:
-erad %>% dplyr::select(-xp_id, -goals, -preparation) -> num.erad
-num.erad <-  dplyr::mutate_if(.tbl = num.erad, .predicate = is.factor, .funs = as.character)
-num.erad <-  dplyr::mutate_if(.tbl = num.erad, .predicate = is.character, .funs = as.numeric) # I use this double conversion-trick because, strangely enough (but actually, there is a topic on SO about this), there is not R function to convert a factor into its numeric value! But we could create it like this:
-# as.numeric.factor <- function(x) {as.numeric(levels(x))[x]}
-# But it could not work in a pipe (because you have to specify `x`), so it's not that convenient.
+erad %>% dplyr::select(-xp_id, -goals, -preparation) %>%
+  dplyr::mutate_if(.predicate = is.factor, .funs = as.numfactor) -> num.erad # as.numfactor is my own custom function (see '01_data_cleaning.R').
 #num.erad <- erad[, sapply(erad, is.numeric)] # Select only numeric columns.
 
 
@@ -230,33 +229,31 @@ uni.histograms(dataset = erad)
 
 The next step in our data exploration is to plot the response variables against each predictors and covariates in order to assess the **linearity** assumption and identify potential **interactions** and **multivariate outliers**. It would be interesting to plot all variables against each other, but we have too many potential predictors and covariates for that.
 
-```{r erad bivariate plot}
+```{r erad bivariate plot, eval=FALSE}
 ### To plot all variables against each other, we can use pairs() or ggpairs():
 # ggplot2::theme_set(ggplot2::theme_bw())
 # erad %>% dplyr::select(-xp_id, -goals, -preparation) %>% GGally::ggpairs()
 
 ### To plot a response variable against all predictors/covariates, we will have to do use a for loop or the facet_wrap function of ggplot (or equivalent).
 # For the "efficiency" variable (bounded continuous variable):
-mydata <- erad %>% dplyr::select(-xp_id, -goals, -eff_eradication, -high_eff, -preparation)
-
 erad %>% dplyr::select(-xp_id, -goals, -eff_eradication, -high_eff, -preparation) %>%
-  dplyr::mutate_if(is.factor, as.numeric.factor) -> mydata
-
+  dplyr::mutate_if(is.factor, as.numfactor) -> mydata
 
 predictors <- colnames(mydata)
 # Tidying the data into the long-format for the plot (because we work here within the tidyverse!)
-mydata %>% tidyr::pivot_longer(!efficiency, # It says that all columns of `mydata` need to be reshaped
-                               # except "efficiency" (works as well with the form `-efficiency`, and we
-                               # can place it somewhere else. Actually, it is the `cols =` argument!)
+mydata %>% tidyr::pivot_longer(-c(efficiency, fully_tarped), # It says that all columns of `mydata` need to be reshaped except "efficiency" & "fully_tarped" (works as well with the form `!efficiency`, and we can place it somewhere else: actually, it is the `cols =` argument)
                                names_to = "Predictor", # Gives the name of the new grouping variable
-                               values_to = "Value", # Gives the name of the variable that will be created
-                               # from the data stored in the cell value
-                               values_transform = list(Value = as.character)) -> mydata
-ggplot2::ggplot(mydata, ggplot2::aes(x = Value, y = efficiency)) +
-  ggplot2::geom_point(size = 0.5, alpha = 0.5) +
-  ggplot2::geom_smooth(method = "loess") + 
-  ggthemes::theme_tufte() + 
-  ggplot2::facet_wrap(~Predictor, scales = "free_y")
+                               values_to = "Value")  -> mydata # Gives the name of the variable that will be created from the data stored in the cell value.
+p_facets <- ggplot2::ggplot(mydata, ggplot2::aes(x = Value, y = efficiency, col = as.factor(fully_tarped))) +
+  ggplot2::facet_wrap(~Predictor, scales = "free") +
+  ggplot2::geom_point(size = 1) +
+  ggplot2::geom_smooth(method = "loess")
+
+p_facets +
+  hrbrthemes::scale_color_ipsum() +
+  ggplot2::labs(x = "Predictor value", y = "Efficiency score", col = "Fully tarped") +
+  ggplot2::theme_minimal()
+  
 ```
 
 
