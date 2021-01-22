@@ -244,16 +244,19 @@ predictors <- colnames(mydata)
 mydata %>% tidyr::pivot_longer(-c(efficiency, fully_tarped), # It says that all columns of `mydata` need to be reshaped except "efficiency" & "fully_tarped" (works as well with the form `!efficiency`, and we can place it somewhere else: actually, it is the `cols =` argument)
                                names_to = "Predictor", # Gives the name of the new grouping variable
                                values_to = "Value")  -> mydata # Gives the name of the variable that will be created from the data stored in the cell value.
-p_facets <- ggplot2::ggplot(mydata, ggplot2::aes(x = Value, y = efficiency, col = as.factor(fully_tarped))) +
+p_facets <- ggplot2::ggplot(mydata, ggplot2::aes(x = Value, y = efficiency)) +
   ggplot2::facet_wrap(~Predictor, scales = "free") +
-  ggplot2::geom_point(size = 1) +
-  ggplot2::geom_smooth(method = "loess")
-
+  ggplot2::geom_point(size = 1.5, alpha = 0.8, ggplot2::aes(col = as.factor(fully_tarped))) +
+  ggplot2::geom_smooth(method = "lm", na.rm = TRUE, size = 1, 
+                       ggplot2::aes(col = as.factor(fully_tarped))) # If you want to affect something related to the input dataframe (such as here, where we want a smoother for each value of mydata$fully_tarped), you have to put the command in an aes() function!
+# If a "loess" smoother is used, sometimes the smoother line won't be plotted, I don't know why.
 p_facets +
-  hrbrthemes::scale_color_ipsum() +
+  ggplot2::scale_colour_manual(values = c("plum1", "palevioletred4")) +
   ggplot2::labs(x = "Predictor value", y = "Efficiency score", col = "Fully tarped") +
-  ggplot2::theme_minimal()
-  
+  ggthemes::theme_hc(style = "darkunica")
+ggplot2::theme()
+
+rm(a, b)
 ```
 
 
