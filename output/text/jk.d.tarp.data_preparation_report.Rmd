@@ -229,7 +229,7 @@ uni.histograms(dataset = erad)
 
 The next step in our data exploration is to plot the response variables against each predictors and covariates in order to assess the **linearity** assumption and identify potential **interactions** and **multivariate outliers**. It would be interesting to plot all variables against each other, but we have too many potential predictors and covariates for that.
 
-```{r erad bivariate plot, eval=FALSE}
+```{r erad bivariate plot, fig.align='center', fig.cap="**Figure 6.** Multivariate representation of the *efficiency score* against each potential explanatory variable with a focus on whether knotweed stands were fully tarped or not", fig.width=12, fig.height=9, message=FALSE, comment=NA, warning=FALSE}
 ### To plot all variables against each other, we can use pairs() or ggpairs():
 # ggplot2::theme_set(ggplot2::theme_bw())
 # erad %>% dplyr::select(-xp_id, -goals, -preparation) %>% GGally::ggpairs()
@@ -237,26 +237,30 @@ The next step in our data exploration is to plot the response variables against 
 ### To plot a response variable against all predictors/covariates, we will have to do use a for loop or the facet_wrap function of ggplot (or equivalent).
 # For the "efficiency" variable (bounded continuous variable):
 erad %>% dplyr::select(-xp_id, -goals, -eff_eradication, -high_eff, -preparation) %>%
-  dplyr::mutate_if(is.factor, as.numfactor) -> mydata
-
-predictors <- colnames(mydata)
-# Tidying the data into the long-format for the plot (because we work here within the tidyverse!)
-mydata %>% tidyr::pivot_longer(-c(efficiency, fully_tarped), # It says that all columns of `mydata` need to be reshaped except "efficiency" & "fully_tarped" (works as well with the form `!efficiency`, and we can place it somewhere else: actually, it is the `cols =` argument)
-                               names_to = "Predictor", # Gives the name of the new grouping variable
-                               values_to = "Value")  -> mydata # Gives the name of the variable that will be created from the data stored in the cell value.
-p_facets <- ggplot2::ggplot(mydata, ggplot2::aes(x = Value, y = efficiency)) +
-  ggplot2::facet_wrap(~Predictor, scales = "free") +
+  dplyr::mutate_if(is.factor, as.numfactor) %>% 
+  tidyr::pivot_longer(-c(efficiency, fully_tarped), # Means that all columns of `mydata` need to be reshaped except "efficiency" & "fully_tarped" (works as well with the form `!efficiency`, and we can place it somewhere else: actually, it is the `cols =` argument)! We have to work in the long-format because that's how the tidyverser and thus ggplot2 love to work...
+                               names_to = "Predictor", # Gives the name of the new grouping variable while "values_to" gives the name of the variable that will be created from the data stored in the cell value.
+                               values_to = "Value") %>% 
+  ggplot2::ggplot(ggplot2::aes(x = Value, y = efficiency)) +
+  ggplot2::facet_wrap(~Predictor, scales = "free", strip.position = "bottom") +
   ggplot2::geom_point(size = 1.5, alpha = 0.8, ggplot2::aes(col = as.factor(fully_tarped))) +
   ggplot2::geom_smooth(method = "lm", na.rm = TRUE, size = 1, 
-                       ggplot2::aes(col = as.factor(fully_tarped))) # If you want to affect something related to the input dataframe (such as here, where we want a smoother for each value of mydata$fully_tarped), you have to put the command in an aes() function!
+                       ggplot2::aes(col = as.factor(fully_tarped))) + # If you want to affect something related to the input dataframe (such as here, where we want a smoother for each value of "fully_tarped"), you have to put the command in an aes() function!
 # If a "loess" smoother is used, sometimes the smoother line won't be plotted, I don't know why.
-p_facets +
   ggplot2::scale_colour_manual(values = c("plum1", "palevioletred4")) +
   ggplot2::labs(x = "Predictor value", y = "Efficiency score", col = "Fully tarped") +
-  ggthemes::theme_hc(style = "darkunica")
-ggplot2::theme()
+  ggthemes::theme_hc(style = "darkunica") +
+  ggplot2::theme(panel.border = ggplot2::element_blank(),
+          legend.key = ggplot2::element_blank(),
+          strip.background = ggplot2::element_blank(),
+          strip.text = ggplot2::element_text(colour = "gray60", size = 10),
+          strip.placement = "outside",
+          axis.line.x = ggplot2::element_line(colour = "darkorange4", 
+                                     size=0.5),
+          axis.line.y = ggplot2::element_line(colour = "darkorange4", 
+                                     size=0.5),
+          legend.position = "right")
 
-rm(a, b)
 ```
 
 
