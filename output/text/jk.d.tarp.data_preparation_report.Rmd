@@ -119,7 +119,7 @@ To investigate potential correlations and colinearity among our variables, we wi
 rm(res.pca, res.imput, xxx, ttt, nb)
 
 # To convert all ordered factors into numeric variables usable in a correlation matrix:
-erad %>% dplyr::select(-xp_id, -goals, -preparation) %>%
+erad %>% dplyr::select(-xp_id, -goals) %>%
   dplyr::mutate_if(.predicate = is.factor, .funs = as.numfactor) -> num.erad # as.numfactor is my own custom function (see '01_data_cleaning.R').
 #num.erad <- erad[, sapply(erad, is.numeric)] # Select only numeric columns.
 
@@ -150,28 +150,30 @@ It is worth reminding that these correlations are just correlations (not **causa
    
 ##### - Multicollinearity
 
-As multicollinearity is one of the biggest issues for inference modelling, we need to assess which explanatory variables and covariates are collinear and remove them from our dataset. To do so, our intention was to compute *Variance Inflation Factors* (VIF) for each variable. However, as several variables are categorical and as we will not be working with models fitted with ordinary least squares, we will rather use *Generalized VIF* (Fox & Monette, 1992).
+As multicollinearity is one of the biggest issues for inference modelling, we need to assess which explanatory variables and covariates are collinear and possibly remove them from our dataset. To do so, our intention was to compute *Variance Inflation Factors* (VIF) for each variable. However, as several variables are categorical and as we will not be working with models fitted with ordinary least squares, we will rather use *Generalized VIF* (Fox & Monette, 1992).
 
-```{r erad init GVIF, fig.cap="**Table 1.** Generalised Variance Inflation Factors (GVIF) for the potential explanatory variables, prior to variable dropping"}
-erad %>% dplyr::select(-xp_id, -goals, -eff_eradication, -high_eff, -preparation) -> mydata
+```{r erad init GVIF}
+erad %>% dplyr::select(-xp_id, -goals, -eff_eradication, -high_eff) -> mydata
 
-modvif <- stats::glm((efficiency/10)~latitude+longitude+elevation+freq_monitoring+slope+coarse_env+obstacles+flood+geomem+geotex+weedsp_geotex+maxveg+stand_surface+fully_tarped+distance+tarping_duration+strips_overlap+tarpfix_multimethod+sedicover_height+trench_depth+plantation+repairs+add_control+degradation+pb_fixation+pb_durability, data = mydata, family = quasibinomial)
+modvif <- stats::glm((efficiency/10)~latitude+longitude+elevation+freq_monitoring+slope+coarse_env+obstacles+flood+geomem+geotex+weedsp_geotex+maxveg+uprootexcav+stand_surface+fully_tarped+distance+tarping_duration+strips_overlap+tarpfix_multimethod+sedicover_height+trench_depth+plantation+repairs+add_control+degradation+pb_fixation+pb_durability, data = mydata, family = quasibinomial)
 #summary(modvif)
 
 knitr::kable(car::vif(modvif))
 ```
 
-As one could expect, there is evidence for important **multicollinearity** among our 24 potential explanatory variables.  
-After iteratively dropping strongly collinear variables and re-assessing GVIF values, we obtain a subset of potential explanatory variables with GVIF values < 2 (which is appropriate if we suspect weak ecological signals from the data; cf. Zuur *et al.*, 2010). Naturally, we dropped in priority variables for which we had feeble hypotheses, but dropped variables will not be forgotten in the discussion anyway.  
-Here is **the list of the dropped variables:** *geotex*, *weedsp_geotex*, *latitude*, *longitude*, *coarse_env*, *pb_durability*, *pb_fixation*,*flood*, *add_control*, *strips_overlap*, and *tarpfix_multimethod*.
+As one could expect, there is evidence for important **multicollinearity** among our 25 potential explanatory variables.  
+After iteratively dropping strongly collinear variables and re-assessing GVIF values, we obtain a subset of potential explanatory variables with GVIF values < 2.2 (which is a very conservative threshold but could still be problematic if ecological signals are weak; cf. Zuur *et al.*, 2010). Naturally, we dropped in priority variables for which we had feeble hypotheses, but variables may not be entirely dropped (depending on which models they are included in) and they will not be forgotten in the discussion anyway.  
+Here is **the list of the collinear variables** requiring careful consideration: *geotex*, *weedsp_geotex*, *latitude*, *longitude*, *coarse_env*, *pb_durability*, *degradation*, *flood*, *add_control*, *strips_overlap*, and *tarpfix_multimethod*.
 
 ```{r erad final GVIF}
-modvif <- stats::glm((efficiency/10)~elevation+freq_monitoring+slope+obstacles+geomem+maxveg+stand_surface+fully_tarped+distance+tarping_duration+sedicover_height+trench_depth+plantation+repairs+degradation, data = mydata, family = quasibinomial)
+modvif <- stats::glm((efficiency/10)~elevation+freq_monitoring+slope+obstacles+geomem+maxveg+uprootexcav+stand_surface+fully_tarped+distance+tarping_duration+sedicover_height+trench_depth+plantation+repairs+pb_fixation, data = mydata, family = quasibinomial)
 #summary(modvif)
 
 knitr::kable(car::vif(modvif))
 
-erad %>% dplyr::select(-xp_id, -goals, -eff_eradication, -high_eff, -preparation)
+erad %>% dplyr::select(-geotex, -weedsp_geotex, -latitude, -longitude, -coarse_env, -pb_durability, -degradation, -flood, -add_control, -strips_overlap, -tarpfix_multimethod) -> erad_light
+
+rm(modvif, mydata)
 ```
 
 
@@ -224,6 +226,7 @@ rm(simu.var)
 After analysing random samples drawn from log-normal distributions (based on the parameters of our potentially problematic variables), we have good reason to believe that only *longitude* and *stand_surface* should be problematic. Consequently, we choose to delete the outlier spotted for *stand_surface* (i.e. the *stand_surface* of ca. 5000 m^2^) and drop the *longitude* variable.   
 The other variables do not have distribution that a transformation could not fix. We will see later on whether we actually need such transformation (e.g log) or not. 
 
+
 ```{r erad update, include=FALSE}
 erad <- erad[-(which.max(erad$stand_surface)),] %>%
   dplyr::select(-longitude)
@@ -246,23 +249,24 @@ uni.histograms(dataset = erad)
 #### - Bivariate relationships
 ##### - Relationships among variables
 
-The next step in our data exploration is to plot the response variables against each predictors and covariates in order to assess the **linearity** assumption and identify potential **interactions** and **multivariate outliers**. It would be interesting to plot all variables against each other, but we have too many potential predictors and covariates for that.
+The next step in our data exploration is to plot the response variables against each predictors and covariates in order to assess the **linearity** and **homoscedasticity** assumptions as well as identify potential **interactions** and **multivariate outliers**. It would be interesting to plot all variables against each other, but we have too many potential predictors and covariates for that.
 
 ```{r erad bivariate plot, fig.align='center', fig.cap="**Figure 6.** Multivariate representation of the *efficiency score* against each potential explanatory variable with a focus on whether knotweed stands were fully tarped or not", fig.width=12, fig.height=9, message=FALSE, comment=NA, warning=FALSE}
 ### To plot all variables against each other, we can use pairs() or ggpairs():
 # ggplot2::theme_set(ggplot2::theme_bw())
-# erad %>% dplyr::select(-xp_id, -goals, -preparation) %>% GGally::ggpairs()
+# erad %>% dplyr::select(-xp_id, -goals) %>% GGally::ggpairs()
 
 ### To plot a response variable against all predictors/covariates, we will have to do use a for loop or the facet_wrap function of ggplot (or equivalent).
 # For the "efficiency" variable (bounded continuous variable):
-erad %>% dplyr::select(-xp_id, -goals, -eff_eradication, -high_eff, -preparation) %>%
+erad %>% dplyr::select(-xp_id, -goals, -eff_eradication, -high_eff) %>%
   dplyr::mutate_if(is.factor, as.numfactor) %>% 
   tidyr::pivot_longer(-c(efficiency, fully_tarped), # Means that all columns of `mydata` need to be reshaped except "efficiency" & "fully_tarped" (works as well with the form `!efficiency`, and we can place it somewhere else: actually, it is the `cols =` argument)! We have to work in the long-format because that's how the tidyverser and thus ggplot2 love to work...
                                names_to = "Predictor", # Gives the name of the new grouping variable while "values_to" gives the name of the variable that will be created from the data stored in the cell value.
                                values_to = "Value") %>% 
   ggplot2::ggplot(ggplot2::aes(x = Value, y = efficiency)) +
-  ggplot2::facet_wrap(~Predictor, scales = "free", strip.position = "bottom") +
+  ggplot2::facet_wrap(~Predictor, scales = "free_x", strip.position = "bottom") +
   ggplot2::geom_point(size = 1.5, alpha = 0.8, ggplot2::aes(col = as.factor(fully_tarped))) +
+  ggplot2::scale_y_continuous(limits=c(0,10)) +
   ggplot2::geom_smooth(method = "lm", na.rm = TRUE, size = 1, 
                        ggplot2::aes(col = as.factor(fully_tarped))) + # If you want to affect something related to the input dataframe (such as here, where we want a smoother for each value of "fully_tarped"), you have to put the command in an aes() function!
 # If a "loess" smoother is used, sometimes the smoother line won't be plotted, I don't know why.
@@ -279,14 +283,50 @@ erad %>% dplyr::select(-xp_id, -goals, -eff_eradication, -high_eff, -preparation
           axis.line.y = ggplot2::element_line(colour = "darkorange4", 
                                      size=0.5),
           legend.position = "right")
-
 ```
 
+Various interesting observations can be made from these scatterplots:
+
+* First, heteroscedasticity will perhaps not be surprising in our models as the variances of many variables do not seem to be homogeneous. On the other hand, we do not see clear multivariate outliers.
+* Second, the *efficiency* score seems to increase with increasing *distance*. This may be evidence in support to one of our working hypotheses stating that successful tarping operations cover areas well beyond the visible limits of knotweed stands. Conversely, the *efficiency* score seems to decrease with increasing presence of *obstacles*.
+* Third, surprisingly, the *efficiency* score also seems to increase with increasing *elevation*. If this is not due to measurement error, then it could be a sign of stronger abiotic constraints on knotweeds.
+* Fourth, there may be signs of interesting interactions between the *fully tarped* variable and *slope*, *coarse_env*, *stand_surface*, *tarping_duration*, *trench_depth* and *uprootexcav*, although caution is required as variances are quite high. Furthermore, if the interaction with *stand_surface* is relatively straightforward, the other ones are trickier do grasp and could simply be noise.
+
+To further investigate multivariate relationship, we will create another serie of scatterplots (but we do not intend on investigating all possible combinations).
+
+```{r erad bivariate plot2, fig.align='center', fig.cap="**Figure 6bis.** Multivariate representation of the *efficiency score* against each potential explanatory variable with a focus on whether knotweed stands were fully tarped or not", fig.width=12, fig.height=9, message=FALSE, comment=NA, warning=FALSE}
+erad %>% dplyr::select(-xp_id, -goals, -eff_eradication, -high_eff) %>%
+  dplyr::mutate_if(is.factor, as.numfactor) %>% 
+  tidyr::pivot_longer(-c(efficiency, plantation), 
+                               names_to = "Predictor", 
+                               values_to = "Value") %>% 
+  ggplot2::ggplot(ggplot2::aes(x = Value, y = efficiency)) +
+  ggplot2::facet_wrap(~Predictor, scales = "free_x", strip.position = "bottom") +
+  ggplot2::geom_point(size = 1.5, alpha = 0.8, ggplot2::aes(col = as.factor(plantation))) +
+  ggplot2::scale_y_continuous(limits=c(0,10)) +
+  ggplot2::geom_smooth(method = "lm", na.rm = TRUE, size = 1, 
+                       ggplot2::aes(col = as.factor(plantation))) + 
+  ggplot2::scale_colour_manual(values = c("goldenrod3", "coral", "darkred")) +
+  ggplot2::labs(x = "Predictor value", y = "Efficiency score", col = "Plantation") +
+  ggthemes::theme_hc(style = "darkunica") +
+  ggplot2::theme(panel.border = ggplot2::element_blank(),
+          legend.key = ggplot2::element_blank(),
+          strip.background = ggplot2::element_blank(),
+          strip.text = ggplot2::element_text(colour = "gray60", size = 10),
+          strip.placement = "outside",
+          axis.line.x = ggplot2::element_line(colour = "darkorange4", 
+                                     size=0.5),
+          axis.line.y = ggplot2::element_line(colour = "darkorange4", 
+                                     size=0.5),
+          legend.position = "right")
+```
+
+We can see from this new panel of plots that the *efficiency* score seems to increase when knotweeds are *fully tarped*, as we hypothesized. 
 
 
+## Next steps for preparation
 
-Regarding scaling:
-I will standardize my predictors, so there should be no problems (it is especially important when I use interactions terms: cf. "standardization" post on CV in my MacBook favorites)!
-BTW, if I create an averaged variable (e.g. efficacy), I should perhaps standardise variables first to avoid giving to much weight to the variable with the largest values!
+1) Multiple imputation (Mice or Amelia)
+2) Transformations and standardization (for scaling, especially important when I use interactions terms; cf. "standardization" post on CV in my MacBook favorites)
+3) Deal with *tarping_duration*. Include weights?
 
-Include weights??? (e.g. tarping duration?) efficiency with quasi-binomial GLM?
