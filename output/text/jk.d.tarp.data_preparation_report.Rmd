@@ -148,12 +148,31 @@ It is worth reminding that these correlations are just correlations (not **causa
 
 
    
-##### - Multicolinearity
+##### - Multicollinearity
 
-I DON't know what to do here§§§§§§§§§§§§§§§§
+As multicollinearity is one of the biggest issues for inference modelling, we need to assess which explanatory variables and covariates are collinear and remove them from our dataset. To do so, our intention was to compute *Variance Inflation Factors* (VIF) for each variable. However, as several variables are categorical and as we will not be working with models fitted with ordinary least squares, we will rather use *Generalized VIF* (Fox & Monette, 1992).
 
-§§§§§§§§§§§§
-§§§§§§§§§§§§§§§§§§§§§§§
+```{r erad init GVIF, fig.cap="**Table 1.** Generalised Variance Inflation Factors (GVIF) for the potential explanatory variables, prior to variable dropping"}
+erad %>% dplyr::select(-xp_id, -goals, -eff_eradication, -high_eff, -preparation) -> mydata
+
+modvif <- stats::glm((efficiency/10)~latitude+longitude+elevation+freq_monitoring+slope+coarse_env+obstacles+flood+geomem+geotex+weedsp_geotex+maxveg+stand_surface+fully_tarped+distance+tarping_duration+strips_overlap+tarpfix_multimethod+sedicover_height+trench_depth+plantation+repairs+add_control+degradation+pb_fixation+pb_durability, data = mydata, family = quasibinomial)
+#summary(modvif)
+
+knitr::kable(car::vif(modvif))
+```
+
+As one could expect, there is evidence for important **multicollinearity** among our 24 potential explanatory variables.  
+After iteratively dropping strongly collinear variables and re-assessing GVIF values, we obtain a subset of potential explanatory variables with GVIF values < 2 (which is appropriate if we suspect weak ecological signals from the data; cf. Zuur *et al.*, 2010). Naturally, we dropped in priority variables for which we had feeble hypotheses, but dropped variables will not be forgotten in the discussion anyway.  
+Here is **the list of the dropped variables:** *geotex*, *weedsp_geotex*, *latitude*, *longitude*, *coarse_env*, *pb_durability*, *pb_fixation*,*flood*, *add_control*, *strips_overlap*, and *tarpfix_multimethod*.
+
+```{r erad final GVIF}
+modvif <- stats::glm((efficiency/10)~elevation+freq_monitoring+slope+obstacles+geomem+maxveg+stand_surface+fully_tarped+distance+tarping_duration+sedicover_height+trench_depth+plantation+repairs+degradation, data = mydata, family = quasibinomial)
+#summary(modvif)
+
+knitr::kable(car::vif(modvif))
+
+erad %>% dplyr::select(-xp_id, -goals, -eff_eradication, -high_eff, -preparation)
+```
 
 
     
@@ -269,3 +288,5 @@ erad %>% dplyr::select(-xp_id, -goals, -eff_eradication, -high_eff, -preparation
 Regarding scaling:
 I will standardize my predictors, so there should be no problems (it is especially important when I use interactions terms: cf. "standardization" post on CV in my MacBook favorites)!
 BTW, if I create an averaged variable (e.g. efficacy), I should perhaps standardise variables first to avoid giving to much weight to the variable with the largest values!
+
+Include weights??? (e.g. tarping duration?) efficiency with quasi-binomial GLM?

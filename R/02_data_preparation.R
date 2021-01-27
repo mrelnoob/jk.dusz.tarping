@@ -66,8 +66,10 @@ model_datasets <- function(response.var = c("efficiency", "edges", "overlaps",
 
   ppp <- jk.dusz.tarping::clean_my_data()
   ppp %>%
-    dplyr::filter(!stringr::str_detect(operation_type, "crushing_tarping_trial")) -> qqq # Exclude rows which
-  # belong to crushing-tarping trials!
+    dplyr::filter(!stringr::str_detect(operation_type, "crushing_tarping_trial")) %>%
+    dplyr::mutate(uprootexcav = ifelse(preparation == "excavation" |
+                                         preparation == "uprooting", 1, 0)) -> qqq # Exclude rows which
+  # belong to crushing-tarping trials, and creates a new variable called "uprootexcav"!
 
   ### For the 3 "efficiency" models
   if (response.var == "efficiency") {
@@ -88,7 +90,7 @@ model_datasets <- function(response.var = c("efficiency", "edges", "overlaps",
                   "granulometry", "obstacles", "flood",
                   "geomem", "geotex", "liner_geomem", "agri_geomem", "woven_geotex", "mulching_geotex",
                   "pla_geotex", "weedsp_geotex", "other_unknown", "grammage", "thickness",
-                  "maxveg", "preparation", "stand_surface", "age", "fully_tarped", "distance", "tarping_duration",
+                  "maxveg", "uprootexcav", "stand_surface", "age", "fully_tarped", "distance", "tarping_duration",
                   "strips_overlap", "tarpfix_multimethod", "sedicover_height", "trench_depth",
                   "pierced_tarpinstall", "plantation", "repairs", "add_control", "add_control_type",
                   "degradation", "pb_fixation", "pb_durability")]
@@ -107,7 +109,7 @@ model_datasets <- function(response.var = c("efficiency", "edges", "overlaps",
       "freq_monitoring", "slope", "difficulty_access", "shade", "forest", "ruggedness", "granulometry",
       "obstacles", "flood",
       "geomem", "geotex",
-      "season", "preparation",
+      "season", "uprootexcav",
       "stand_surface", "age", "fully_tarped", "distance", "tarping_duration", "strips_overlap",
       "fabric_fixation", "tarpfix_multimethod", "sedicover_height", "trench_depth", "plantation",
       "repairs", "add_control", "add_control_type",
@@ -125,7 +127,7 @@ model_datasets <- function(response.var = c("efficiency", "edges", "overlaps",
       "freq_monitoring", "slope", "difficulty_access","shade", "forest", "ruggedness", "granulometry",
       "obstacles", "flood",
       "geomem", "geotex",
-      "season", "preparation",
+      "season", "uprootexcav",
       "stand_surface", "age", "fully_tarped", "distance","tarping_duration",
       "strips_overlap", "strips_fixation", "staples_distance", "fabric_fixation", "sedicover_height", "plantation",
       "reg_elsewhere")]
@@ -138,7 +140,7 @@ model_datasets <- function(response.var = c("efficiency", "edges", "overlaps",
       "obstacles", "flood",
       "geomem", "geotex", "liner_geomem", "agri_geomem", "woven_geotex", "mulching_geotex", "pla_geotex", "weedsp_geotex",
       "other_unknown", "grammage", "thickness", "resi_punc", "resi_trac",
-      "preparation", "levelling", "stand_surface", "age", "fully_tarped", "distance", "tarping_duration",
+      "uprootexcav", "levelling", "stand_surface", "age", "fully_tarped", "distance", "tarping_duration",
       "strips_overlap", "strips_fixation", "staples_distance", "fabric_fixation", "sedicover_height",
       "pierced_tarpinstall", "plantation", "repairs", "add_control",
       "degradation", "regrowth_during")]
@@ -151,7 +153,7 @@ model_datasets <- function(response.var = c("efficiency", "edges", "overlaps",
       "obstacles", "flood",
       "geomem", "geotex", "liner_geomem", "agri_geomem", "woven_geotex", "mulching_geotex", "pla_geotex", "weedsp_geotex",
       "other_unknown", "grammage", "thickness",
-      "preparation", "levelling", "stand_surface", "age", "fully_tarped", "distance", "tarping_duration",
+      "uprootexcav", "levelling", "stand_surface", "age", "fully_tarped", "distance", "tarping_duration",
       "multi_strips", "strips_overlap", "strips_fixation", "staples_distance", "fabric_fixation",
       "tarpfix_multimethod", "sedicover_height", "trench_depth", "plantation",
       "repairs", "pb_durability", "pb_trampiercing",
