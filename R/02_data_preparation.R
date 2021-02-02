@@ -91,7 +91,7 @@ model_datasets <- function(response.var = c("efficiency", "edges", "overlaps",
                   "geomem", "geotex", "liner_geomem", "agri_geomem", "woven_geotex", "mulching_geotex",
                   "pla_geotex", "weedsp_geotex", "other_unknown", "grammage", "thickness",
                   "maxveg", "uprootexcav", "stand_surface", "age", "fully_tarped", "distance", "tarping_duration",
-                  "strips_overlap", "tarpfix_multimethod", "sedicover_height", "trench_depth",
+                  "strips_overlap", "tarpfix_multimethod", "tarpfix_pierced", "sedicover_height", "trench_depth",
                   "pierced_tarpinstall", "plantation", "repairs", "add_control", "add_control_type",
                   "degradation", "pb_fixation", "pb_durability")]
   }
@@ -111,7 +111,7 @@ model_datasets <- function(response.var = c("efficiency", "edges", "overlaps",
       "geomem", "geotex",
       "season", "uprootexcav",
       "stand_surface", "age", "fully_tarped", "distance", "tarping_duration", "strips_overlap",
-      "fabric_fixation", "tarpfix_multimethod", "sedicover_height", "trench_depth", "plantation",
+      "fabric_fixation", "tarpfix_multimethod", "tarpfix_pierced", "sedicover_height", "trench_depth", "plantation",
       "repairs", "add_control", "add_control_type",
       "degradation", "pb_fixation", "pb_durability",
       "reg_elsewhere")]
@@ -129,7 +129,7 @@ model_datasets <- function(response.var = c("efficiency", "edges", "overlaps",
       "geomem", "geotex",
       "season", "uprootexcav",
       "stand_surface", "age", "fully_tarped", "distance","tarping_duration",
-      "strips_overlap", "strips_fixation", "staples_distance", "fabric_fixation", "sedicover_height", "plantation",
+      "strips_overlap", "strips_fixation", "staples_distance", "fabric_fixation", "tarpfix_multimethod", "tarpfix_pierced", "sedicover_height", "plantation",
       "reg_elsewhere")]
   }
 
@@ -141,7 +141,7 @@ model_datasets <- function(response.var = c("efficiency", "edges", "overlaps",
       "geomem", "geotex", "liner_geomem", "agri_geomem", "woven_geotex", "mulching_geotex", "pla_geotex", "weedsp_geotex",
       "other_unknown", "grammage", "thickness", "resi_punc", "resi_trac",
       "uprootexcav", "levelling", "stand_surface", "age", "fully_tarped", "distance", "tarping_duration",
-      "strips_overlap", "strips_fixation", "staples_distance", "fabric_fixation", "sedicover_height",
+      "strips_overlap", "strips_fixation", "staples_distance", "fabric_fixation", "tarpfix_multimethod", "tarpfix_pierced", "sedicover_height",
       "pierced_tarpinstall", "plantation", "repairs", "add_control",
       "degradation", "regrowth_during")]
   }
@@ -155,7 +155,7 @@ model_datasets <- function(response.var = c("efficiency", "edges", "overlaps",
       "other_unknown", "grammage", "thickness",
       "uprootexcav", "levelling", "stand_surface", "age", "fully_tarped", "distance", "tarping_duration",
       "multi_strips", "strips_overlap", "strips_fixation", "staples_distance", "fabric_fixation",
-      "tarpfix_multimethod", "sedicover_height", "trench_depth", "plantation",
+      "tarpfix_multimethod", "tarpfix_pierced", "sedicover_height", "trench_depth", "plantation",
       "repairs", "pb_durability", "pb_trampiercing",
       "regrowth_during")]
   }

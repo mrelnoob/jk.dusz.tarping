@@ -115,6 +115,8 @@ clean_my_data <- function(){
     dplyr::mutate(geomem = ifelse(grepl("geomem$", fabric_type) | grepl("tarp$", fabric_type) |
                                     grepl("mixed", fabric_type) | grepl("unknown", fabric_type), 1, 0)) %>%
     dplyr::mutate(geotex = ifelse(grepl("geotex$", fabric_type) | grepl("mixed", fabric_type), 1, 0)) %>%
+    dplyr::mutate(tarpfix_pierced = ifelse(c(grepl("*staples*", fabric_fixation) | fabric_fixation == "wired_stakes") &
+                                             fabric_fixation != "staples_and_taped_patches", 1, 0)) %>%
     dplyr::mutate_if(is.character, factor) %>%
     dplyr::mutate_if(is_binary, factor) -> cleaned_data
 
