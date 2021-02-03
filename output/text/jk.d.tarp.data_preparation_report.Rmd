@@ -155,7 +155,7 @@ As multicollinearity is one of the biggest issues for inference modelling, we ne
 ```{r erad init GVIF}
 erad %>% dplyr::select(-xp_id, -goals, -eff_eradication, -high_eff) -> mydata
 
-modvif <- stats::glm((efficiency/10)~latitude+longitude+elevation+freq_monitoring+slope+coarse_env+obstacles+flood+geomem+geotex+weedsp_geotex+maxveg+uprootexcav+stand_surface+fully_tarped+distance+tarping_duration+strips_overlap+tarpfix_multimethod+tarpfix_pierced+sedicover_height+trench_depth+plantation+repairs+add_control+degradation+pb_fixation+pb_durability, data = mydata, family = quasibinomial)
+modvif <- stats::glm((efficiency/10)~latitude+longitude+elevation+freq_monitoring+slope+coarse_env+obstacles+flood+geomem+geotex+weedsp_geotex+maxveg+uprootexcav+stand_surface+fully_tarped+distance+tarping_duration+stripsoverlap_ok+tarpfix_multimethod+tarpfix_pierced+sedicover_height+trench_depth+plantation+repairs+add_control+degradation+pb_fixation+pb_durability, data = mydata, family = quasibinomial)
 #summary(modvif)
 
 knitr::kable(car::vif(modvif))
@@ -164,21 +164,19 @@ knitr::kable(car::vif(modvif))
 As one could expect, there is evidence for important **multicollinearity** among our 26 potential explanatory variables. However, strong collinearity among variables is only a problem if these variables are included together in the same model, hence the necessity to reevaluate collinearity more precisely when actual working models will be built. Here, we will simply identify which variables will be generally too problematic across likely models and, possibly, drop them (we will try to lower GVIF values as much as possible, considering that, even GVIF of 2 could still be problematic if ecological signals are weak; cf. Zuur *et al.*, 2010):
 
 * The variables *geomem* and *geotex* (and *weedsp_geotex*) are, without a surprise, very problematic as they contain the same information. Therefore, we decide to only keep *geomem*.
-* The *plantation* variable also seems highly problematic. Yet, as we have a strong interest in that variable, we choose to drop it **only temporarily**, only to detect other problematic variables.
+* The *plantation* variable also seems highly problematic. Yet, as we have a strong interest in that variable, we choose to drop it **only temporarily**, only to detect other problematic variables. A particular attention to multicollinearity should be maintained when this variable will be included within models.
 * Since our dataset contains sites on both sides of the Atlantic and since we do not have strong hypotheses regarding the effects of *longitude* (because our sites are located well within the longitudinal range of knotweeds), we decide to drop it.
 * Since *degradation* contains most of the information contained in *pb_fixation* and *pb_durability*, we decide to drop it to reduce the number of variables. 
-* We also decide to drop the *flood* variable. 
 
-After iteratively dropping strongly collinear variables and re-assessing GVIF values, we obtain a subset of potential explanatory variables with GVIF values < 2.2 (which is a very conservative threshold but could still be problematic if ecological signals are weak; cf. Zuur *et al.*, 2010). Naturally, we dropped in priority variables for which we had feeble hypotheses, but variables may not be entirely dropped (depending on which models they are included in) and they will not be forgotten in the discussion anyway.  
-Here is **the list of the collinear variables** requiring careful consideration: *geotex*, *weedsp_geotex*, *latitude*, *longitude*, *coarse_env*, *pb_durability*, *degradation*, *flood*, *add_control*, *strips_overlap*, and *tarpfix_multimethod*.
+After iteratively dropping these strongly collinear variables and re-assessing GVIF values, we obtain a subset of potential explanatory variables with GVIF values globally < 3.5 and GVIF values will likely be even lower in later stages as models will not include so many variables at the same time. Naturally, we will also bear in mind the potential effects of the dropped variables in the discussion.
 
 ```{r erad final GVIF}
-modvif <- stats::glm((efficiency/10)~latitude+elevation+freq_monitoring+slope+coarse_env+obstacles+flood+geomem+maxveg+uprootexcav+stand_surface+fully_tarped+distance+tarping_duration+strips_overlap+tarpfix_multimethod+tarpfix_pierced+sedicover_height+trench_depth+repairs+add_control+pb_fixation+pb_durability, data = mydata, family = quasibinomial)
+modvif <- stats::glm((efficiency/10)~latitude+elevation+freq_monitoring+slope+coarse_env+flood+obstacles+geomem+maxveg+uprootexcav+stand_surface+fully_tarped+distance+tarping_duration+stripsoverlap_ok+tarpfix_multimethod+tarpfix_pierced+sedicover_height+trench_depth+repairs+add_control+pb_fixation+pb_durability, data = mydata, family = quasibinomial)
 #summary(modvif)
 
 knitr::kable(car::vif(modvif))
 
-erad %>% dplyr::select(-geotex, -weedsp_geotex, -latitude, -longitude, -coarse_env, -pb_durability, -degradation, -flood, -add_control, -strips_overlap, -tarpfix_multimethod) -> erad_light
+erad %>% dplyr::select(-geotex, -weedsp_geotex, -longitude, -degradation) -> erad
 
 rm(modvif, mydata)
 ```
@@ -215,13 +213,13 @@ jk.dusz.tarping::uni.dotplots(dataset = erad)
 By the look of these graphs, it is clear that we have many *extreme values* (possible outliers). Yet, extreme values are not necessarily **true outliers**:
 
 * The variables *latitude*, *slope* and *coarse_env*  look fine.
-* The variables *efficiency*, *obstacles*, *flood*, *distance*, *tarping_duration*, *strips_overlap*, and *trench_depth* may require mild transformations to be normalized but do not seem to contain too extreme values.
+* The variables *efficiency*, *obstacles*, *flood*, *distance*, *tarping_duration*, and *trench_depth* may require mild transformations to be normalized but do not seem to contain too extreme values.
 * The variables *elevation*, *freq_monitoring*, and *sedicover_height* may require important transformations to be normalized. It would be interesting to see if their extreme values are too far from what could be expected from a Normal or a Poisson distribution (see below).
-* The variables *longitude*, and *stand_surface* contain problematic patterns/outliers. As longitude is supposed to be used as a ***random effect*** in our models, I am unsure about the consequences of extreme values or bimodal distributions (but I guess it is not good). Still, longitude is unlikely to effectively affect tarping success, so we can consider dropping this variable. 
+* The *stand_surface* variable contains a problematic patterns/outliers.
 
 
 ```{r erad simu.distrib, include=FALSE, eval=FALSE}
-simu.var <- dplyr::select(.data = erad, elevation, freq_monitoring, stand_surface, distance, strips_overlap, sedicover_height, trench_depth, tarping_duration)
+simu.var <- dplyr::select(.data = erad, elevation, freq_monitoring, stand_surface, distance, sedicover_height, trench_depth, tarping_duration)
 
 jk.dusz.tarping::uni.simudistrib(simu.var = simu.var, distribution = "normal")
 jk.dusz.tarping::uni.simudistrib(simu.var = simu.var, distribution = "log-normal")
@@ -230,13 +228,12 @@ rm(simu.var)
 
 ```
 
-After analysing random samples drawn from log-normal distributions (based on the parameters of our potentially problematic variables), we have good reason to believe that only *longitude* and *stand_surface* should be problematic. Consequently, we choose to delete the outlier spotted for *stand_surface* (i.e. the *stand_surface* of ca. 5000 m^2^) and drop the *longitude* variable.   
+After analysing random samples drawn from log-normal distributions (based on the parameters of our potentially problematic variables), we have good reason to believe that only *stand_surface* should be problematic. Consequently, we choose to delete the spotted outlier within *stand_surface* (i.e. the *stand_surface* of ca. 5000 m^2^).    
 The other variables do not have distribution that a transformation could not fix. We will see later on whether we actually need such transformation (e.g log) or not. 
 
 
 ```{r erad update, include=FALSE}
-erad <- erad[-(which.max(erad$stand_surface)),] %>%
-  dplyr::select(-longitude)
+erad <- erad[-(which.max(erad$stand_surface)),]
 ```
 
 
@@ -310,7 +307,7 @@ erad %>% dplyr::select(-xp_id, -goals, -eff_eradication, -high_eff) %>%
   ggplot2::ggplot(ggplot2::aes(x = Value, y = efficiency)) +
   ggplot2::facet_wrap(~Predictor, scales = "free_x", strip.position = "bottom") +
   ggplot2::geom_point(size = 1.5, alpha = 0.8, ggplot2::aes(col = as.factor(plantation))) +
-  ggplot2::scale_y_continuous(limits=c(0,10)) +
+  ggplot2::scale_y_continuous(limits=c(0,10.5)) +
   ggplot2::geom_smooth(method = "lm", na.rm = TRUE, size = 1, 
                        ggplot2::aes(col = as.factor(plantation))) + 
   ggplot2::scale_colour_manual(values = c("goldenrod3", "coral", "darkred")) +
@@ -333,6 +330,7 @@ We can see from this new panel of plots that the *efficiency* score seems to inc
 
 ## Next steps for preparation
 
+0) New IDs for random effects????
 1) Multiple imputation (Mice or Amelia)
 2) Transformations and standardization (for scaling, especially important when I use interactions terms; cf. "standardization" post on CV in my MacBook favorites)
 3) Deal with *tarping_duration*. Include weights?
