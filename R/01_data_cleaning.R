@@ -117,6 +117,7 @@ clean_my_data <- function(){
     dplyr::mutate(geotex = ifelse(grepl("geotex$", fabric_type) | grepl("mixed", fabric_type), 1, 0)) %>%
     dplyr::mutate(tarpfix_pierced = ifelse(c(grepl("*staples*", fabric_fixation) | fabric_fixation == "wired_stakes") &
                                              fabric_fixation != "staples_and_taped_patches", 1, 0)) %>%
+    dplyr::mutate(stripsoverlap_ok = ifelse(multi_strips == 0 | strips_overlap > 42.5, 1, 0)) %>%
     dplyr::mutate_if(is.character, factor) %>%
     dplyr::mutate_if(is_binary, factor) -> cleaned_data
 

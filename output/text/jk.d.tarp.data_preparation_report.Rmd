@@ -33,9 +33,9 @@ library(jk.dusz.tarping)
 zzz_mydata_cleaned <- jk.dusz.tarping::clean_my_data()
 ```
 
-In order to build valid and meaningful models to explain or predict the success/failure of tarping operations for the control of Japanese knotweed *s.l.*, we need first to learn more about our data. Therefore, we thoroughly examined our variables (e.g. outliers, distribution, interactions, colinearity, variance homogeneity, observation independence) mostly following the protocol presented by Zuur *et al.* (2010) for each of our **6 response variables**: *eff_eradication*, *efficiency*, *latest_reg_edges*, *reg_overlaps*, *latest_condition*, and *pb_fixation*.
+In order to build valid and meaningful models to explain or predict the success/failure of tarping operations for the control of Japanese knotweed *s.l.*, we need first to learn more about our data. Therefore, we thoroughly examined our variables (e.g. outliers, distribution, interactions, colinearity, variance homogeneity, observation independence) mostly following the protocol presented by Zuur *et al.* (2010) for each of our **5 response variables**: *eff_eradication*, *efficiency*, *latest_reg_edges*, *reg_overlaps*, *reg_tarpedarea*.
 
-As our global dataset contains many variables (*p* = 81), it would be interesting to reduce their number in order to spare time for further exploration and analyses. As such, the first steps of our data exploration for each response variable will aim at reducing the dimensionality of the data. First, we will try and see if the *environmental variables* can be coerced into a synthetic variable (e.g. through a PCA). Then, we will investigate correlations among variables as well as potential colinearity. This should have the twofold advantage of improving our understanding of the data and enabling us to remove colinear and too strongly correlated variables.
+As our global dataset contains many variables (*p* = 85), it would be interesting to reduce their number in order to spare time for further exploration and analyses. As such, the first steps of our data exploration for each response variable will aim at reducing the dimensionality of the data. First, we will try and see if the *environmental variables* can be coerced into a synthetic variable (e.g. through a PCA). Then, we will investigate correlations among variables as well as potential colinearity. This should have the twofold advantage of improving our understanding of the data and enabling us to remove colinear and too strongly correlated variables. Finally, we will carry on data exploration in various ways in order to detect outliers, identify distributions, heteroscedasticity, univariate and multivariate relationships...
 
 
 
@@ -55,7 +55,7 @@ erad <- jk.dusz.tarping::model_datasets(response.var = "efficiency")
 erad %>% dplyr::select(-liner_geomem, -agri_geomem,-woven_geotex, -mulching_geotex, -pla_geotex, -other_unknown, -grammage, -age, -thickness, -pierced_tarpinstall, -add_control_type) %>%
   dplyr::filter(eff_eradication != "NA") %>%
   dplyr::filter(tarping_duration >= 2) %>%
-  dplyr::filter(xp_id != "54") -> erad
+  dplyr::filter(xp_id != "54") -> erad # Operation n°54 was destroyed because of vandalism.
 
 summary(erad)
 ```
@@ -141,7 +141,7 @@ Many interesting patterns can be observed in this correlation matrix. Among them
 
 * One or several of the *efficiency* variables seem to be mildly positively correlated with *distance*, and *fully_tarped* and negatively with *obstacles*, *add_control* and *pb_durability*. 
 * *add_control*, *rapairs* and *plantation* display a relatively similar pattern of positive correlation with *slope*, *coarse_env*, *flood* and *geomem*, and negative correlation with *geotex*, *weedsp_geotex* and *maxveg*. However, this pattern certainly bears the mark of our own tarping experiments in Chalon that were installed in June and where we did not repaired set ups nor performed additional controls nor planted anything (most correlations with *weedsp_geotex* should also be influenced by our experiments).
-* *pb_fixation* seems to be strongly positively correlated with *stand_surface*.
+* *pb_fixation* seems to be strongly positively correlated with *stand_surface* and, to a lesser extent, with *tarpfix_pierced*.
 * *stand_surface* seems to be strongly positively correlated with *flood*.
 
 It is worth reminding that these correlations are just correlations (not **causation**) and only bivariate. Accounting for multivariate relationships and interactions will certainly give very different patterns.
@@ -150,23 +150,30 @@ It is worth reminding that these correlations are just correlations (not **causa
    
 ##### - Multicollinearity
 
-As multicollinearity is one of the biggest issues for inference modelling, we need to assess which explanatory variables and covariates are collinear and possibly remove them from our dataset. To do so, our intention was to compute *Variance Inflation Factors* (VIF) for each variable. However, as several variables are categorical and as we will not be working with models fitted with ordinary least squares, we will rather use *Generalized VIF* (Fox & Monette, 1992).
+As multicollinearity is one of the biggest issues for inference modelling, we need to assess which explanatory variables and covariates are collinear and will possibly become problematic for modelling. To do so, our intention was to compute *Variance Inflation Factors* (VIF) for each variable. However, as several variables are categorical and as we will not be working with models fitted with ordinary least squares, we will rather use *Generalized VIF* (Fox & Monette, 1992).
 
 ```{r erad init GVIF}
 erad %>% dplyr::select(-xp_id, -goals, -eff_eradication, -high_eff) -> mydata
 
-modvif <- stats::glm((efficiency/10)~latitude+longitude+elevation+freq_monitoring+slope+coarse_env+obstacles+flood+geomem+geotex+weedsp_geotex+maxveg+uprootexcav+stand_surface+fully_tarped+distance+tarping_duration+strips_overlap+tarpfix_multimethod+sedicover_height+trench_depth+plantation+repairs+add_control+degradation+pb_fixation+pb_durability, data = mydata, family = quasibinomial)
+modvif <- stats::glm((efficiency/10)~latitude+longitude+elevation+freq_monitoring+slope+coarse_env+obstacles+flood+geomem+geotex+weedsp_geotex+maxveg+uprootexcav+stand_surface+fully_tarped+distance+tarping_duration+strips_overlap+tarpfix_multimethod+tarpfix_pierced+sedicover_height+trench_depth+plantation+repairs+add_control+degradation+pb_fixation+pb_durability, data = mydata, family = quasibinomial)
 #summary(modvif)
 
 knitr::kable(car::vif(modvif))
 ```
 
-As one could expect, there is evidence for important **multicollinearity** among our 25 potential explanatory variables.  
+As one could expect, there is evidence for important **multicollinearity** among our 26 potential explanatory variables. However, strong collinearity among variables is only a problem if these variables are included together in the same model, hence the necessity to reevaluate collinearity more precisely when actual working models will be built. Here, we will simply identify which variables will be generally too problematic across likely models and, possibly, drop them (we will try to lower GVIF values as much as possible, considering that, even GVIF of 2 could still be problematic if ecological signals are weak; cf. Zuur *et al.*, 2010):
+
+* The variables *geomem* and *geotex* (and *weedsp_geotex*) are, without a surprise, very problematic as they contain the same information. Therefore, we decide to only keep *geomem*.
+* The *plantation* variable also seems highly problematic. Yet, as we have a strong interest in that variable, we choose to drop it **only temporarily**, only to detect other problematic variables.
+* Since our dataset contains sites on both sides of the Atlantic and since we do not have strong hypotheses regarding the effects of *longitude* (because our sites are located well within the longitudinal range of knotweeds), we decide to drop it.
+* Since *degradation* contains most of the information contained in *pb_fixation* and *pb_durability*, we decide to drop it to reduce the number of variables. 
+* We also decide to drop the *flood* variable. 
+
 After iteratively dropping strongly collinear variables and re-assessing GVIF values, we obtain a subset of potential explanatory variables with GVIF values < 2.2 (which is a very conservative threshold but could still be problematic if ecological signals are weak; cf. Zuur *et al.*, 2010). Naturally, we dropped in priority variables for which we had feeble hypotheses, but variables may not be entirely dropped (depending on which models they are included in) and they will not be forgotten in the discussion anyway.  
 Here is **the list of the collinear variables** requiring careful consideration: *geotex*, *weedsp_geotex*, *latitude*, *longitude*, *coarse_env*, *pb_durability*, *degradation*, *flood*, *add_control*, *strips_overlap*, and *tarpfix_multimethod*.
 
 ```{r erad final GVIF}
-modvif <- stats::glm((efficiency/10)~elevation+freq_monitoring+slope+obstacles+geomem+maxveg+uprootexcav+stand_surface+fully_tarped+distance+tarping_duration+sedicover_height+trench_depth+plantation+repairs+pb_fixation, data = mydata, family = quasibinomial)
+modvif <- stats::glm((efficiency/10)~latitude+elevation+freq_monitoring+slope+coarse_env+obstacles+flood+geomem+maxveg+uprootexcav+stand_surface+fully_tarped+distance+tarping_duration+strips_overlap+tarpfix_multimethod+tarpfix_pierced+sedicover_height+trench_depth+repairs+add_control+pb_fixation+pb_durability, data = mydata, family = quasibinomial)
 #summary(modvif)
 
 knitr::kable(car::vif(modvif))
