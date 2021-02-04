@@ -332,6 +332,7 @@ We can see from this new panel of plots that the *efficiency* score seems to inc
 
 0) New IDs for random effects????
 1) Multiple imputation (Mice or Amelia)
-2) Transformations and standardization (for scaling, especially important when I use interactions terms; cf. "standardization" post on CV in my MacBook favorites)
-3) Deal with *tarping_duration*. Include weights?
+2) Write other preparation chapters!
+3) Set drake?
+3) Transformations and standardization (for scaling, especially important when I use interactions terms; cf. "standardization" post on CV in my MacBook favorites)
 

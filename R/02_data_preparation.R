@@ -7,7 +7,8 @@
 # all my scripts doing any kind of analyses (otherwise, I should always assign each variable, e.g.
 # mydata$myvariable, which is quite time consuming and wearisome).
 if(getRversion() >= "2.15.1")  utils::globalVariables(c(
-  "xp_id", "country", "latitude", "longitude", "elevation", "tarping_date", "planned_duration", "goals",
+  "manager_id", "xp_id", "country", "latitude", "longitude", "elevation", "tarping_date",
+  "planned_duration", "goals",
   "restoration", "operation_type", "multiple_ops", "freq_monitoring", "slope", "difficulty_access",
   "shade", "forest", "ruggedness", "granulometry", "obstacles", "flood", "environment", "fabric_type",
   "liner_geomem", "agri_geomem", "woven_geotex", "mulching_geotex", "pla_geotex", "weedsp_geotex",
@@ -82,10 +83,10 @@ model_datasets <- function(response.var = c("efficiency", "edges", "overlaps",
     # (quite similar to grep)!
 
     qqq <- dplyr::mutate(.data = qqq,
-                         efficiency = rowMeans(x = qqq[,79:81], na.rm = FALSE))
+                         efficiency = rowMeans(x = qqq[,80:82], na.rm = FALSE))
 
 
-    tapioca <- qqq[,c("xp_id", "latitude", "longitude", "elevation", "goals",
+    tapioca <- qqq[,c("manager_id", "xp_id", "latitude", "longitude", "elevation", "goals",
                   "efficiency", "eff_eradication", "high_eff",
                   "freq_monitoring", "slope", "difficulty_access", "shade", "forest", "ruggedness",
                   "granulometry", "obstacles", "flood",
@@ -106,7 +107,7 @@ model_datasets <- function(response.var = c("efficiency", "edges", "overlaps",
                       ifelse(reg_staples == 1 | reg_stripoverlaps == 1 | reg_obstacles == 1 |
                                reg_holes == 1 | reg_plantations == 1 | reg_pierced == 1, yes = 1, no = 0))
 
-    tapioca <- qqq[,c("xp_id", "latitude", "longitude", "elevation", "latest_reg_edges",
+    tapioca <- qqq[,c("manager_id", "xp_id", "latitude", "longitude", "elevation", "latest_reg_edges",
       "freq_monitoring", "slope", "difficulty_access", "shade", "forest", "ruggedness", "granulometry",
       "obstacles", "flood",
       "geomem", "geotex",
@@ -124,7 +125,7 @@ model_datasets <- function(response.var = c("efficiency", "edges", "overlaps",
                            ifelse(reg_staples == 1 | reg_edges == 1 | reg_obstacles == 1 |
                                     reg_holes == 1 | reg_plantations == 1 | reg_pierced == 1, yes = 1, no = 0))
 
-    tapioca <- qqq[,c("xp_id", "latitude", "longitude", "elevation", "reg_stripoverlaps",
+    tapioca <- qqq[,c("manager_id", "xp_id", "latitude", "longitude", "elevation", "reg_stripoverlaps",
       "freq_monitoring", "slope", "difficulty_access","shade", "forest", "ruggedness", "granulometry",
       "obstacles", "flood",
       "geomem", "geotex",
@@ -136,7 +137,7 @@ model_datasets <- function(response.var = c("efficiency", "edges", "overlaps",
 
   ### For the "latest_condition" model
   if (response.var == "latest_condition") {
-    tapioca <- qqq[,c("xp_id", "latitude", "longitude", "elevation", "latest_condition",
+    tapioca <- qqq[,c("manager_id", "xp_id", "latitude", "longitude", "elevation", "latest_condition",
       "freq_monitoring", "slope", "difficulty_access", "shade", "forest", "ruggedness", "granulometry",
       "obstacles", "flood",
       "geomem", "geotex", "liner_geomem", "agri_geomem", "woven_geotex", "mulching_geotex", "pla_geotex", "weedsp_geotex",
@@ -149,7 +150,7 @@ model_datasets <- function(response.var = c("efficiency", "edges", "overlaps",
 
   ### For the "fixation" model
   if (response.var == "fixation") {
-    tapioca <- qqq[,c("xp_id", "latitude", "longitude", "elevation", "pb_fixation",
+    tapioca <- qqq[,c("manager_id", "xp_id", "latitude", "longitude", "elevation", "pb_fixation",
       "freq_monitoring", "slope", "difficulty_access", "shade", "forest", "ruggedness", "granulometry",
       "obstacles", "flood",
       "geomem", "geotex", "liner_geomem", "agri_geomem", "woven_geotex", "mulching_geotex", "pla_geotex", "weedsp_geotex",

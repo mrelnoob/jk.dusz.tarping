@@ -7,7 +7,8 @@
 # all my scripts doing any kind of analyses (otherwise, I should always assign each variable, e.g.
 # mydata$myvariable, which is quite time consuming and wearisome).
 if(getRversion() >= "2.15.1")  utils::globalVariables(c(
-  "xp_id", "country", "latitude", "longitude", "elevation", "tarping_date", "planned_duration", "goals",
+  "manager_id", "xp_id", "country", "latitude", "longitude", "elevation", "tarping_date",
+  "planned_duration", "goals",
   "restoration", "operation_type", "multiple_ops", "freq_monitoring", "slope", "difficulty_access",
   "shade", "forest", "ruggedness", "granulometry", "obstacles", "flood", "environment", "fabric_type",
   "liner_geomem", "agri_geomem", "woven_geotex", "mulching_geotex", "pla_geotex", "weedsp_geotex",
@@ -107,7 +108,7 @@ as.numfactor <- function(x){as.numeric(levels(x))[x]}
 clean_my_data <- function(){
   raw_data <- jk.dusz.tarping::import_raw_data()
   # Transform character variables into factors, ordinal variables into ordered factors, and boolean/binary
-  # variables into factors:
+  # variables into factors (+ creation of new variables):
   raw_data %>%
     dplyr::mutate(planned_duration = factor(x = planned_duration, ordered = TRUE),
                   age = factor(x = age, ordered = TRUE),
