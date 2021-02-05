@@ -46,8 +46,9 @@ The first thing to do here is to prepare the sub-dataset that will be used to mo
 * We selected the subset of predictors and covariates that will be used to model tarping efficiency;
 * We left out the observations that were too recent (installed less than 2 growing seasons ago) and those for which we could not obtain an *efficiency score* (i.e. NA);
 * We deleted operations that got prematurely interrupted (e.g. because of vandalism) since there failure results from external causes.
+* Finally, we imputed missing values using **Random Forest** and the `missForest` package (Stekhoven & Buehlmann, 2012). 
 
-Now, let's take a quick look at our dataset. For the meaning of the variables, please refer to the attached **documentation**.
+The table below presents the *out-of-bag (OOB) imputation error* estimates for each variables (computed as Mean Squared Error (MSE) for numeric variables, and Proportion of Falsely Classified (PFC) for categorical variables), compared to the number of imputed values (i.e. number of NAs per variable): OOB values around 1 or > 1 indicate that imputations are not reliable. Accordingly, we will keep an eye on the observations that have unreliable imputations if they become **influential observations** in subsequent models (in which case, we will drop them)! (**BUT I SHOULD VERIFY if my interpretation is correct**§§§)
 
 ```{r erad import, include=TRUE, message=FALSE, comment=NA}
 erad <- jk.dusz.tarping::model_datasets(response.var = "efficiency")
@@ -57,7 +58,28 @@ erad %>% dplyr::select(-liner_geomem, -agri_geomem,-woven_geotex, -mulching_geot
   dplyr::filter(tarping_duration >= 2) %>%
   dplyr::filter(xp_id != "54") -> erad # Operation n°54 was destroyed because of vandalism.
 
+### Imputation of missing values using `missForest` (we could also have worked with `MICE`):
+erad %>% dplyr::select(-manager_id, -xp_id) %>% as.data.frame() -> erad_mis # missForest only accepts data.frames or matrices (not tibbles). Variables must also be numeric or factors only (no character, date, difftime... classes)!
+
+imput <- missForest::missForest(xmis = erad_mis, verbose = TRUE, variablewise = TRUE)
+
+# To create a small summary table for the OOB errors:
+imput_error <- data.frame(cbind(
+  sapply(erad_mis, function(y) sum(length(which(is.na(y))))), # Number of imputed values (NAs)
+  imput$OOBerror), # Out-of-bag error (OOB) for each variable
+  row.names = colnames(erad_mis)) # To get the name of the variables
+dplyr::rename(imput_error, nb_imputed_values = 'X1', oob_error = 'X2') -> imput_error
+
+knitr::kable(imput_error)
+```
+
+Now, let's take a quick look at our dataset. For the meaning of the variables, please refer to the attached **documentation**.
+
+```{r erad summary, include=TRUE, message=FALSE, comment=NA}
+erad[,3:ncol(erad)] <- imput$ximp # Replacing th original dataset with the imputed one!
 summary(erad)
+
+rm(erad_mis, imput, imput_error)
 ```
 
 
@@ -68,7 +90,7 @@ summary(erad)
 We performed a **normed-PCA** on some of our environmental variables for which we do not have strong hypotheses (i.e. *difficulty_access*, *shade*, *forest*, *ruggedness*, *granulometry*) but we kept *slope*, *obstacles*, and *flood* because we suspected they might have a major influence on the success/failure of tarping. In order to get optimum results, we imputed missing values using the *Regularised Iterative PCA algorithm* (Josse & Husson, 2013) of the `missMDA` package (Josse & Husson, 2016). 
 
 ```{r erad env PCAs, warning=FALSE, fig.align='center', fig.cap="**Figure 1.** Correlation plot of the normed-PCA on environmental variables for the *tarping efficiency* dataset"}
-xxx <- erad[,11:15]
+xxx <- dplyr::select(.data = erad, c(difficulty_access, shade, forest, ruggedness, granulometry))
 
 # As there are missing values in some variables, we will impute them using the missPCA() function.
 # But first, we need to estimate how many components are required to correctly impute the missing values:
@@ -262,7 +284,7 @@ The next step in our data exploration is to plot the response variables against 
 
 ### To plot a response variable against all predictors/covariates, we will have to do use a for loop or the facet_wrap function of ggplot (or equivalent).
 # For the "efficiency" variable (bounded continuous variable):
-erad %>% dplyr::select(-xp_id, -goals, -eff_eradication, -high_eff) %>%
+erad %>% dplyr::select(-manager_id, -xp_id, -goals, -eff_eradication, -high_eff) %>%
   dplyr::mutate_if(is.factor, as.numfactor) %>% 
   tidyr::pivot_longer(-c(efficiency, fully_tarped), # Means that all columns of `mydata` need to be reshaped except "efficiency" & "fully_tarped" (works as well with the form `!efficiency`, and we can place it somewhere else: actually, it is the `cols =` argument)! We have to work in the long-format because that's how the tidyverser and thus ggplot2 love to work...
                                names_to = "Predictor", # Gives the name of the new grouping variable while "values_to" gives the name of the variable that will be created from the data stored in the cell value.
@@ -299,7 +321,7 @@ Various interesting observations can be made from these scatterplots:
 To further investigate multivariate relationship, we will create another serie of scatterplots (but we do not intend on investigating all possible combinations).
 
 ```{r erad bivariate plot2, fig.align='center', fig.cap="**Figure 6bis.** Multivariate representation of the *efficiency score* against each potential explanatory variable with a focus on whether knotweed stands were fully tarped or not", fig.width=12, fig.height=9, message=FALSE, comment=NA, warning=FALSE}
-erad %>% dplyr::select(-xp_id, -goals, -eff_eradication, -high_eff) %>%
+erad %>% dplyr::select(-manager_id, -xp_id, -goals, -eff_eradication, -high_eff) %>%
   dplyr::mutate_if(is.factor, as.numfactor) %>% 
   tidyr::pivot_longer(-c(efficiency, plantation), 
                                names_to = "Predictor", 
@@ -330,7 +352,6 @@ We can see from this new panel of plots that the *efficiency* score seems to inc
 
 ## Next steps for preparation
 
-0) New IDs for random effects????
 1) Multiple imputation (Mice or Amelia)
 2) Write other preparation chapters!
 3) Set drake?

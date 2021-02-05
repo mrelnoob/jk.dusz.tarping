@@ -110,7 +110,8 @@ clean_my_data <- function(){
   # Transform character variables into factors, ordinal variables into ordered factors, and boolean/binary
   # variables into factors (+ creation of new variables):
   raw_data %>%
-    dplyr::mutate(planned_duration = factor(x = planned_duration, ordered = TRUE),
+    dplyr::mutate(manager_id = factor(x = manager_id),
+                  planned_duration = factor(x = planned_duration, ordered = TRUE),
                   age = factor(x = age, ordered = TRUE),
                   plantation = factor(x = plantation, ordered = TRUE)) %>%
     dplyr::mutate(geomem = ifelse(grepl("geomem$", fabric_type) | grepl("tarp$", fabric_type) |
