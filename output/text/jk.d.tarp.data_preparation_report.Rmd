@@ -48,9 +48,9 @@ The first thing to do here is to prepare the sub-dataset that will be used to mo
 * We deleted operations that got prematurely interrupted (e.g. because of vandalism) since there failure results from external causes.
 * Finally, we imputed missing values using **Random Forest** and the `missForest` package (Stekhoven & Buehlmann, 2012). 
 
-The table below presents the *out-of-bag (OOB) imputation error* estimates for each variables (computed as Mean Squared Error (MSE) for numeric variables, and Proportion of Falsely Classified (PFC) for categorical variables), compared to the number of imputed values (i.e. number of NAs per variable): OOB values around 1 or > 1 indicate that imputations are not reliable. Accordingly, we will keep an eye on the observations that have unreliable imputations if they become **influential observations** in subsequent models (in which case, we will drop them)! (**BUT I SHOULD VERIFY if my interpretation is correct**§§§)
+The table below presents the *out-of-bag (OOB) imputation error* estimates for each variables (computed as Mean Squared Error (MSE) for numeric variables, and Proportion of Falsely Classified (PFC) for categorical variables), compared to the number of imputed values (i.e. number of NAs per variable): OOB values around 1 or > 1 indicate that imputations are not reliable. Accordingly, we will keep an eye on the observations that have unreliable imputations if they become **influential observations** in subsequent models (in which case, we will drop them)! For the meaning of the variables, please refer to the attached **documentation**.
 
-```{r erad import, include=TRUE, message=FALSE, comment=NA}
+```{r erad import & imput, include=FALSE}
 erad <- jk.dusz.tarping::model_datasets(response.var = "efficiency")
 
 erad %>% dplyr::select(-liner_geomem, -agri_geomem,-woven_geotex, -mulching_geotex, -pla_geotex, -other_unknown, -grammage, -age, -thickness, -pierced_tarpinstall, -add_control_type) %>%
@@ -69,11 +69,13 @@ imput_error <- data.frame(cbind(
   imput$OOBerror), # Out-of-bag error (OOB) for each variable
   row.names = colnames(erad_mis)) # To get the name of the variables
 dplyr::rename(imput_error, nb_imputed_values = 'X1', oob_error = 'X2') -> imput_error
+```
 
+```{r erad imput error table, include=TRUE, message=FALSE, comment=NA}
 knitr::kable(imput_error)
 ```
 
-Now, let's take a quick look at our dataset. For the meaning of the variables, please refer to the attached **documentation**.
+Now, let's take a quick look at our dataset.
 
 ```{r erad summary, include=TRUE, message=FALSE, comment=NA}
 erad[,3:ncol(erad)] <- imput$ximp # Replacing th original dataset with the imputed one!
@@ -87,17 +89,17 @@ rm(erad_mis, imput, imput_error)
 #### - Investigation of correlation structures
 ##### - Multivariate synthesis of environmental variables
 
-We performed a **normed-PCA** on some of our environmental variables for which we do not have strong hypotheses (i.e. *difficulty_access*, *shade*, *forest*, *ruggedness*, *granulometry*) but we kept *slope*, *obstacles*, and *flood* because we suspected they might have a major influence on the success/failure of tarping. In order to get optimum results, we imputed missing values using the *Regularised Iterative PCA algorithm* (Josse & Husson, 2013) of the `missMDA` package (Josse & Husson, 2016). 
+We performed a **normed-PCA** on some of our environmental variables for which we do not have strong hypotheses (i.e. *difficulty_access*, *shade*, *forest*, *ruggedness*, *granulometry*) but we kept *slope*, *obstacles*, and *flood* because we suspected they might have a major influence on the success/failure of tarping. 
 
 ```{r erad env PCAs, warning=FALSE, fig.align='center', fig.cap="**Figure 1.** Correlation plot of the normed-PCA on environmental variables for the *tarping efficiency* dataset"}
 xxx <- dplyr::select(.data = erad, c(difficulty_access, shade, forest, ruggedness, granulometry))
 
-# As there are missing values in some variables, we will impute them using the missPCA() function.
+# In order to get optimum results, we imputed missing values using the *Regularised Iterative PCA algorithm* (Josse & Husson, 2013) of the `missMDA` package (Josse & Husson, 2016). 
 # But first, we need to estimate how many components are required to correctly impute the missing values:
-nb <- missMDA::estim_ncpPCA(xxx, ncp.max=5) # Can be time consuming. Here, the best result is 0 but we will take 2 as it is (almost) the second best option.
+#nb <- missMDA::estim_ncpPCA(xxx, ncp.max=5) # Can be time consuming. Here, the best result is 0 but we will take 2 as it is (almost) the second best option.
 # Then we impute the missing values and extract the imputed dataset:
-res.imput <- missMDA::imputePCA(X = xxx, method = "Regularized", scale = TRUE, ncp = 2)
-xxx <- res.imput$completeObs # Gives the completed dataset!
+#res.imput <- missMDA::imputePCA(X = xxx, method = "Regularized", scale = TRUE, ncp = 2)
+#xxx <- res.imput$completeObs # Gives the completed dataset!
 
 # Normed-PCA:
 res.pca <- FactoMineR::PCA(X = xxx, scale.unit = TRUE, graph = FALSE)
@@ -135,15 +137,17 @@ As the first axis (PC) of our PCA satisfactorily synthesizes a large amount (`r 
   
 ##### - Correlation among variables
 
-To investigate potential correlations and colinearity among our variables, we will start by computing a **correlation matrix** of the data. As most of our factors are either ordered factors (i.e. ordinal variables) or binary factors (i.e. boolean), we can use them in a correlation matrix. To do that however, computations will be based on *Spearman*'s rank correlation coefficient.
+To investigate potential correlations and colinearity among our variables, we will start by computing a **correlation matrix** of the data. As most of our factors are either ordered factors (i.e. ordinal variables) or binary factors (i.e. boolean), we can use them in a correlation matrix. To do that however, computations will be based on *Spearman*'s rank correlation coefficient.  
+To avoid giving too much weight to our own tarping experiments (those performed in Chalon s/ Saone with the French national railway company), we removed them from the data to compute correlations: their influence will be accounted for in further analyses by the use of **mixed-effect models**.
 
 ```{r erad corrplot, fig.align='center', fig.cap="**Figure 2.** Correlation matrix displaying *Spearman*'s $\\rho$ for the numeric variables and ordered factors of the *tarping efficiency* dataset. Only significant correlations are displayed (with $\\alpha$ = 0.05)", warning=FALSE}
 rm(res.pca, res.imput, xxx, ttt, nb)
 
 # To convert all ordered factors into numeric variables usable in a correlation matrix:
-erad %>% dplyr::select(-xp_id, -goals) %>%
-  dplyr::mutate_if(.predicate = is.factor, .funs = as.numfactor) -> num.erad # as.numfactor is my own custom function (see '01_data_cleaning.R').
-#num.erad <- erad[, sapply(erad, is.numeric)] # Select only numeric columns.
+erad %>% dplyr::filter(!manager_id == 1) %>% # We remove our own experiments as they share many features that will strongly influence correlations (it should not be a problem for modelling as we will use mixed-effect models).
+  dplyr::select(-manager_id, -xp_id, -goals) %>%
+  dplyr::mutate_if(.predicate = is.factor, .funs = as.numfactor) -> num.erad # as.numfactor() is my own custom function (see '01_data_cleaning.R').
+
 
 
 # To compute the correlation matrix:
@@ -161,12 +165,14 @@ rm(num.erad, res.cor.erad, res.pcor.erad)
 
 Many interesting patterns can be observed in this correlation matrix. Among them, we can see that:
 
-* One or several of the *efficiency* variables seem to be mildly positively correlated with *distance*, and *fully_tarped* and negatively with *obstacles*, *add_control* and *pb_durability*. 
-* *add_control*, *rapairs* and *plantation* display a relatively similar pattern of positive correlation with *slope*, *coarse_env*, *flood* and *geomem*, and negative correlation with *geotex*, *weedsp_geotex* and *maxveg*. However, this pattern certainly bears the mark of our own tarping experiments in Chalon that were installed in June and where we did not repaired set ups nor performed additional controls nor planted anything (most correlations with *weedsp_geotex* should also be influenced by our experiments).
-* *pb_fixation* seems to be strongly positively correlated with *stand_surface* and, to a lesser extent, with *tarpfix_pierced*.
-* *stand_surface* seems to be strongly positively correlated with *flood*.
+* One or several of the *efficiency* variables seem to be mildly positively correlated with *distance*, and *fully_tarped* and negatively with *obstacles*, *add_control*, and *pb_durability*. 
+* *geomem* is extremely negatively correlated with *geotex*, which is logical as one is the opposite of the other. 
+* *trench_depth* seems to be strongly positively correlated with *tarpfix_multimethod*, which is logical as trenches are strong fixation method. 
+* *pb_fixation* seems to be strongly positively correlated with *stand_surface* and, to a lesser extent, with *tarpfix_pierced* and *repairs*.
+* *obstacles* is positively correlated with *slope* and *coarse_env* (which are also positively correlated), as well as with *pb_durability*, and negatively with *distance*: all these correlations seem quite straightforward. 
+* Interestingly, *flood* is positively correlated with *geotex*, *tarpfix_pierced*, *add_control* and *pb_fixation*.
 
-It is worth reminding that these correlations are just correlations (not **causation**) and only bivariate. Accounting for multivariate relationships and interactions will certainly give very different patterns.
+It is worth reminding that accounting for multivariate relationships, interactions and the effect of our tarping operations (dropped for the current correlation matrix) will certainly give very different patterns.
 
 
    
@@ -175,32 +181,30 @@ It is worth reminding that these correlations are just correlations (not **causa
 As multicollinearity is one of the biggest issues for inference modelling, we need to assess which explanatory variables and covariates are collinear and will possibly become problematic for modelling. To do so, our intention was to compute *Variance Inflation Factors* (VIF) for each variable. However, as several variables are categorical and as we will not be working with models fitted with ordinary least squares, we will rather use *Generalized VIF* (Fox & Monette, 1992).
 
 ```{r erad init GVIF}
-erad %>% dplyr::select(-xp_id, -goals, -eff_eradication, -high_eff) -> mydata
-
-modvif <- stats::glm((efficiency/10)~latitude+longitude+elevation+freq_monitoring+slope+coarse_env+obstacles+flood+geomem+geotex+weedsp_geotex+maxveg+uprootexcav+stand_surface+fully_tarped+distance+tarping_duration+stripsoverlap_ok+tarpfix_multimethod+tarpfix_pierced+sedicover_height+trench_depth+plantation+repairs+add_control+degradation+pb_fixation+pb_durability, data = mydata, family = quasibinomial)
+modvif <- stats::glm((efficiency/10)~latitude+longitude+elevation+freq_monitoring+slope+coarse_env+obstacles+flood+geomem+geotex+weedsp_geotex+maxveg+uprootexcav+stand_surface+fully_tarped+distance+tarping_duration+stripsoverlap_ok+tarpfix_multimethod+tarpfix_pierced+sedicover_height+trench_depth+plantation+repairs+add_control+degradation+pb_fixation+pb_durability, data = erad, family = quasibinomial)
 #summary(modvif)
 
 knitr::kable(car::vif(modvif))
 ```
 
-As one could expect, there is evidence for important **multicollinearity** among our 26 potential explanatory variables. However, strong collinearity among variables is only a problem if these variables are included together in the same model, hence the necessity to reevaluate collinearity more precisely when actual working models will be built. Here, we will simply identify which variables will be generally too problematic across likely models and, possibly, drop them (we will try to lower GVIF values as much as possible, considering that, even GVIF of 2 could still be problematic if ecological signals are weak; cf. Zuur *et al.*, 2010):
+As one could expect, there is evidence for **multicollinearity** among our 26 potential explanatory variables. However, strong collinearity among variables is only a problem if these variables are included together in the same model, hence we should reevaluate collinearity more precisely when actual working models will be built. Here, we will simply identify which variables will be generally too problematic across likely models and, possibly, drop them (we will try to lower GVIF values as much as possible, considering that, even GVIF of 2 could still be problematic if ecological signals are weak; cf. Zuur *et al.*, 2010):
 
-* The variables *geomem* and *geotex* (and *weedsp_geotex*) are, without a surprise, very problematic as they contain the same information. Therefore, we decide to only keep *geomem*.
+* The variables *geomem* and *geotex* (and *weedsp_geotex*) are, without a surprise, problematic as they contain the same information. Therefore, we decide to only keep *geomem*.
 * The *plantation* variable also seems highly problematic. Yet, as we have a strong interest in that variable, we choose to drop it **only temporarily**, only to detect other problematic variables. A particular attention to multicollinearity should be maintained when this variable will be included within models.
 * Since our dataset contains sites on both sides of the Atlantic and since we do not have strong hypotheses regarding the effects of *longitude* (because our sites are located well within the longitudinal range of knotweeds), we decide to drop it.
 * Since *degradation* contains most of the information contained in *pb_fixation* and *pb_durability*, we decide to drop it to reduce the number of variables. 
 
-After iteratively dropping these strongly collinear variables and re-assessing GVIF values, we obtain a subset of potential explanatory variables with GVIF values globally < 3.5 and GVIF values will likely be even lower in later stages as models will not include so many variables at the same time. Naturally, we will also bear in mind the potential effects of the dropped variables in the discussion.
+After iteratively dropping these collinear variables and re-assessing GVIF values, we obtain a subset of potential explanatory variables with GVIF values globally < 3 and GVIF values will likely be even lower in later stages as models will not include so many variables at the same time. Naturally, we will also bear in mind the potential effects of the dropped variables in the discussion.
 
 ```{r erad final GVIF}
-modvif <- stats::glm((efficiency/10)~latitude+elevation+freq_monitoring+slope+coarse_env+flood+obstacles+geomem+maxveg+uprootexcav+stand_surface+fully_tarped+distance+tarping_duration+stripsoverlap_ok+tarpfix_multimethod+tarpfix_pierced+sedicover_height+trench_depth+repairs+add_control+pb_fixation+pb_durability, data = mydata, family = quasibinomial)
+modvif <- stats::glm((efficiency/10)~latitude+elevation+freq_monitoring+slope+coarse_env+obstacles+flood+geomem+maxveg+uprootexcav+stand_surface+fully_tarped+distance+tarping_duration+stripsoverlap_ok+tarpfix_multimethod+tarpfix_pierced+sedicover_height+trench_depth+repairs+add_control+pb_fixation+pb_durability, data = erad, family = quasibinomial)
 #summary(modvif)
 
 knitr::kable(car::vif(modvif))
 
 erad %>% dplyr::select(-geotex, -weedsp_geotex, -longitude, -degradation) -> erad
 
-rm(modvif, mydata)
+rm(modvif)
 ```
 
 
@@ -314,11 +318,11 @@ erad %>% dplyr::select(-manager_id, -xp_id, -goals, -eff_eradication, -high_eff)
 Various interesting observations can be made from these scatterplots:
 
 * First, heteroscedasticity will perhaps not be surprising in our models as the variances of many variables do not seem to be homogeneous. On the other hand, we do not see clear multivariate outliers.
-* Second, the *efficiency* score seems to increase with increasing *distance*. This may be evidence in support to one of our working hypotheses stating that successful tarping operations cover areas well beyond the visible limits of knotweed stands. Conversely, the *efficiency* score seems to decrease with increasing presence of *obstacles*.
-* Third, surprisingly, the *efficiency* score also seems to increase with increasing *elevation*. If this is not due to measurement error, then it could be a sign of stronger abiotic constraints on knotweeds.
-* Fourth, there may be signs of interesting interactions between the *fully tarped* variable and *slope*, *coarse_env*, *stand_surface*, *tarping_duration*, *trench_depth* and *uprootexcav*, although caution is required as variances are quite high. Furthermore, if the interaction with *stand_surface* is relatively straightforward, the other ones are trickier do grasp and could simply be noise.
+* Second, the *efficiency* score seems to increase with increasing *distance*. This may be evidence in support to one of our working hypotheses stating that successful tarping operations cover areas well beyond the visible limits of knotweed stands. Conversely, the *efficiency* score seems to decrease with increasing presence of *obstacles* and with *pb_durability*.
+* Third, surprisingly, the *efficiency* score also seems to increase with increasing *elevation*. If this is not due to measurement error, then it could be a sign of stronger abiotic constraints on knotweeds. *Additional control* similarly seems to improve *efficiency*.
+* Fourth, there may be signs of interesting interactions between the *fully tarped* variable and *coarse_env*, *pb_durability*, *slope*, *stand_surface*, *tarpfix_pierced*, *tarping_duration*, *trench_depth* and *uprootexcav*, although caution is required as variances are quite high. Furthermore, if interactions with *stand_surface* or *pb_durability* are relatively straightforward, the other ones are trickier do grasp and could simply be spurious.
 
-To further investigate multivariate relationship, we will create another serie of scatterplots (but we do not intend on investigating all possible combinations).
+To further investigate multivariate relationship, we will create another set of scatterplots (but we do not intend on investigating all possible combinations between variables).
 
 ```{r erad bivariate plot2, fig.align='center', fig.cap="**Figure 6bis.** Multivariate representation of the *efficiency score* against each potential explanatory variable with a focus on whether knotweed stands were fully tarped or not", fig.width=12, fig.height=9, message=FALSE, comment=NA, warning=FALSE}
 erad %>% dplyr::select(-manager_id, -xp_id, -goals, -eff_eradication, -high_eff) %>%
@@ -349,11 +353,18 @@ erad %>% dplyr::select(-manager_id, -xp_id, -goals, -eff_eradication, -high_eff)
 
 We can see from this new panel of plots that the *efficiency* score seems to increase when knotweeds are *fully tarped*, as we hypothesized. 
 
+```{r erad export, include=FALSE}
+### Finally, I export the dataset to be used for modelling in my "mydata" folder:
+readr::write_csv(x = erad, file = here::here("mydata", "erad.csv"), append = FALSE)
+# A problem with this method is that once exported, R will lose track of the variable types (class). Therefore, if we open (read) this .csv file with R, it will specify columns as best it can, that is as double for numeric columns and as character for columns containing letters. For instance, it will import the first column of `erad` (i.e. "manager_id") as a numeric (double) variable when it should be a factor.
+# A not so ideal solution is to use the `col_types` argument of the readr::read_csv() function to manually specify variable types during import. Yet, we will not be able to specify that "plantation" is an ordered factor and we will have to do it manually afterward. 
+```
+
+
 
 ## Next steps for preparation
 
-1) Multiple imputation (Mice or Amelia)
-2) Write other preparation chapters!
+2) Write other preparation chapters! Terminate excel_model and send it...
 3) Set drake?
 3) Transformations and standardization (for scaling, especially important when I use interactions terms; cf. "standardization" post on CV in my MacBook favorites)
 
