@@ -5,21 +5,21 @@
 \title{Datasets for Models Building}
 \usage{
 model_datasets(
-  response.var = c("efficiency", "edges", "overlaps", "latest_condition", "fixation")
+  response.var = c("efficiency", "edges", "overlaps", "tarpedarea", "fixation")
 )
 }
 \arguments{
 \item{response.var}{A character string specifying which modelling dataset should be produced (either:
-efficiency", "edges", "overlaps", "latest_condition", or "fixation"):
+efficiency", "edges", "overlaps", "tarpedarea", or "fixation"):
 \itemize{
 \item "efficiency" will produce the dataset for the 3 efficiency evaluation variables (namely \emph{
 eff_eradication}, \emph{eff_expansion} and \emph{eff_vigour});
 \item "edges" will produce the dataset having for response variable the tarping operations that observed
 regrowth at the edge of the tarped area;
 \item "overlaps" produce the dataset having for response variable the tarping operations that observed
-regrowth at at strip overlaps;
-\item "latest_condition" will produce the dataset having for response variable the condition (good, bad, etc.)
-of the fabric at the date of the latest observation;
+regrowth at strip overlaps;
+\item "tarpedarea" will produce the dataset having for response variable the tarping operations that observed
+regrowth at somewhere on the area covered by the fabric;
 \item "fixation" will produce the dataset having for response variable the tarping operations that reported
 fixation problems during the operation.
 }}

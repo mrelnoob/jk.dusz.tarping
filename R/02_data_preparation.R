@@ -43,15 +43,15 @@ if(getRversion() >= "2.15.1")  utils::globalVariables(c(
 #' variables to be used as \strong{predictors/explanatory variables} (removing all the variables that
 #' should not be used to model \emph{pb_fixation}'s variations).
 #' @param response.var A character string specifying which modelling dataset should be produced (either:
-#' efficiency", "edges", "overlaps", "latest_condition", or "fixation"):
+#' efficiency", "edges", "overlaps", "tarpedarea", or "fixation"):
 #' * "efficiency" will produce the dataset for the 3 efficiency evaluation variables (namely \emph{
 #' eff_eradication}, \emph{eff_expansion} and \emph{eff_vigour});
 #' * "edges" will produce the dataset having for response variable the tarping operations that observed
 #' regrowth at the edge of the tarped area;
 #' * "overlaps" produce the dataset having for response variable the tarping operations that observed
-#' regrowth at at strip overlaps;
-#' * "latest_condition" will produce the dataset having for response variable the condition (good, bad, etc.)
-#' of the fabric at the date of the latest observation;
+#' regrowth at strip overlaps;
+#' * "tarpedarea" will produce the dataset having for response variable the tarping operations that observed
+#' regrowth at somewhere on the area covered by the fabric;
 #' * "fixation" will produce the dataset having for response variable the tarping operations that reported
 #' fixation problems during the operation.
 #'
@@ -64,7 +64,7 @@ if(getRversion() >= "2.15.1")  utils::globalVariables(c(
 #' eff_model <- model_datasets(response.var = "efficiency")
 #' }
 model_datasets <- function(response.var = c("efficiency", "edges", "overlaps",
-                                            "latest_condition", "fixation")){
+                                            "tarpedarea", "fixation")){
 
   ppp <- jk.dusz.tarping::clean_my_data()
   ppp %>%
@@ -86,8 +86,8 @@ model_datasets <- function(response.var = c("efficiency", "edges", "overlaps",
                          efficiency = rowMeans(x = qqq[,80:82], na.rm = FALSE))
 
 
-    tapioca <- qqq[,c("manager_id", "xp_id", "latitude", "longitude", "elevation", "goals",
-                  "efficiency", "eff_eradication", "high_eff",
+    tapioca <- qqq[,c("manager_id", "xp_id", "efficiency", "eff_eradication", "high_eff",
+                  "latitude", "longitude", "elevation", "goals",
                   "freq_monitoring", "slope", "difficulty_access", "shade", "forest", "ruggedness",
                   "granulometry", "obstacles", "flood",
                   "geomem", "geotex", "liner_geomem", "agri_geomem", "woven_geotex", "mulching_geotex",
@@ -100,23 +100,22 @@ model_datasets <- function(response.var = c("efficiency", "edges", "overlaps",
 
   ### For the "latest_reg_edges" model
   if (response.var == "edges") {
-    qqq <- dplyr::mutate(.data = qqq, latest_reg_edges =
-                           ifelse(latest_regrowth == "edges" | latest_regrowth == "edges_nearby",
-                                  yes = 1, no = 0)) %>%
+    qqq <- dplyr::mutate(.data = qqq, lreg_edges =
+                      ifelse(grepl("*edges*", latest_regrowth), 1, 0)) %>%
       dplyr::mutate(.data = qqq, reg_elsewhere =
                       ifelse(reg_staples == 1 | reg_stripoverlaps == 1 | reg_obstacles == 1 |
-                               reg_holes == 1 | reg_plantations == 1 | reg_pierced == 1, yes = 1, no = 0))
+                               reg_holes == 1 | reg_plantations == 1 | reg_pierced == 1, yes = 1, no = 0)) %>%
+      dplyr::filter(fully_tarped == 1) # Only for fully tarped operations!
 
-    tapioca <- qqq[,c("manager_id", "xp_id", "latitude", "longitude", "elevation", "latest_reg_edges",
-      "freq_monitoring", "slope", "difficulty_access", "shade", "forest", "ruggedness", "granulometry",
-      "obstacles", "flood",
+    tapioca <- qqq[,c("manager_id", "xp_id", "lreg_edges",
+      "latitude", "longitude", "elevation", "slope", "flood", "difficulty_access", "shade", "forest",
+      "ruggedness", "granulometry", "obstacles", "stand_surface",
       "geomem", "geotex",
-      "season", "uprootexcav",
-      "stand_surface", "age", "fully_tarped", "distance", "tarping_duration", "stripsoverlap_ok","strips_overlap",
-      "fabric_fixation", "tarpfix_multimethod", "tarpfix_pierced", "sedicover_height", "trench_depth", "plantation",
-      "repairs", "add_control", "add_control_type",
-      "degradation", "pb_fixation", "pb_durability",
-      "reg_elsewhere")]
+      "maxveg", "uprootexcav",
+      "distance", "stripsoverlap_ok",
+      "tarpfix_multimethod", "tarpfix_pierced", "sedicover_height", "trench_depth", "plantation",
+      "repairs", "add_control", "freq_monitoring",
+      "degradation", "pb_fixation", "pb_durability", "tarping_duration", "reg_elsewhere")]
   }
 
   ### For the "overlaps" model
@@ -135,9 +134,9 @@ model_datasets <- function(response.var = c("efficiency", "edges", "overlaps",
       "reg_elsewhere")]
   }
 
-  ### For the "latest_condition" model
-  if (response.var == "latest_condition") {
-    tapioca <- qqq[,c("manager_id", "xp_id", "latitude", "longitude", "elevation", "latest_condition",
+  ### For the "tarpedarea" model
+  if (response.var == "tarpedarea") {
+    tapioca <- qqq[,c("manager_id", "xp_id", "latitude", "longitude", "elevation", "tarpedarea",
       "freq_monitoring", "slope", "difficulty_access", "shade", "forest", "ruggedness", "granulometry",
       "obstacles", "flood",
       "geomem", "geotex", "liner_geomem", "agri_geomem", "woven_geotex", "mulching_geotex", "pla_geotex", "weedsp_geotex",
