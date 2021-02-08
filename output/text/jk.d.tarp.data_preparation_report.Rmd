@@ -107,7 +107,7 @@ res.pca <- FactoMineR::PCA(X = xxx, scale.unit = TRUE, graph = FALSE)
 factoextra::fviz_pca_var(res.pca, col.var = "contrib",
              gradient.cols = c("#00AFBB", "#E7B800", "#FC4E07"), repel = TRUE)
 
-# As the first axis (PC) of my PCA satisfactorily synthesizes a large amount of the variance of my 5 variables (38.2%), I will use the coordinates of the tarping operations on this axis as a synthetic variable:
+# As the first axis (PC) of my PCA satisfactorily synthesizes a fairly large amount of the variance of my 5 variables, I will use the coordinates of the tarping operations on this axis as a synthetic variable:
 ttt <- res.pca$ind$coord[,1] 
 erad %>% dplyr::select(-difficulty_access, -shade, -forest, -ruggedness) %>%
   dplyr::rename(coarse_env = "granulometry") -> erad
@@ -370,17 +370,15 @@ The first thing to do here is to prepare the sub-dataset that will be used to mo
 
 * We selected the subset of predictors and covariates that will be used to model *lreg_edges*;
 * We left out the observations for which we could not obtain information on regrowths (i.e. NA);
-* We deleted operations that got prematurely interrupted (e.g. because of vandalism) since there regrowths may be the result of external causes.
 * Finally, we imputed missing values using **Random Forest** and the `missForest` package (Stekhoven & Buehlmann, 2012). 
 
 The table below presents the *out-of-bag (OOB) imputation error* estimates for each variables (computed as Mean Squared Error (MSE) for numeric variables, and Proportion of Falsely Classified (PFC) for categorical variables), compared to the number of imputed values (i.e. number of NAs per variable): OOB values around 1 or > 1 indicate that imputations are not reliable. Accordingly, we will keep an eye on the observations that have unreliable imputations if they become **influential observations** in subsequent models (in which case, we will drop them)! For the meaning of the variables, please refer to the attached **documentation**.
 
 ```{r redges import & imput, include=FALSE}
 redges <- jk.dusz.tarping::model_datasets(response.var = "edges")
-
-redges %>% dplyr::filter(eff_redgesication != "NA") %>%
-  dplyr::filter(tarping_duration >= 2) %>%
-  dplyr::filter(xp_id != "54") -> redges # Operation n°54 was destroyed because of vandalism.
+redges <- dplyr::mutate(.data = redges, 
+                        lreg_edges = as.factor(x = lreg_edges),
+                        reg_elsewhere = as.factor(x = reg_elsewhere))
 
 ### Imputation of missing values using `missForest` (we could also have worked with `MICE`):
 redges %>% dplyr::select(-manager_id, -xp_id) %>% as.data.frame() -> redges_mis # missForest only accepts data.frames or matrices (not tibbles). Variables must also be numeric or factors only (no character, date, difftime... classes)!
@@ -402,7 +400,7 @@ knitr::kable(imput_error)
 Now, let's take a quick look at our dataset.
 
 ```{r redges summary, include=TRUE, message=FALSE, comment=NA}
-redges[,3:ncol(redges)] <- imput$ximp # Replacing th original dataset with the imputed one!
+redges[,3:ncol(redges)] <- imput$ximp # Replacing the original dataset with the imputed one!
 summary(redges)
 
 rm(redges_mis, imput, imput_error)
@@ -413,17 +411,10 @@ rm(redges_mis, imput, imput_error)
 #### - Investigation of correlation structures
 ##### - Multivariate synthesis of environmental variables
 
-We performed a **normed-PCA** on some of our environmental variables for which we do not have strong hypotheses (i.e. *difficulty_access*, *shade*, *forest*, *ruggedness*, *granulometry*) but we kept *slope*, *obstacles*, and *flood* because we suspected they might have a major influence on the success/failure of tarping. 
+We performed a **normed-PCA** on some of our environmental variables for which we do not have strong hypotheses (i.e. *difficulty_access*, *shade*, *forest*, *ruggedness*, *granulometry*) but we kept *slope*, *obstacles*, and *flood* because we suspected they might have a strong influence on the presence of knotweed regrowths. 
 
-```{r redges env PCAs, warning=FALSE, fig.align='center', fig.cap="**Figure 1.** Correlation plot of the normed-PCA on environmental variables for the *tarping efficiency* dataset"}
+```{r redges env PCAs, warning=FALSE, fig.align='center', fig.cap="**Figure 7.** Correlation plot of the normed-PCA on environmental variables for the *regrowth at the edges of the tarped area* dataset"}
 xxx <- dplyr::select(.data = redges, c(difficulty_access, shade, forest, ruggedness, granulometry))
-
-# In order to get optimum results, we imputed missing values using the *Regularised Iterative PCA algorithm* (Josse & Husson, 2013) of the `missMDA` package (Josse & Husson, 2016). 
-# But first, we need to estimate how many components are required to correctly impute the missing values:
-#nb <- missMDA::estim_ncpPCA(xxx, ncp.max=5) # Can be time consuming. Here, the best result is 0 but we will take 2 as it is (almost) the second best option.
-# Then we impute the missing values and extract the imputed dataset:
-#res.imput <- missMDA::imputePCA(X = xxx, method = "Regularized", scale = TRUE, ncp = 2)
-#xxx <- res.imput$completeObs # Gives the completed dataset!
 
 # Normed-PCA:
 res.pca <- FactoMineR::PCA(X = xxx, scale.unit = TRUE, graph = FALSE)
@@ -431,32 +422,15 @@ res.pca <- FactoMineR::PCA(X = xxx, scale.unit = TRUE, graph = FALSE)
 factoextra::fviz_pca_var(res.pca, col.var = "contrib",
              gradient.cols = c("#00AFBB", "#E7B800", "#FC4E07"), repel = TRUE)
 
-# As the first axis (PC) of my PCA satisfactorily synthesizes a large amount of the variance of my 5 variables (38.2%), I will use the coordinates of the tarping operations on this axis as a synthetic variable:
+# As the first axis (PC) of my PCA satisfactorily synthesizes a fairly large amount of the variance of my 5 variables, I will use the coordinates of the tarping operations on this axis as a synthetic variable:
 ttt <- res.pca$ind$coord[,1] 
 redges %>% dplyr::select(-difficulty_access, -shade, -forest, -ruggedness) %>%
   dplyr::rename(coarse_env = "granulometry") -> redges
 redges$coarse_env <- ttt # And I use this occasion to reduce the dataset and replace one variable with my new synthetic variable.
-
-# To plot side by side:
-#gridExtra::grid.arrange(FIG_1, FIG_2, ncol = 2)
 ```
 
 As the first axis (PC) of our PCA satisfactorily synthesizes a large amount (`r round(res.pca$eig[1,2],1)`%) of the variance of the 5 environmental variables, we will use operations' coordinates on this axis to build a synthetic variable to summarize their environment. This new variable will be named **coarse_env** and will thus replace the other 5 variables in the dataset. Operations with *positive values* for this variable are located in sites that tend to be forested (and thus shaded), difficult to access, with uneven ground and a coarse soil texture (and vice-versa).
 
-
-```{r, eval=FALSE, include=FALSE}
-# PEUT ETRE INTERESSANT POUR D'AUTRES MODELES???????? mouais...
-# pb <- zzz_mydata_cleaned[, c(59,60,64,66,68)] #PB+REG (2dim = 53%)
-# pb <- na.omit(object = pb) # To have no obs. with NAs!
-# summary(pb)
-# 
-# 
-# #MCA
-# acm <- FactoMineR::MCA(X = pb, ncp = 5,graph = FALSE)
-# acm$eig
-# plot(acm, label = "var")
-# plot(acm, choix = "var")
-```
 
   
 ##### - Correlation among variables
@@ -464,12 +438,12 @@ As the first axis (PC) of our PCA satisfactorily synthesizes a large amount (`r 
 To investigate potential correlations and colinearity among our variables, we will start by computing a **correlation matrix** of the data. As most of our factors are either ordered factors (i.e. ordinal variables) or binary factors (i.e. boolean), we can use them in a correlation matrix. To do that however, computations will be based on *Spearman*'s rank correlation coefficient.  
 To avoid giving too much weight to our own tarping experiments (those performed in Chalon s/ Saone with the French national railway company), we removed them from the data to compute correlations: their influence will be accounted for in further analyses by the use of **mixed-effect models**.
 
-```{r redges corrplot, fig.align='center', fig.cap="**Figure 2.** Correlation matrix displaying *Spearman*'s $\\rho$ for the numeric variables and ordered factors of the *tarping efficiency* dataset. Only significant correlations are displayed (with $\\alpha$ = 0.05)", warning=FALSE}
-rm(res.pca, res.imput, xxx, ttt, nb)
+```{r redges corrplot, fig.align='center', fig.cap="**Figure 8.** Correlation matrix displaying *Spearman*'s $\\rho$ for the numeric variables and ordered factors of the *regrowth at the edges of the tarped area* dataset. Only significant correlations are displayed (with $\\alpha$ = 0.05)", warning=FALSE}
+rm(res.pca, xxx, ttt)
 
 # To convert all ordered factors into numeric variables usable in a correlation matrix:
 redges %>% dplyr::filter(!manager_id == 1) %>% # We remove our own experiments as they share many features that will strongly influence correlations (it should not be a problem for modelling as we will use mixed-effect models).
-  dplyr::select(-manager_id, -xp_id, -goals) %>%
+  dplyr::select(-manager_id, -xp_id) %>%
   dplyr::mutate_if(.predicate = is.factor, .funs = as.numfactor) -> num.redges # as.numfactor() is my own custom function (see '01_data_cleaning.R').
 
 
