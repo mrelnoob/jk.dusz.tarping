@@ -47,7 +47,8 @@ if(getRversion() >= "2.15.1")  utils::globalVariables(c(
 #' * "efficiency" will produce the dataset for the 3 efficiency evaluation variables (namely \emph{
 #' eff_eradication}, \emph{eff_expansion} and \emph{eff_vigour});
 #' * "edges" will produce the dataset having for response variable the tarping operations that observed
-#' regrowth at the edge of the tarped area;
+#' regrowth at the edge of the tarped area (at the end of the operation or during the latest visit to the
+#' site);
 #' * "overlaps" produce the dataset having for response variable the tarping operations that observed
 #' regrowth at strip overlaps;
 #' * "tarpedarea" will produce the dataset having for response variable the tarping operations that observed
@@ -101,7 +102,7 @@ model_datasets <- function(response.var = c("efficiency", "edges", "overlaps",
   ### For the "latest_reg_edges" model
   if (response.var == "edges") {
     qqq <- dplyr::mutate(.data = qqq, lreg_edges =
-                      ifelse(grepl("*edges*", latest_regrowth), 1, 0)) %>%
+                      ifelse(c(grepl("*edges*", latest_regrowth) | grepl("*edges*", untarped_regrowth)), 1, 0)) %>%
       dplyr::mutate(.data = qqq, reg_elsewhere =
                       ifelse(reg_staples == 1 | reg_stripoverlaps == 1 | reg_obstacles == 1 |
                                reg_holes == 1 | reg_plantations == 1 | reg_pierced == 1, yes = 1, no = 0)) %>%
@@ -130,7 +131,8 @@ model_datasets <- function(response.var = c("efficiency", "edges", "overlaps",
       "geomem", "geotex",
       "season", "uprootexcav",
       "stand_surface", "age", "fully_tarped", "distance","tarping_duration",
-      "stripsoverlap_ok", "strips_overlap", "strips_fixation", "staples_distance", "fabric_fixation", "tarpfix_multimethod", "tarpfix_pierced", "sedicover_height", "plantation",
+      "stripsoverlap_ok", "strips_overlap", "strips_fixation", "staples_distance", "fabric_fixation",
+      "tarpfix_multimethod", "tarpfix_pierced", "sedicover_height", "plantation",
       "reg_elsewhere")]
   }
 

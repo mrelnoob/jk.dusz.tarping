@@ -378,8 +378,7 @@ The table below presents the *out-of-bag (OOB) imputation error* estimates for e
 ```{r redges import & imput, include=FALSE}
 redges <- jk.dusz.tarping::model_datasets(response.var = "edges")
 
-redges %>% dplyr::select(-liner_geomem, -agri_geomem,-woven_geotex, -mulching_geotex, -pla_geotex, -other_unknown, -grammage, -age, -thickness, -pierced_tarpinstall, -add_control_type) %>%
-  dplyr::filter(eff_redgesication != "NA") %>%
+redges %>% dplyr::filter(eff_redgesication != "NA") %>%
   dplyr::filter(tarping_duration >= 2) %>%
   dplyr::filter(xp_id != "54") -> redges # Operation n°54 was destroyed because of vandalism.
 

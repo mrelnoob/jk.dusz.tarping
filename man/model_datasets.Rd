@@ -15,7 +15,8 @@ efficiency", "edges", "overlaps", "tarpedarea", or "fixation"):
 \item "efficiency" will produce the dataset for the 3 efficiency evaluation variables (namely \emph{
 eff_eradication}, \emph{eff_expansion} and \emph{eff_vigour});
 \item "edges" will produce the dataset having for response variable the tarping operations that observed
-regrowth at the edge of the tarped area;
+regrowth at the edge of the tarped area (at the end of the operation or during the latest visit to the
+site);
 \item "overlaps" produce the dataset having for response variable the tarping operations that observed
 regrowth at strip overlaps;
 \item "tarpedarea" will produce the dataset having for response variable the tarping operations that observed
