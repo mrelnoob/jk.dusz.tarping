@@ -5,12 +5,12 @@
 \title{Datasets for Models Building}
 \usage{
 model_datasets(
-  response.var = c("efficiency", "edges", "overlaps", "tarpedarea", "fixation")
+  response.var = c("efficiency", "edges", "overlaps", "tarpedarea")
 )
 }
 \arguments{
 \item{response.var}{A character string specifying which modelling dataset should be produced (either:
-efficiency", "edges", "overlaps", "tarpedarea", or "fixation"):
+efficiency", "edges", "overlaps", or "tarpedarea"):
 \itemize{
 \item "efficiency" will produce the dataset for the 3 efficiency evaluation variables (namely \emph{
 eff_eradication}, \emph{eff_expansion} and \emph{eff_vigour});
@@ -20,9 +20,7 @@ site);
 \item "overlaps" produce the dataset having for response variable the tarping operations that observed
 regrowth at strip overlaps;
 \item "tarpedarea" will produce the dataset having for response variable the tarping operations that observed
-regrowth at somewhere on the area covered by the fabric;
-\item "fixation" will produce the dataset having for response variable the tarping operations that reported
-fixation problems during the operation.
+regrowth at somewhere on the area covered by the fabric.
 }}
 }
 \value{
@@ -30,10 +28,10 @@ A tibble.
 }
 \description{
 The \code{model_datasets} function creates the respective reduced datasets that should be used
-to model each response variables. For instance, if \code{response.var = "fixation"}, the function will
-produce a dataset containing \emph{pb_fixation} as the \strong{response} variable and a subset of
+to model each response variables. For instance, if \code{response.var = "overlaps"}, the function will
+produce a dataset containing \emph{reg_stripoverlaps} as the \strong{response} variable and a subset of
 variables to be used as \strong{predictors/explanatory variables} (removing all the variables that
-should not be used to model \emph{pb_fixation}'s variations).
+should not be used to model \emph{reg_stripoverlaps}'s variations).
 }
 \examples{
 \dontrun{
