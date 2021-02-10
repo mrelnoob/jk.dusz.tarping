@@ -847,7 +847,7 @@ readr::write_csv(x = rtarped, file = here::here("mydata", "rtarped.csv"), append
 
 ## Next steps for preparation
 
-2) Write other preparation chapters! Terminate excel_model and send it...
-3) Set drake?
+2) Write other preparation chapters! Terminate excel_model and send it to the others...
+3) MEANWHILE: set drake + co-plots ???
 3) Transformations and standardization (for scaling, especially important when I use interactions terms; cf. "standardization" post on CV in my MacBook favorites)
 
