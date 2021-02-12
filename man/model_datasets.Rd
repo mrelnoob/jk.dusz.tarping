@@ -29,9 +29,9 @@ A tibble.
 \description{
 The \code{model_datasets} function creates the respective reduced datasets that should be used
 to model each response variables. For instance, if \code{response.var = "overlaps"}, the function will
-produce a dataset containing \emph{reg_stripoverlaps} as the \strong{response} variable and a subset of
+produce a dataset containing \emph{reg_stripsoverlap} as the \strong{response} variable and a subset of
 variables to be used as \strong{predictors/explanatory variables} (removing all the variables that
-should not be used to model \emph{reg_stripoverlaps}'s variations).
+should not be used to model \emph{reg_stripsoverlap}'s variations).
 }
 \examples{
 \dontrun{

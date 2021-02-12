@@ -845,11 +845,11 @@ readr::write_csv(x = rtarped, file = here::here("mydata", "rtarped.csv"), append
 
 ******
 
-### - For the response variables indicating knotweed regrowths at fabric strip overlaps (i.e. *reg_stripoverlaps*)
+### - For the response variables indicating knotweed regrowths at fabric strip overlaps (i.e. *reg_stripsoverlap*)
 \
-The first thing to do here is to prepare the sub-dataset that will be used to model the responses of the *reg_stripoverlaps* variable. To do so, the following steps have been performed:
+The first thing to do here is to prepare the sub-dataset that will be used to model the responses of the *reg_stripsoverlap* variable. To do so, the following steps have been performed:
 
-* We selected the subset of predictors and covariates that will be used to model *reg_stripoverlaps*;
+* We selected the subset of predictors and covariates that will be used to model *reg_stripsoverlap*;
 * Finally, we imputed missing values using **Random Forest** and the `missForest` package (Stekhoven & Buehlmann, 2012). 
 
 The table below presents the *out-of-bag (OOB) imputation error* estimates for each variables (computed as Mean Squared Error (MSE) for numeric variables, and Proportion of Falsely Classified (PFC) for categorical variables), compared to the number of imputed values (i.e. number of NAs per variable): OOB values around 1 or > 1 indicate that imputations are not reliable. Accordingly, we will keep an eye on the observations that have unreliable imputations if they become **influential observations** in subsequent models (in which case, we will drop them)! For the meaning of the variables, please refer to the attached **documentation**.
@@ -1088,6 +1088,6 @@ readr::write_csv(x = roverlaps, file = here::here("mydata", "roverlaps.csv"), ap
 ## Next steps for preparation
 
 2) Write other preparation chapters! Terminate excel_model and send it to the others...
-3) MEANWHILE: set drake + co-plots ???
+3) MEANWHILE: set drake + co-plots + ask questions SO/CV !!!
 3) Transformations and standardization (for scaling, especially important when I use interactions terms; cf. "standardization" post on CV in my MacBook favorites)
 

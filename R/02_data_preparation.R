@@ -18,7 +18,7 @@ if(getRversion() >= "2.15.1")  utils::globalVariables(c(
   "strips_fixation", "staples_distance", "fabric_fixation", "tarpfix_multimethod", "sedicover_height",
   "trench", "trench_depth", "pierced_tarpinstall", "plantation", "repairs", "add_control",
   "add_control_type", "degradation", "pb_fixation", "pb_durability", "pb_trampiercing", "pb_vandalism",
-  "regrowth_during", "reg_staples", "reg_stripoverlaps", "reg_obstacles", "reg_holes", "reg_plantations",
+  "regrowth_during", "reg_staples", "reg_stripsoverlap", "reg_obstacles", "reg_holes", "reg_plantations",
   "reg_pierced", "reg_edges", "reg_nearby", "untarped_regrowth", "tarping_abandoned", "tarping_completed",
   "tarping_ongoing", "tarping_duration", "latest_condition", "latest_regrowth", "latest_months",
   "eff_expansion", "eff_dispersal", "eff_vigour", "eff_eradication"))
@@ -39,9 +39,9 @@ if(getRversion() >= "2.15.1")  utils::globalVariables(c(
 #'
 #' @description The `model_datasets` function creates the respective reduced datasets that should be used
 #' to model each response variables. For instance, if `response.var = "overlaps"`, the function will
-#' produce a dataset containing \emph{reg_stripoverlaps} as the \strong{response} variable and a subset of
+#' produce a dataset containing \emph{reg_stripsoverlap} as the \strong{response} variable and a subset of
 #' variables to be used as \strong{predictors/explanatory variables} (removing all the variables that
-#' should not be used to model \emph{reg_stripoverlaps}'s variations).
+#' should not be used to model \emph{reg_stripsoverlap}'s variations).
 #' @param response.var A character string specifying which modelling dataset should be produced (either:
 #' efficiency", "edges", "overlaps", or "tarpedarea"):
 #' * "efficiency" will produce the dataset for the 3 efficiency evaluation variables (namely \emph{
@@ -102,7 +102,7 @@ model_datasets <- function(response.var = c("efficiency", "edges", "overlaps",
     qqq <- dplyr::mutate(.data = qqq, lreg_edges =
                       ifelse(c(grepl("*edges*", latest_regrowth) | grepl("*edges*", untarped_regrowth)), 1, 0)) %>%
       dplyr::mutate(.data = qqq, reg_elsewhere =
-                      ifelse(reg_staples == 1 | reg_stripoverlaps == 1 | reg_obstacles == 1 |
+                      ifelse(reg_staples == 1 | reg_stripsoverlap == 1 | reg_obstacles == 1 |
                                reg_holes == 1 | reg_plantations == 1 | reg_pierced == 1, yes = 1, no = 0)) %>%
       dplyr::filter(fully_tarped == 1) # Only for fully tarped operations!
 
@@ -121,17 +121,24 @@ model_datasets <- function(response.var = c("efficiency", "edges", "overlaps",
   if (response.var == "overlaps") {
     qqq <- dplyr::mutate(.data = qqq, reg_elsewhere =
                            ifelse(reg_staples == 1 | reg_edges == 1 | reg_obstacles == 1 |
-                                    reg_holes == 1 | reg_plantations == 1 | reg_pierced == 1, yes = 1, no = 0))
+                                    reg_holes == 1 | reg_plantations == 1 | reg_pierced == 1, yes = 1, no = 0)) %>%
+      dplyr::mutate(stripfix_pierced =
+                      ifelse(c(grepl("*staples*", strips_fixation) | grepl("*stakes*", strips_fixation)), 1, 0)) %>%
+      dplyr::mutate(stripfix_taped =
+                      ifelse(c(strips_fixation == "tape_and_heavyobj" | strips_fixation == "double_tape" |
+                                 strips_fixation == "tape" | strips_fixation == "tape_and_staples"), 1, 0)) %>%
+      dplyr::filter(multi_strips == 1) %>%
+      dplyr::mutate_if(is_binary, factor)
 
-    tapioca <- qqq[,c("manager_id", "xp_id", "latitude", "longitude", "elevation", "reg_stripoverlaps",
-      "freq_monitoring", "slope", "difficulty_access","shade", "forest", "ruggedness", "granulometry",
-      "obstacles", "flood",
+    tapioca <- qqq[,c("manager_id", "xp_id", "reg_stripsoverlap",
+      "latitude", "longitude", "elevation", "slope", "flood", "difficulty_access","shade", "forest", "ruggedness",
+      "granulometry", "obstacles", "stand_surface",
       "geomem", "geotex",
-      "season", "uprootexcav",
-      "stand_surface", "age", "fully_tarped", "distance","tarping_duration",
-      "stripsoverlap_ok", "strips_overlap", "strips_fixation", "staples_distance", "fabric_fixation",
-      "tarpfix_multimethod", "tarpfix_pierced", "sedicover_height", "plantation",
-      "reg_elsewhere")]
+      "maxveg", "uprootexcav", "levelling", "fully_tarped", "distance",
+      "strips_overlap", "tarpfix_multimethod", "tarpfix_pierced", "stripfix_pierced", "stripfix_taped",
+      "sedicover_height", "trench_depth", "plantation",
+      "repairs", "add_control", "freq_monitoring", "pb_fixation", "pb_durability",
+      "reg_elsewhere", "tarping_duration")]
   }
 
   ### For the "tarpedarea" model

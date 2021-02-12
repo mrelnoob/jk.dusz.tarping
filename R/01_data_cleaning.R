@@ -109,17 +109,20 @@ clean_my_data <- function(){
   raw_data <- jk.dusz.tarping::import_raw_data()
   # Transform character variables into factors, ordinal variables into ordered factors, and boolean/binary
   # variables into factors (+ creation of new variables):
+  raw_data$plantation[raw_data$plantation == 1] <- 0
+  raw_data$plantation[raw_data$plantation == 2] <- 1
+
   raw_data %>%
     dplyr::mutate(manager_id = factor(x = manager_id),
                   planned_duration = factor(x = planned_duration, ordered = TRUE),
-                  age = factor(x = age, ordered = TRUE),
-                  plantation = factor(x = plantation, ordered = TRUE)) %>%
+                  age = factor(x = age, ordered = TRUE)) %>%
     dplyr::mutate(geomem = ifelse(grepl("geomem$", fabric_type) | grepl("tarp$", fabric_type) |
                                     grepl("mixed", fabric_type) | grepl("unknown", fabric_type), 1, 0)) %>%
     dplyr::mutate(geotex = ifelse(grepl("geotex$", fabric_type) | grepl("mixed", fabric_type), 1, 0)) %>%
     dplyr::mutate(tarpfix_pierced = ifelse(c(grepl("*staples*", fabric_fixation) | fabric_fixation == "wired_stakes") &
                                              fabric_fixation != "staples_and_taped_patches", 1, 0)) %>%
     dplyr::mutate(stripsoverlap_ok = ifelse(multi_strips == 0 | strips_overlap > 42.5, 1, 0)) %>%
+    dplyr::rename(reg_stripsoverlap = reg_stripoverlaps) %>%
     dplyr::mutate_if(is.character, factor) %>%
     dplyr::mutate_if(is_binary, factor) -> cleaned_data
 
