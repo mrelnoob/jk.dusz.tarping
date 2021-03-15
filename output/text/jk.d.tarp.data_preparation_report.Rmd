@@ -35,7 +35,7 @@ zzz_mydata_cleaned <- jk.dusz.tarping::clean_my_data()
 \
 In order to build valid and meaningful models to explain or predict the success/failure of tarping operations for the control of Japanese knotweed *s.l.*, we need first to learn more about our data. Therefore, we thoroughly examined our variables (e.g. outliers, distribution, interactions, colinearity, variance homogeneity, observation independence) mostly following the protocol presented by Zuur *et al.* (2010) for each of our **5 response variables**: *eff_eradication*, *efficiency*, *lreg_edges*, *lreg_tarpedarea*, *reg_overlaps*.
 
-As our global dataset contains many variables (*p* = 85), it would be interesting to reduce their number in order to spare time for further exploration and analyses. As such, the first steps of our data exploration for each response variable will aim at reducing the dimensionality of the data. First, we will try and see if the *environmental variables* can be coerced into a synthetic variable (e.g. through a PCA). Then, we will investigate correlations among variables as well as potential colinearity. This should have the twofold advantage of improving our understanding of the data and enabling us to remove colinear and too strongly correlated variables. Finally, we will carry on data exploration in various ways in order to detect outliers, identify distributions, heteroscedasticity, univariate and multivariate relationships...
+As our global dataset contains many variables (*p* = 85), it would be interesting to reduce their number in order to spare time for further exploration and analyses. As such, the first steps of our data exploration for each response variable will aim at reducing the dimensionality of the data. First, we will try and see if the *environmental* and *follow-up* variables can be coerced into synthetic variables (e.g. through a PCA). Then, we will investigate correlations among variables as well as broad multicolinearity issues. This should have the twofold advantage of improving our understanding of the data and enabling us to remove multicolinear variables. Finally, we will carry on data exploration in various ways in order to detect outliers, identify distributions, heteroscedasticity, some univariate and multivariate relationships...
 \
 \
 
@@ -48,7 +48,7 @@ The first thing to do here is to prepare the sub-dataset that will be used to mo
 * We deleted operations that got prematurely interrupted (e.g. because of vandalism) since there failure results from external causes.
 * Finally, we imputed missing values using **Random Forest** and the `missForest` package (Stekhoven & Buehlmann, 2012). 
 
-The table below presents the *out-of-bag (OOB) imputation error* estimates for each variables (computed as Mean Squared Error (MSE) for numeric variables, and Proportion of Falsely Classified (PFC) for categorical variables), compared to the number of imputed values (i.e. number of NAs per variable): OOB values around 1 or > 1 indicate that imputations are not reliable. Accordingly, we will keep an eye on the observations that have unreliable imputations if they become **influential observations** in subsequent models (in which case, we will drop them)! For the meaning of the variables, please refer to the attached **documentation**.
+The table below presents the *out-of-bag (OOB) imputation error* estimates for each type of variables (computed as the Normalized Root Mean Squared Error (NRMSE) for the numeric variables, and Proportion of Falsely Classified entries (PFC) for the categorical variables). OOB values near 1 indicate that imputations are not reliable, while values close to 0 indicate very low imputation error. For the meaning of the variables, please refer to the attached **documentation**.
 
 ```{r erad import & imput, include=FALSE}
 erad <- jk.dusz.tarping::model_datasets(response.var = "efficiency")
@@ -61,18 +61,18 @@ erad %>% dplyr::select(-liner_geomem, -agri_geomem,-woven_geotex, -mulching_geot
 ### Imputation of missing values using `missForest` (we could also have worked with `MICE`):
 erad %>% dplyr::select(-manager_id, -xp_id) %>% as.data.frame() -> erad_mis # missForest only accepts data.frames or matrices (not tibbles). Variables must also be numeric or factors only (no character, date, difftime... classes)!
 
-imput <- missForest::missForest(xmis = erad_mis, verbose = TRUE, variablewise = TRUE)
+imput <- missForest::missForest(xmis = erad_mis, verbose = TRUE)
 
-# To create a small summary table for the OOB errors:
-imput_error <- data.frame(cbind(
-  sapply(erad_mis, function(y) sum(length(which(is.na(y))))), # Number of imputed values (NAs)
-  imput$OOBerror), # Out-of-bag error (OOB) for each variable
-  row.names = colnames(erad_mis)) # To get the name of the variables
-dplyr::rename(imput_error, nb_imputed_values = 'X1', oob_error = 'X2') -> imput_error
+# To create a small summary table for the OOB errors (for each variable, with the argument `variablewise = TRUE` in missForest):
+# imput_error <- data.frame(cbind(
+#   sapply(erad_mis, function(y) sum(length(which(is.na(y))))), # Number of imputed values (NAs)
+#   imput$OOBerror), # Out-of-bag error (OOB) for each variable
+#   row.names = colnames(erad_mis)) # To get the name of the variables
+# dplyr::rename(imput_error, nb_imputed_values = 'X1', oob_error = 'X2') -> imput_error
 ```
 
 ```{r erad imput error table, include=TRUE, message=FALSE, comment=NA}
-knitr::kable(imput_error)
+knitr::kable(imput$OOBerror)
 ```
 
 Now, let's take a quick look at our dataset.
@@ -81,7 +81,7 @@ Now, let's take a quick look at our dataset.
 erad[,3:ncol(erad)] <- imput$ximp # Replacing th original dataset with the imputed one!
 summary(erad)
 
-rm(erad_mis, imput, imput_error)
+rm(erad_mis, imput)
 ```
 \
 \
@@ -120,19 +120,25 @@ erad$coarse_env <- ttt # And I use this occasion to reduce the dataset and repla
 As the first axis (PC) of our PCA satisfactorily synthesizes a large amount (`r round(res.pca$eig[1,2],1)`%) of the variance of the 5 environmental variables, we will use operations' coordinates on this axis to build a synthetic variable to summarize their environment. This new variable will be named **coarse_env** and will thus replace the other 5 variables in the dataset. Operations with *positive values* for this variable are located in sites that tend to be forested (and thus shaded), difficult to access, with uneven ground and a coarse soil texture (and vice-versa).
 
 
-```{r, eval=FALSE, include=FALSE}
-# PEUT ETRE INTERESSANT POUR D'AUTRES MODELES???????? mouais...
-# pb <- zzz_mydata_cleaned[, c(59,60,64,66,68)] #PB+REG (2dim = 53%)
-# pb <- na.omit(object = pb) # To have no obs. with NAs!
-# summary(pb)
-# 
-# 
-# #MCA
-# acm <- FactoMineR::MCA(X = pb, ncp = 5,graph = FALSE)
-# acm$eig
-# plot(acm, label = "var")
-# plot(acm, choix = "var")
+```{r erad followups, warning=FALSE, fig.align='center', fig.cap="**Figure 1 bis.** Correlation plot of the normed-PCA on follow-up variables for the *tarping efficiency* dataset"}
+erad %>% dplyr::select(freq_monitoring, repairs, add_control) %>%
+  dplyr::mutate(repairs = as.numfactor(x = repairs),
+                add_control = as.numfactor(x = add_control))-> xxx
+
+# Normed-PCA:
+res.pca <- FactoMineR::PCA(X = xxx, scale.unit = TRUE, graph = FALSE)
+# To get the correlation circle for this PCA, with a variable coloration according to their contribution to the first 2 principal components:
+factoextra::fviz_pca_var(res.pca, col.var = "contrib",
+             gradient.cols = c("#00AFBB", "#E7B800", "#FC4E07"), repel = TRUE)
+
+# As the first axis (PC) of my PCA satisfactorily synthesizes a fairly large amount of the variance of my 5 variables, I will use the coordinates of the tarping operations on this axis as a synthetic variable:
+ttt <- res.pca$ind$coord[,1] 
+erad %>% dplyr::select(-freq_monitoring, -repairs) %>%
+  dplyr::rename(followups = "add_control") -> erad
+erad$followups <- ttt # And I use this occasion to reduce the dataset and replace one variable with my new synthetic variable.
 ```
+
+As the first axis (PC) of our PCA satisfactorily synthesizes a large amount (`r round(res.pca$eig[1,2],1)`%) of the variance of the 3 follow-up variables, we will use operations' coordinates on this axis to build a synthetic variable to summarize their follow-up. This new variable will be named **followups** and will thus replace the other 3 variables in the dataset. High *positive values* for this variable represent operations that were frequently monitored and where additional control and repairs were performed (and vice-versa).
 \
 \
 
@@ -166,12 +172,12 @@ rm(num.erad, res.cor.erad, res.pcor.erad)
 
 Many interesting patterns can be observed in this correlation matrix. Among them, we can see that:
 
-* One or several of the *efficiency* variables seem to be mildly positively correlated with *distance*, and *fully_tarped* and negatively with *obstacles*, *add_control*, and *pb_durability*. 
+* One or several of the *efficiency* variables seem to be mildly positively correlated with *distance*, and *fully_tarped* and negatively with *obstacles*, *followups*, and *pb_durability*. 
 * *geomem* is extremely negatively correlated with *geotex*, which is logical as one is the opposite of the other. 
 * *trench_depth* seems to be strongly positively correlated with *tarpfix_multimethod*, which is logical as trenches are strong fixation method. 
-* *pb_fixation* seems to be strongly positively correlated with *stand_surface* and, to a lesser extent, with *tarpfix_pierced* and *repairs*.
+* *pb_fixation* seems to be strongly positively correlated with *stand_surface* and, to a lesser extent, with *tarpfix_pierced*.
 * *obstacles* is positively correlated with *slope* and *coarse_env* (which are also positively correlated), as well as with *pb_durability*, and negatively with *distance*: all these correlations seem quite straightforward. 
-* Interestingly, *flood* is positively correlated with *geotex*, *tarpfix_pierced*, *add_control* and *pb_fixation*.
+* Interestingly, *flood* is positively correlated with *geotex*, *tarpfix_pierced*, and *pb_fixation*.
 
 It is worth reminding that accounting for multivariate relationships, interactions and the effect of our tarping operations (dropped for the current correlation matrix) will certainly give very different patterns.
 \
@@ -182,7 +188,7 @@ It is worth reminding that accounting for multivariate relationships, interactio
 As multicollinearity is one of the biggest issues for inference modelling, we need to assess which explanatory variables and covariates are collinear and will possibly become problematic for modelling. To do so, our intention was to compute *Variance Inflation Factors* (VIF) for each variable. However, as several variables are categorical and as we will not be working with models fitted with ordinary least squares, we will rather use *Generalized VIF* (Fox & Monette, 1992).
 
 ```{r erad init GVIF}
-modvif <- stats::glm((efficiency/10)~latitude+longitude+elevation+freq_monitoring+slope+coarse_env+obstacles+flood+geomem+geotex+weedsp_geotex+maxveg+uprootexcav+stand_surface+fully_tarped+distance+tarping_duration+stripsoverlap_ok+tarpfix_multimethod+tarpfix_pierced+sedicover_height+trench_depth+plantation+repairs+add_control+degradation+pb_fixation+pb_durability, data = erad, family = quasibinomial)
+modvif <- stats::glm((efficiency/10)~latitude+longitude+elevation+slope+coarse_env+obstacles+flood+geomem+geotex+weedsp_geotex+maxveg+uprootexcav+stand_surface+fully_tarped+distance+tarping_duration+stripsoverlap_ok+tarpfix_multimethod+tarpfix_pierced+sedicover_height+trench_depth+plantation+followups+degradation+pb_fixation+pb_durability, data = erad, family = quasibinomial)
 #summary(modvif)
 
 knitr::kable(car::vif(modvif))
@@ -195,10 +201,10 @@ As one could expect, there is evidence for **multicollinearity** among our 26 po
 * Since our dataset contains sites on both sides of the Atlantic and since we do not have strong hypotheses regarding the effects of *longitude* (because our sites are located well within the longitudinal range of knotweeds), we decide to drop it.
 * Since *degradation* contains most of the information contained in *pb_fixation* and *pb_durability*, we decide to drop it to reduce the number of variables. 
 
-After iteratively dropping these collinear variables and re-assessing GVIF values, we obtain a subset of potential explanatory variables with GVIF values globally < 3 and GVIF values will likely be even lower in later stages as models will not include so many variables at the same time. Naturally, we will also bear in mind the potential effects of the dropped variables in the discussion.
+After iteratively dropping these collinear variables and re-assessing GVIF values, we obtain a subset of potential explanatory variables with GVIF values globally < 2.5 and GVIF values will likely be even lower in later stages as models will not include so many variables at the same time. Naturally, we will also bear in mind the potential effects of the dropped variables in the discussion.
 
 ```{r erad final GVIF}
-modvif <- stats::glm((efficiency/10)~latitude+elevation+freq_monitoring+slope+coarse_env+obstacles+flood+geomem+maxveg+uprootexcav+stand_surface+fully_tarped+distance+tarping_duration+stripsoverlap_ok+tarpfix_multimethod+tarpfix_pierced+sedicover_height+trench_depth+repairs+add_control+pb_fixation+pb_durability, data = erad, family = quasibinomial)
+modvif <- stats::glm((efficiency/10)~latitude+elevation+slope+coarse_env+obstacles+flood+geomem+maxveg+uprootexcav+stand_surface+fully_tarped+distance+tarping_duration+stripsoverlap_ok+tarpfix_multimethod+tarpfix_pierced+sedicover_height+trench_depth+followups+pb_fixation+pb_durability, data = erad, family = quasibinomial)
 #summary(modvif)
 
 knitr::kable(car::vif(modvif))
@@ -240,8 +246,8 @@ jk.dusz.tarping::uni.dotplots(dataset = erad)
 By the look of these graphs, it is clear that we have many *extreme values* (possible outliers). Yet, extreme values are not necessarily **true outliers**:
 
 * The *latitude*, *slope* and *coarse_env* variables look fine.
-* The *efficiency*, *obstacles*, *flood*, *distance*, *tarping_duration*, and *trench_depth* variables may require mild transformations to be normalized but do not seem to contain too extreme values.
-* The *elevation*, *freq_monitoring*, and *sedicover_height* variables may require important transformations to be normalized. It would be interesting to see if their extreme values are too far from what could be expected from a Normal or a Poisson distribution (see below).
+* The *efficiency*, *obstacles*, *flood*, *distance*, *tarping_duration*, *trench_depth*, and *followups* variables may require mild transformations to be normalized but do not seem to contain too extreme values.
+* The *elevation* and *sedicover_height* variables may require important transformations to be normalized. It would be interesting to see if their extreme values are too far from what could be expected from a Normal or a Poisson distribution (see below).
 * The *stand_surface* variable contains a problematic patterns/outliers.
 
 
@@ -318,7 +324,7 @@ Various interesting observations can be made from these scatterplots:
 
 * First, heteroscedasticity will perhaps not be surprising in our models as the variances of many variables do not seem to be homogeneous. On the other hand, we do not see clear multivariate outliers.
 * Second, the *efficiency* score seems to increase with increasing *distance*. This may be evidence in support to one of our working hypotheses stating that successful tarping operations cover areas well beyond the visible limits of knotweed stands. Conversely, the *efficiency* score seems to decrease with increasing presence of *obstacles* and with *pb_durability*.
-* Third, surprisingly, the *efficiency* score also seems to increase with increasing *elevation*. If this is not due to measurement error, then it could be a sign of stronger abiotic constraints on knotweeds. *Additional control* similarly seems to improve *efficiency*.
+* Third, surprisingly, the *efficiency* score also seems to increase with increasing *elevation*. If this is not due to measurement error, then it could be a sign of stronger abiotic constraints on knotweeds. *Follow-ups* similarly seems to improve *efficiency*.
 * Fourth, there may be signs of interesting interactions between the *fully tarped* variable and *coarse_env*, *pb_durability*, *slope*, *stand_surface*, *tarpfix_pierced*, *tarping_duration*, *trench_depth* and *uprootexcav*, although caution is required as variances are quite high. Furthermore, if interactions with *stand_surface* or *pb_durability* are relatively straightforward, the other ones are trickier do grasp and could simply be spurious.
 
 To further investigate multivariate relationship, we will create another set of scatterplots (but we do not intend on investigating all possible combinations between variables).
@@ -335,7 +341,7 @@ erad %>% dplyr::select(-manager_id, -xp_id, -goals, -eff_eradication, -high_eff)
   ggplot2::scale_y_continuous(limits=c(0,10.5)) +
   ggplot2::geom_smooth(method = "lm", na.rm = TRUE, size = 1, 
                        ggplot2::aes(col = as.factor(plantation))) + 
-  ggplot2::scale_colour_manual(values = c("goldenrod3", "coral", "darkred")) +
+  ggplot2::scale_colour_manual(values = c("coral", "darkred")) +
   ggplot2::labs(x = "Predictor value", y = "Efficiency score", col = "Plantation") +
   ggthemes::theme_hc(style = "darkunica") +
   ggplot2::theme(panel.border = ggplot2::element_blank(),
@@ -371,7 +377,7 @@ The first thing to do here is to prepare the sub-dataset that will be used to mo
 * We left out the observations for which we could not obtain information on regrowths (i.e. NA);
 * Finally, we imputed missing values using **Random Forest** and the `missForest` package (Stekhoven & Buehlmann, 2012). 
 
-The table below presents the *out-of-bag (OOB) imputation error* estimates for each variables (computed as Mean Squared Error (MSE) for numeric variables, and Proportion of Falsely Classified (PFC) for categorical variables), compared to the number of imputed values (i.e. number of NAs per variable): OOB values around 1 or > 1 indicate that imputations are not reliable. Accordingly, we will keep an eye on the observations that have unreliable imputations if they become **influential observations** in subsequent models (in which case, we will drop them)! For the meaning of the variables, please refer to the attached **documentation**.
+The table below presents the *out-of-bag (OOB) imputation error* estimates for each type of variables (computed as the Normalized Root Mean Squared Error (NRMSE) for the numeric variables, and Proportion of Falsely Classified entries (PFC) for the categorical variables). OOB values near 1 indicate that imputations are not reliable, while values close to 0 indicate very low imputation error. For the meaning of the variables, please refer to the attached **documentation**.
 
 ```{r redges import & imput, include=FALSE}
 redges <- jk.dusz.tarping::model_datasets(response.var = "edges")
@@ -383,18 +389,11 @@ redges <- dplyr::mutate(.data = redges,
 ### Imputation of missing values using `missForest` (we could also have worked with `MICE`):
 redges %>% dplyr::select(-manager_id, -xp_id) %>% as.data.frame() -> redges_mis # missForest only accepts data.frames or matrices (not tibbles). Variables must also be numeric or factors only (no character, date, difftime... classes)!
 
-imput <- missForest::missForest(xmis = redges_mis, verbose = TRUE, variablewise = TRUE)
-
-# To create a small summary table for the OOB errors:
-imput_error <- data.frame(cbind(
-  sapply(redges_mis, function(y) sum(length(which(is.na(y))))), # Number of imputed values (NAs)
-  imput$OOBerror), # Out-of-bag error (OOB) for each variable
-  row.names = colnames(redges_mis)) # To get the name of the variables
-dplyr::rename(imput_error, nb_imputed_values = 'X1', oob_error = 'X2') -> imput_error
+imput <- missForest::missForest(xmis = redges_mis, verbose = TRUE)
 ```
 
 ```{r redges imput error table, include=TRUE, message=FALSE, comment=NA}
-knitr::kable(imput_error)
+knitr::kable(imput$OOBerror)
 ```
 
 Now, let's take a quick look at our dataset.
@@ -403,7 +402,7 @@ Now, let's take a quick look at our dataset.
 redges[,3:ncol(redges)] <- imput$ximp # Replacing the original dataset with the imputed one!
 summary(redges)
 
-rm(redges_mis, imput, imput_error)
+rm(redges_mis, imput)
 ```
 \
 \
@@ -430,6 +429,26 @@ redges$coarse_env <- ttt # And I use this occasion to reduce the dataset and rep
 ```
 
 As the first axis (PC) of our PCA satisfactorily synthesizes a large amount (`r round(res.pca$eig[1,2],1)`%) of the variance of the 5 environmental variables, we will use operations' coordinates on this axis to build a synthetic variable to summarize their environment. This new variable will be named **coarse_env** and will thus replace the other 5 variables in the dataset. Operations with *positive values* for this variable are located in sites that tend to be forested (and thus shaded), difficult to access, with uneven ground and a coarse soil texture (and vice-versa).
+
+```{r redges followups, warning=FALSE, fig.align='center', fig.cap="**Figure 1 bis.** Correlation plot of the normed-PCA on follow-up variables for the *tarping efficiency* dataset"}
+redges %>% dplyr::select(freq_monitoring, repairs, add_control) %>%
+  dplyr::mutate(repairs = as.numfactor(x = repairs),
+                add_control = as.numfactor(x = add_control))-> xxx
+
+# Normed-PCA:
+res.pca <- FactoMineR::PCA(X = xxx, scale.unit = TRUE, graph = FALSE)
+# To get the correlation circle for this PCA, with a variable coloration according to their contribution to the first 2 principal components:
+factoextra::fviz_pca_var(res.pca, col.var = "contrib",
+             gradient.cols = c("#00AFBB", "#E7B800", "#FC4E07"), repel = TRUE)
+
+# As the first axis (PC) of my PCA satisfactorily synthesizes a fairly large amount of the variance of my 5 variables, I will use the coordinates of the tarping operations on this axis as a synthetic variable:
+ttt <- res.pca$ind$coord[,1] 
+redges %>% dplyr::select(-freq_monitoring, -repairs) %>%
+  dplyr::rename(followups = "add_control") -> redges
+redges$followups <- ttt # And I use this occasion to reduce the dataset and replace one variable with my new synthetic variable.
+```
+
+As the first axis (PC) of our PCA satisfactorily synthesizes a large amount (`r round(res.pca$eig[1,2],1)`%) of the variance of the 3 follow-up variables, we will use operations' coordinates on this axis to build a synthetic variable to summarize their follow-up. This new variable will be named **followups** and will thus replace the other 3 variables in the dataset. High *positive values* for this variable represent operations that were frequently monitored and where additional control and repairs were performed (and vice-versa).
 \
 \
   
@@ -464,12 +483,12 @@ rm(num.redges, res.cor.redges, res.pcor.redges)
 Many interesting patterns can be observed in this correlation matrix. Among them, we can see that:
 
 * The *lreg_edges* variable seems to be negatively correlated with *distance*, as we hypothesized. 
-* Interestingly, *reg_elsewhere* seems positively correlated with *obstacles*, *repairs* and *add_control*, and negatively with *trench_depth*.
 * *geomem* is extremely negatively correlated with *geotex*, which is logical as one is the opposite of the other. 
 * *tarpfix_multimethod* seems to be strongly positively correlated with *trench_depth*, *tarpfix_pierced* and *plantation*, which is logical as trenches, staples and plantations are considered strong fabric fixation methods. 
 * Without surprise, *degradation* seems to be strongly positively correlated with *pb_fixation* and *pb_durability*.
-* *stand_surface* seems positively correlated with *flood*, *geotex*,*distance*, *repairs* and *pb_fixation*.
+* *stand_surface* seems positively correlated with *flood*, *geotex*,*distance*, and *pb_fixation*.
 * *obstacles* is positively correlated with *slope* and *coarse_env* (which are also positively correlated), as well as with *pb_durability* and *reg_elsewhere*.
+* *followups* is positively correlated with *degradation* and *reg_elsewhere*.
 
 It is worth reminding that accounting for multivariate relationships, interactions and the effect of our tarping operations (dropped for the current correlation matrix) will certainly give very different patterns.
 \
@@ -480,7 +499,7 @@ It is worth reminding that accounting for multivariate relationships, interactio
 As multicollinearity is one of the biggest issues for inference modelling, we need to assess which explanatory variables and covariates are collinear and will possibly become problematic for modelling. To do so, our intention was to compute *Variance Inflation Factors* (VIF) for each variable. However, as several variables are categorical and as we will not be working with models fitted with ordinary least squares, we will rather use *Generalized VIF* (Fox & Monette, 1992).
 
 ```{r redges init GVIF}
-modvif <- stats::glm(lreg_edges~latitude+longitude+elevation+slope+flood+coarse_env+obstacles+stand_surface+geomem+geotex+maxveg+uprootexcav+distance+stripsoverlap_ok+tarpfix_multimethod+tarpfix_pierced+sedicover_height+trench_depth+plantation+repairs+add_control+freq_monitoring+degradation+pb_fixation+pb_durability+tarping_duration+reg_elsewhere, data = redges, family = binomial)
+modvif <- stats::glm(lreg_edges~latitude+longitude+elevation+slope+flood+coarse_env+obstacles+stand_surface+geomem+geotex+maxveg+uprootexcav+distance+stripsoverlap_ok+tarpfix_multimethod+tarpfix_pierced+sedicover_height+trench_depth+plantation+followups+degradation+pb_fixation+pb_durability+tarping_duration+reg_elsewhere, data = redges, family = binomial)
 #summary(modvif)
 
 knitr::kable(car::vif(modvif))
@@ -497,7 +516,7 @@ As one could expect, there is evidence for **multicollinearity** among our 27 po
 After iteratively dropping these collinear variables and re-assessing GVIF values, we obtain a subset of potential explanatory variables with GVIF values globally < 2.5 and GVIF values will likely be even lower in later stages as models will not include so many variables at the same time. Naturally, we will also bear in mind the potential effects of the dropped variables in the discussion.
 
 ```{r redges final GVIF}
-modvif <- stats::glm(lreg_edges~latitude+elevation+slope+flood+obstacles+stand_surface+geomem+maxveg+uprootexcav+distance+stripsoverlap_ok+tarpfix_multimethod+tarpfix_pierced+sedicover_height+trench_depth+repairs+add_control+freq_monitoring+pb_fixation+pb_durability+tarping_duration+reg_elsewhere, data = redges, family = binomial)
+modvif <- stats::glm(lreg_edges~latitude+elevation+slope+flood+obstacles+stand_surface+geomem+maxveg+uprootexcav+distance+stripsoverlap_ok+tarpfix_multimethod+tarpfix_pierced+sedicover_height+trench_depth+followups+pb_fixation+pb_durability+tarping_duration+reg_elsewhere, data = redges, family = binomial)
 #summary(modvif)
 
 knitr::kable(car::vif(modvif))
@@ -525,8 +544,8 @@ jk.dusz.tarping::uni.dotplots(dataset = redges)
 By the look of these graphs, it is clear that we have many *extreme values* (possible outliers). Yet, extreme values are not necessarily **true outliers**:
 
 * The *slope* variable looks fine.
-* The *elevation*, *flood*, *obstacles*, *tarping_duration* variables may require mild transformations to be normalized but do not seem to contain too extreme values.
-* The *distance*, *sedicover_height*, *trench_depth*, and *freq_monitoring* variables may require important transformations to be normalized. It would be interesting to see if their extreme values are too far from what could be expected from a Normal or a Poisson distribution (see below).
+* The *elevation*, *flood*, *obstacles*, *tarping_duration*, and *followups* variables may require mild transformations to be normalized but do not seem to contain too extreme values.
+* The *distance*, *sedicover_height*, and *trench_depth* variables may require important transformations to be normalized. It would be interesting to see if their extreme values are too far from what could be expected from a Normal or a Poisson distribution (see below).
 * The *latitude* and *stand_surface* variables contain problematic patterns/outliers.
 
 
@@ -594,7 +613,7 @@ redges %>% dplyr::select(-manager_id, -xp_id) %>%
 Various interesting observations can be made from these scatterplots:
 
 * First, heteroscedasticity will perhaps not be surprising in our models as the variances of many variables do not seem to be homogeneous. On the other hand, we do not see clear multivariate outliers.
-* Second, *lreg_edges* seems to increase with increasing *add control*, *freq_monitoring*, *geomem*, *obstacles* and *stripsoverlap_ok*. If the relationship with *obstacles* seems quite straightforward (and was one of our hypotheses), the other relationships are more surprising.
+* Second, *lreg_edges* seems to increase with increasing *followups*, *freq_monitoring*, *geomem*, *obstacles* and *stripsoverlap_ok*. If the relationship with *obstacles* seems quite straightforward (and was one of our hypotheses), the other relationships are more surprising.
 * Third, conversely and as hypothesized, *lreg_edges* seems to decrease with increasing *distance*, *sedicover_height*, *trench depth*, *tarping_duration* and, more surprisingly, with *stand surface*.
 
 ```{r redges export, include=FALSE}
@@ -613,7 +632,7 @@ The first thing to do here is to prepare the sub-dataset that will be used to mo
 * We selected the subset of predictors and covariates that will be used to model *lreg_tarpedarea*;
 * Finally, we imputed missing values using **Random Forest** and the `missForest` package (Stekhoven & Buehlmann, 2012). 
 
-The table below presents the *out-of-bag (OOB) imputation error* estimates for each variables (computed as Mean Squared Error (MSE) for numeric variables, and Proportion of Falsely Classified (PFC) for categorical variables), compared to the number of imputed values (i.e. number of NAs per variable): OOB values around 1 or > 1 indicate that imputations are not reliable. Accordingly, we will keep an eye on the observations that have unreliable imputations if they become **influential observations** in subsequent models (in which case, we will drop them)! For the meaning of the variables, please refer to the attached **documentation**.
+The table below presents the *out-of-bag (OOB) imputation error* estimates for each type of variables (computed as the Normalized Root Mean Squared Error (NRMSE) for the numeric variables, and Proportion of Falsely Classified entries (PFC) for the categorical variables). OOB values near 1 indicate that imputations are not reliable, while values close to 0 indicate very low imputation error. For the meaning of the variables, please refer to the attached **documentation**.
 
 ```{r rtarped import & imput, include=FALSE}
 rtarped <- jk.dusz.tarping::model_datasets(response.var = "tarpedarea")
@@ -624,18 +643,11 @@ rtarped <- dplyr::mutate(.data = rtarped,
 ### Imputation of missing values using `missForest` (we could also have worked with `MICE`):
 rtarped %>% dplyr::select(-manager_id, -xp_id) %>% as.data.frame() -> rtarped_mis # missForest only accepts data.frames or matrices (not tibbles). Variables must also be numeric or factors only (no character, date, difftime... classes)!
 
-imput <- missForest::missForest(xmis = rtarped_mis, verbose = TRUE, variablewise = TRUE)
-
-# To create a small summary table for the OOB errors:
-imput_error <- data.frame(cbind(
-  sapply(rtarped_mis, function(y) sum(length(which(is.na(y))))), # Number of imputed values (NAs)
-  imput$OOBerror), # Out-of-bag error (OOB) for each variable
-  row.names = colnames(rtarped_mis)) # To get the name of the variables
-dplyr::rename(imput_error, nb_imputed_values = 'X1', oob_error = 'X2') -> imput_error
+imput <- missForest::missForest(xmis = rtarped_mis, verbose = TRUE)
 ```
 
 ```{r rtarped imput error table, include=TRUE, message=FALSE, comment=NA}
-knitr::kable(imput_error)
+knitr::kable(imput$OOBerror)
 ```
 
 Now, let's take a quick look at our dataset.
@@ -644,7 +656,7 @@ Now, let's take a quick look at our dataset.
 rtarped[,3:ncol(rtarped)] <- imput$ximp # Replacing the original dataset with the imputed one!
 summary(rtarped)
 
-rm(rtarped_mis, imput, imput_error)
+rm(rtarped_mis, imput)
 ```
 \
 \
@@ -671,6 +683,26 @@ rtarped$coarse_env <- ttt # And I use this occasion to reduce the dataset and re
 ```
 
 As the first axis (PC) of our PCA satisfactorily synthesizes a large amount (`r round(res.pca$eig[1,2],1)`%) of the variance of the 5 environmental variables, we will use operations' coordinates on this axis to build a synthetic variable to summarize their environment. This new variable will be named **coarse_env** and will thus replace the other 5 variables in the dataset. Operations with *positive values* for this variable are located in sites that tend to be forested (and thus shaded), difficult to access, with uneven ground and a coarse soil texture (and vice-versa).
+
+```{r rtarped followups, warning=FALSE, fig.align='center', fig.cap="**Figure 1 bis.** Correlation plot of the normed-PCA on follow-up variables for the *tarping efficiency* dataset"}
+rtarped %>% dplyr::select(freq_monitoring, repairs, add_control) %>%
+  dplyr::mutate(repairs = as.numfactor(x = repairs),
+                add_control = as.numfactor(x = add_control))-> xxx
+
+# Normed-PCA:
+res.pca <- FactoMineR::PCA(X = xxx, scale.unit = TRUE, graph = FALSE)
+# To get the correlation circle for this PCA, with a variable coloration according to their contribution to the first 2 principal components:
+factoextra::fviz_pca_var(res.pca, col.var = "contrib",
+             gradient.cols = c("#00AFBB", "#E7B800", "#FC4E07"), repel = TRUE)
+
+# As the first axis (PC) of my PCA satisfactorily synthesizes a fairly large amount of the variance of my 5 variables, I will use the coordinates of the tarping operations on this axis as a synthetic variable:
+ttt <- res.pca$ind$coord[,1] 
+rtarped %>% dplyr::select(-freq_monitoring, -repairs) %>%
+  dplyr::rename(followups = "add_control") -> rtarped
+rtarped$followups <- ttt # And I use this occasion to reduce the dataset and replace one variable with my new synthetic variable.
+```
+
+As the first axis (PC) of our PCA satisfactorily synthesizes a large amount (`r round(res.pca$eig[1,2],1)`%) of the variance of the 3 follow-up variables, we will use operations' coordinates on this axis to build a synthetic variable to summarize their follow-up. This new variable will be named **followups** and will thus replace the other 3 variables in the dataset. High *positive values* for this variable represent operations that were frequently monitored and where additional control and repairs were performed (and vice-versa).
 \
 \
   
@@ -704,12 +736,11 @@ rm(num.rtarped, res.cor.rtarped, res.pcor.rtarped)
 
 Many interesting patterns can be observed in this correlation matrix. Among them, we can see that:
 
-* The *lreg_tarpedarea* variable seems to be positively correlated with *stripsoverlap_ok*, *add_control*, and all the *problem* variables which makes quite sense, except for the former.
+* The *lreg_tarpedarea* variable seems to be positively correlated with *stripsoverlap_ok*, and all the *problem* variables which makes quite sense, except for the former.
 * *geomem* is extremely negatively correlated with *geotex* and *woven_geotex*, which is logical since the use of geomembranes usually precludes the use of geotextiles (except in mixed settings).
 * *tarpfix_multimethod* seems to be strongly positively correlated with *trench_depth*, *tarpfix_pierced*, *sedicover_height* and *plantation*, which is logical as trenches, staples, sediment covers and plantations are considered strong fabric fixation methods. 
 * *levelling* is also correlated with *uprootexcav*, here again quite logically as the ground is often levelled after knotweed excavation. 
-* Without surprise, *pierced_tarpinstall* seems to be strongly positively correlated with *obstacles*, *repairs* and *pb_durability*.
-* Quite logically, *freq_monitoring* is positively correlated with *add_control*. 
+* Without surprise, *pierced_tarpinstall* seems to be strongly positively correlated with *obstacles* and *pb_durability*.
 * *stand_surface* seems positively correlated with *flood*, *geotex*, *woven_geotex*, *distance* and *pb_fixation*.
 
 It is worth reminding that accounting for multivariate relationships, interactions and the effect of our tarping operations (dropped for the current correlation matrix) will certainly give very different patterns.
@@ -721,7 +752,7 @@ It is worth reminding that accounting for multivariate relationships, interactio
 As multicollinearity is one of the biggest issues for inference modelling, we need to assess which explanatory variables and covariates are collinear and will possibly become problematic for modelling. To do so, our intention was to compute *Variance Inflation Factors* (VIF) for each variable. However, as several variables are categorical and as we will not be working with models fitted with ordinary least squares, we will rather use *Generalized VIF* (Fox & Monette, 1992).
 
 ```{r rtarped init GVIF}
-modvif <- stats::glm(lreg_tarpedarea~latitude+longitude+elevation+slope+flood+coarse_env+obstacles+stand_surface+geomem+geotex+woven_geotex+maxveg+uprootexcav+levelling+fully_tarped+distance+stripsoverlap_ok+tarpfix_multimethod+tarpfix_pierced+pierced_tarpinstall+sedicover_height+trench_depth+plantation+repairs+add_control+freq_monitoring+pb_fixation+pb_durability+pb_trampiercing+reg_edges+tarping_duration, data = rtarped, family = binomial)
+modvif <- stats::glm(lreg_tarpedarea~latitude+longitude+elevation+slope+flood+coarse_env+obstacles+stand_surface+geomem+geotex+woven_geotex+maxveg+uprootexcav+levelling+fully_tarped+distance+stripsoverlap_ok+tarpfix_multimethod+tarpfix_pierced+pierced_tarpinstall+sedicover_height+trench_depth+plantation+followups+pb_fixation+pb_durability+pb_trampiercing+reg_edges+tarping_duration, data = rtarped, family = binomial)
 #summary(modvif)
 
 knitr::kable(car::vif(modvif))
@@ -734,10 +765,10 @@ As one could expect, there is evidence for **multicollinearity** among our 31 po
 * Since our dataset contains sites on both sides of the Atlantic and since we do not have strong hypotheses regarding the effects of *longitude* (because our sites are located well within the longitudinal range of knotweeds), we decide to drop it.
 * As much of the information contained in *obstacles* is shared with *pierced_tarpinstall* and *coarse_env*, we decide to drop it in order to reduce multicollinearity as well as the number of variables. 
 
-After iteratively dropping these collinear variables and re-assessing GVIF values, we obtain a subset of potential explanatory variables with GVIF values globally < 3 and GVIF values will likely be even lower in later stages as models will not include so many variables at the same time. Naturally, we will also bear in mind the potential effects of the dropped variables in the discussion.
+After iteratively dropping these collinear variables and re-assessing GVIF values, we obtain a subset of potential explanatory variables with GVIF values globally < 2.5 and GVIF values will likely be even lower in later stages as models will not include so many variables at the same time. Naturally, we will also bear in mind the potential effects of the dropped variables in the discussion.
 
 ```{r rtarped final GVIF}
-modvif <- stats::glm(lreg_tarpedarea~latitude+elevation+slope+flood+coarse_env+stand_surface+geomem+woven_geotex+maxveg+uprootexcav+levelling+fully_tarped+distance+stripsoverlap_ok+tarpfix_multimethod+tarpfix_pierced+pierced_tarpinstall+sedicover_height+trench_depth+repairs+add_control+freq_monitoring+pb_fixation+pb_durability+pb_trampiercing+reg_edges+tarping_duration, data = rtarped, family = binomial)
+modvif <- stats::glm(lreg_tarpedarea~latitude+elevation+slope+flood+coarse_env+stand_surface+geomem+woven_geotex+maxveg+uprootexcav+levelling+fully_tarped+distance+stripsoverlap_ok+tarpfix_multimethod+tarpfix_pierced+pierced_tarpinstall+sedicover_height+trench_depth+followups+pb_fixation+pb_durability+pb_trampiercing+reg_edges+tarping_duration, data = rtarped, family = binomial)
 #summary(modvif)
 
 knitr::kable(car::vif(modvif))
@@ -766,7 +797,7 @@ By the look of these graphs, it is clear that we have many *extreme values* (pos
 
 * The *slope* and *coarse_env* variables look fine.
 * The *elevation*, *flood*, and *tarping_duration* variables may require mild transformations to be normalized but do not seem to contain too extreme values.
-* The *distance*, *pierced_tarpinstall*, *sedicover_height*, *trench_depth*, and *freq_monitoring* variables may require important transformations to be normalized. It would be interesting to see if their extreme values are too far from what could be expected from a Normal or a Poisson distribution (see below).
+* The *distance*, *pierced_tarpinstall*, *sedicover_height*, *trench_depth*, and *followups* variables may require important transformations to be normalized. It would be interesting to see if their extreme values are too far from what could be expected from a Normal or a Poisson distribution (see below).
 * The *latitude* and *stand_surface* variables contain problematic patterns/outliers.
 
 
@@ -833,7 +864,7 @@ rtarped %>% dplyr::select(-manager_id, -xp_id) %>%
 Various interesting observations can be made from these scatterplots:
 
 * First, heteroscedasticity will perhaps not be surprising in our models as the variances of many variables do not seem to be homogeneous. On the other hand, we do not see clear multivariate outliers.
-* Second, *lreg_tarpedarea* seems to increase with increasing *add_control*, *flood*, *freq_monitoring*, *maxveg*, all *problem variables*, *stand-surface*, *stripsoverlap_ok* and *woven_geotextile*. If some relationships seem quite straightforward (and are in accordance with our hypotheses), others are more surprising and may just be noise. 
+* Second, *lreg_tarpedarea* seems to increase with increasing *followups*, *flood*, *maxveg*, all *problem variables*, *stand-surface*, *stripsoverlap_ok* and *woven_geotextile*. If some relationships seem quite straightforward (and are in accordance with our hypotheses), others are more surprising and may just be noise. 
 * Third, *lreg_tarpedarea* seems to decrease with increasing *elevation*, *geomem*,and *pierced_tarpinstall*. If the first two relationships seem quite straightforward (and are in accordance with our hypotheses), the third one is more surprising!
 
 ```{r rtarped export, include=FALSE}
@@ -853,7 +884,7 @@ The first thing to do here is to prepare the sub-dataset that will be used to mo
 * We selected observations that had no missing values for *reg_stripsoverlap* and for *strips_overlap* as the first variable is our response value and the second is central for our hypotheses;
 * Finally, we imputed missing values using **Random Forest** and the `missForest` package (Stekhoven & Buehlmann, 2012). 
 
-The table below presents the *out-of-bag (OOB) imputation error* estimates for each variables (computed as Mean Squared Error (MSE) for numeric variables, and Proportion of Falsely Classified (PFC) for categorical variables), compared to the number of imputed values (i.e. number of NAs per variable): OOB values around 1 or > 1 indicate that imputations are not reliable. Accordingly, we will keep an eye on the observations that have unreliable imputations if they become **influential observations** in subsequent models (in which case, we will drop them)! For the meaning of the variables, please refer to the attached **documentation**.
+The table below presents the *out-of-bag (OOB) imputation error* estimates for each type of variables (computed as the Normalized Root Mean Squared Error (NRMSE) for the numeric variables, and Proportion of Falsely Classified entries (PFC) for the categorical variables). OOB values near 1 indicate that imputations are not reliable, while values close to 0 indicate very low imputation error. For the meaning of the variables, please refer to the attached **documentation**.
 
 ```{r roverlaps import & imput, include=FALSE}
 roverlaps <- jk.dusz.tarping::model_datasets(response.var = "overlaps")
@@ -863,18 +894,11 @@ roverlaps <- dplyr::filter(.data = roverlaps, reg_stripsoverlap != "NA") %>%
 ### Imputation of missing values using `missForest` (we could also have worked with `MICE`):
 roverlaps %>% dplyr::select(-manager_id, -xp_id) %>% as.data.frame() -> roverlaps_mis # missForest only accepts data.frames or matrices (not tibbles). Variables must also be numeric or factors only (no character, date, difftime... classes)!
 
-imput <- missForest::missForest(xmis = roverlaps_mis, verbose = TRUE, variablewise = TRUE)
-
-# To create a small summary table for the OOB errors:
-imput_error <- data.frame(cbind(
-  sapply(roverlaps_mis, function(y) sum(length(which(is.na(y))))), # Number of imputed values (NAs)
-  imput$OOBerror), # Out-of-bag error (OOB) for each variable
-  row.names = colnames(roverlaps_mis)) # To get the name of the variables
-dplyr::rename(imput_error, nb_imputed_values = 'X1', oob_error = 'X2') -> imput_error
+imput <- missForest::missForest(xmis = roverlaps_mis, verbose = TRUE)
 ```
 
 ```{r roverlaps imput error table, include=TRUE, message=FALSE, comment=NA}
-knitr::kable(imput_error)
+knitr::kable(imput$OOBerror)
 ```
 
 Now, let's take a quick look at our dataset.
@@ -883,7 +907,7 @@ Now, let's take a quick look at our dataset.
 roverlaps[,3:ncol(roverlaps)] <- imput$ximp # Replacing the original dataset with the imputed one!
 summary(roverlaps)
 
-rm(roverlaps_mis, imput, imput_error)
+rm(roverlaps_mis, imput)
 ```
 \
 \
@@ -910,6 +934,26 @@ roverlaps$coarse_env <- ttt # And I use this occasion to reduce the dataset and 
 ```
 
 As the first axis (PC) of our PCA satisfactorily synthesizes a large amount (`r round(res.pca$eig[1,2],1)`%) of the variance of the 5 environmental variables, we will use operations' coordinates on this axis to build a synthetic variable to summarize their environment. This new variable will be named **coarse_env** and will thus replace the other 5 variables in the dataset. Operations with *positive values* for this variable are located in sites that tend to be forested (and thus shaded), difficult to access, with uneven ground and a coarse soil texture (and vice-versa).
+
+```{r roverlaps followups, warning=FALSE, fig.align='center', fig.cap="**Figure 1 bis.** Correlation plot of the normed-PCA on follow-up variables for the *tarping efficiency* dataset"}
+roverlaps %>% dplyr::select(freq_monitoring, repairs, add_control) %>%
+  dplyr::mutate(repairs = as.numfactor(x = repairs),
+                add_control = as.numfactor(x = add_control))-> xxx
+
+# Normed-PCA:
+res.pca <- FactoMineR::PCA(X = xxx, scale.unit = TRUE, graph = FALSE)
+# To get the correlation circle for this PCA, with a variable coloration according to their contribution to the first 2 principal components:
+factoextra::fviz_pca_var(res.pca, col.var = "contrib",
+             gradient.cols = c("#00AFBB", "#E7B800", "#FC4E07"), repel = TRUE)
+
+# As the first axis (PC) of my PCA satisfactorily synthesizes a fairly large amount of the variance of my 5 variables, I will use the coordinates of the tarping operations on this axis as a synthetic variable:
+ttt <- res.pca$ind$coord[,1] 
+roverlaps %>% dplyr::select(-freq_monitoring, -repairs) %>%
+  dplyr::rename(followups = "add_control") -> roverlaps
+roverlaps$followups <- ttt # And I use this occasion to reduce the dataset and replace one variable with my new synthetic variable.
+```
+
+As the first axis (PC) of our PCA satisfactorily synthesizes a large amount (`r round(res.pca$eig[1,2],1)`%) of the variance of the 3 follow-up variables, we will use operations' coordinates on this axis to build a synthetic variable to summarize their follow-up. This new variable will be named **followups** and will thus replace the other 3 variables in the dataset. High *positive values* for this variable represent operations that were frequently monitored and where additional control and repairs were performed (and vice-versa).
 \
 \
   
@@ -945,14 +989,13 @@ Many interesting patterns can be observed in this correlation matrix. Among them
 
 * The *reg_stripsoverlap* variable seems to be mildly positively correlated with *obstacles*.
 * As usual, *geomem* is extremely negatively correlated with *geotex*, which is logical since the use of geomembranes usually precludes the use of geotextiles (except in mixed settings).
-* *stripfix_pierced* is strongly positively correlated with *tarpfix_pierced*, but also with *fully_tarped*,  and negatively with *repairs*.
+* *stripfix_pierced* is strongly positively correlated with *tarpfix_pierced*, but also with *fully_tarped*.
 * *stripfix_taped* is mildly positively correlated with *maxveg*, and negatively with *add_control*, and *reg_elsewhere*. 
-* Conversely, *strips_overlap* is mildly negatively correlated with *repairs* and *pb_durability*. 
+* Conversely, *strips_overlap* is mildly negatively correlated with *pb_durability*. 
 * *tarpfix_multimethod* seems to be positively correlated with *trench_depth* and *plantation*, which is logical.
 * *levelling* is also correlated with *uprootexcav* and *trench_depth*, here again quite logically as the ground is often levelled after knotweed excavation or trench digging. 
-* Quite logically, *freq_monitoring* is positively correlated with *add_control*. 
 * *obstacles* is, among other things, correlated with *coarse_env*, *distance*, *pb_durability* and *reg_elsewhere*.
-* *reg_elsewhere* is also negatively correlated with *maxveg* and *trench_depth*, and positively with *add_control*, all these correlations seeming quite logical. 
+* *reg_elsewhere* is also negatively correlated with *maxveg* and *trench_depth*, all these correlations seeming quite logical. 
 * Finally, *stand_surface* seems positively correlated with *flood*, *geotex*, *plantation*, *tarpfix_pierced* and *pb_fixation*.
 
 It is worth reminding that accounting for multivariate relationships, interactions and the effect of our tarping operations (dropped for the current correlation matrix) will certainly give very different patterns.
@@ -965,7 +1008,7 @@ As multicollinearity is one of the biggest issues for inference modelling, we ne
 Because of convergence problems, we had to remove some variables before computing GVIF values. So here is the list of the dropped variables: *longitude*, *geotex* and *tarpfix_pierced* (because it was redundant with *stripfix_pierced*).
 
 ```{r roverlaps init GVIF}
-modvif <- stats::glm(reg_stripsoverlap~latitude+elevation+slope+flood+coarse_env+obstacles+stand_surface+geomem+maxveg+uprootexcav+levelling+fully_tarped+distance+strips_overlap+tarpfix_multimethod+stripfix_pierced+stripfix_taped+sedicover_height+trench_depth+plantation+repairs+add_control+freq_monitoring+pb_fixation+pb_durability+reg_elsewhere+tarping_duration, data = roverlaps, family = binomial)
+modvif <- stats::glm(reg_stripsoverlap~latitude+elevation+slope+flood+coarse_env+obstacles+stand_surface+geomem+maxveg+uprootexcav+levelling+fully_tarped+distance+strips_overlap+tarpfix_multimethod+stripfix_pierced+stripfix_taped+sedicover_height+trench_depth+plantation+followups+pb_fixation+pb_durability+reg_elsewhere+tarping_duration, data = roverlaps, family = binomial)
 #summary(modvif)
 
 knitr::kable(car::vif(modvif))
@@ -980,7 +1023,7 @@ As one could expect, there is evidence for **multicollinearity** among our 27 po
 After iteratively dropping these collinear variables and re-assessing GVIF values, we obtain a subset of potential explanatory variables with GVIF values globally < 2.6 and GVIF values will likely be even lower in later stages as models will not include so many variables at the same time. Naturally, we will also bear in mind the potential effects of the dropped variables in the discussion.
 
 ```{r roverlaps final GVIF}
-modvif <- stats::glm(reg_stripsoverlap~latitude+elevation+slope+coarse_env+stand_surface+geomem+levelling+fully_tarped+distance+strips_overlap+tarpfix_multimethod+stripfix_pierced+stripfix_taped+sedicover_height+trench_depth+plantation+repairs+add_control+freq_monitoring+pb_fixation+pb_durability+reg_elsewhere+tarping_duration, data = roverlaps, family = binomial)
+modvif <- stats::glm(reg_stripsoverlap~latitude+elevation+slope+coarse_env+stand_surface+geomem+levelling+fully_tarped+distance+strips_overlap+tarpfix_multimethod+stripfix_pierced+stripfix_taped+sedicover_height+trench_depth+plantation+followups+pb_fixation+pb_durability+reg_elsewhere+tarping_duration, data = roverlaps, family = binomial)
 #summary(modvif)
 
 knitr::kable(car::vif(modvif))
@@ -1009,7 +1052,7 @@ By the look of these graphs, it is clear that we have many *extreme values* (pos
 
 * The *slope* and *coarse_env* variables look fine.
 * The *latitude*, *elevation*, *strips_overlap* and *tarping_duration* variables may require mild transformations to be normalized but do not seem to contain too extreme values.
-* The *distance*, *sedicover_height*, *trench_depth*, and *freq_monitoring* variables may require important transformations to be normalized. 
+* The *distance*, *sedicover_height*, *trench_depth*, and *followups* variables may require important transformations to be normalized. 
 * The *stand_surface* variable contains a problematic pattern/outlier.
 
 
@@ -1075,7 +1118,7 @@ roverlaps %>% dplyr::select(-manager_id, -xp_id) %>%
 Various interesting observations can be made from these scatterplots:
 
 * First, heteroscedasticity will perhaps not be surprising in some of our models as the variances of several variables do not seem to be homogeneous. On the other hand, we do not see clear multivariate outliers.
-* Second, *reg_stripsoverlap* seems to increase with increasing *add_control*, *coarse_env*, *elevation*, *freq_monitoring*, *geomem*, *reg_elsewhere*, *sedicover_height*, and *slope*. If some relationships seem quite straightforward (and are in accordance with our hypotheses), others are more surprising and may just be noise. 
+* Second, *reg_stripsoverlap* seems to increase with increasing *followups*, *coarse_env*, *elevation*, *freq_monitoring*, *geomem*, *reg_elsewhere*, *sedicover_height*, and *slope*. If some relationships seem quite straightforward (and are in accordance with our hypotheses), others are more surprising and may just be noise. 
 * Third, *reg_stripsoverlap* seems to decrease with increasing *distance*, *latitude*, *levelling*, *plantation*, the *strips* related variables, *tarping duration* and *trench_depth*. 
 
 ```{r roverlaps export, include=FALSE}
@@ -1090,7 +1133,7 @@ readr::write_csv(x = roverlaps, file = here::here("mydata", "roverlaps.csv"), ap
 
 ## Next steps
 
-1) Set drake + co-plots? + ask questions SO/CV !!!
+1) Set drake + co-plots? + ask questions SO/CV !!! + Conditional boxplot (homoschedasticity for the continuous Y)§§§§§§§ 
 2) Transformations and standardization (for scaling, especially important when I use interactions terms)
 3) Write models!
 
