@@ -13,42 +13,46 @@ output:
 knitr::opts_chunk$set(echo = FALSE)
 ```
 
-# - Reproductibility
-## - System information for my session  
+# - Introduction
+## - Regarding reproductibility
+
+In order to facilitate any attempt at reproducing this study, here is a depiction of the system information used to prepare and analyse the data from the survey on tarping operations for the control Japanese knotweed *s.l.* (*Reynoutria spp.*).  
 
 ```{r session information}
 rm(list=ls())
 sessionInfo()
 ```
+
+The data and code used to analyse it can furthermore be found here: https://github.com/mrelnoob/jk.dusz.tarping
 \
 \
 
-******
-
-# - Data visualisation and exploration  
-## - Data exploration following Zuur *et al.* (2010)
+## - What this document is about?  
 
 ```{r data import and summary, include=FALSE}
 library(jk.dusz.tarping)
 zzz_mydata_cleaned <- jk.dusz.tarping::clean_my_data()
 ```
 \
-In order to build valid and meaningful models to explain or predict the success/failure of tarping operations for the control of Japanese knotweed *s.l.*, we need first to learn more about our data. Therefore, we thoroughly examined our variables (e.g. outliers, distribution, interactions, colinearity, variance homogeneity, observation independence) mostly following the protocol presented by Zuur *et al.* (2010) for each of our **5 response variables**: *eff_eradication*, *efficiency*, *lreg_edges*, *lreg_tarpedarea*, *reg_overlaps*.
+In our efforts to build valid and meaningful models to explain or predict the success/failure of tarping operations for the control of Japanese knotweed *s.l.*, we had to learn more about our data. This *data preparation report* presents the results of the **exploratory data analyses** performed on the data we collected for this study.  
+Here, we have explored various aspects of our data (e.g. outliers, variables distribution, multicollinearity among predictors, homogeneity of variances, independence, potential interactions, etc.) mostly following the protocol presented by Zuur *et al.* (2010). As we used slightly different datasets to model each of our **5 response variables** (i.e. *eff_eradication*, *efficiency*, *lreg_edges*, *lreg_tarpedarea*, *reg_overlaps*), we ran five separated exploratory analyses.
 
-As our global dataset contains many variables (*p* = 85), it would be interesting to reduce their number in order to spare time for further exploration and analyses. As such, the first steps of our data exploration for each response variable will aim at reducing the dimensionality of the data. First, we will try and see if the *environmental* and *follow-up* variables can be coerced into synthetic variables (e.g. through a PCA). Then, we will investigate correlations among variables as well as broad multicolinearity issues. This should have the twofold advantage of improving our understanding of the data and enabling us to remove multicolinear variables. Finally, we will carry on data exploration in various ways in order to detect outliers, identify distributions, heteroscedasticity, some univariate and multivariate relationships...
+As our global dataset contains many potential predictors (*p* = 85), much effort was directed toward reducing their number and keeping only the most reliable and important variables relative to our hypotheses. In other words, we tried to reduce the dimensionality of the data. 
 \
 \
 
-### - For the response variables related to tarping *efficiency*
-\
-The first thing to do here is to prepare the sub-dataset that will be used to model the responses of the *efficiency variables* (i.e. **efficiency**, **eff_eradication** and **high_eff**). To do so, the following steps have been performed:
+******
 
-* We selected the subset of predictors and covariates that will be used to model tarping efficiency;
-* We left out the observations that were too recent (installed less than 2 growing seasons ago) and those for which we could not obtain an *efficiency score* (i.e. NA);
+# - Exploration of the sub-dataset related to tarping *efficiency*
+\
+The first thing to do here was to prepare the sub-dataset that will be used to model the responses of the *efficiency variables* (i.e. **efficiency**, **eff_eradication** and **high_eff**). To do so, the following steps have been performed:
+
+* We imported the subset of predictors and covariates that we wanted to use to model tarping efficiency (based on our knowledge and hypotheses).
+* We left out observations that were too recent (tarping operations installed less than 2 growing seasons ago) and those for which we could not obtain an *efficiency score* (i.e. NA).
 * We deleted operations that got prematurely interrupted (e.g. because of vandalism) since there failure results from external causes.
 * Finally, we imputed missing values using **Random Forest** and the `missForest` package (Stekhoven & Buehlmann, 2012). 
 
-The table below presents the *out-of-bag (OOB) imputation error* estimates for each type of variables (computed as the Normalized Root Mean Squared Error (NRMSE) for the numeric variables, and Proportion of Falsely Classified entries (PFC) for the categorical variables). OOB values near 1 indicate that imputations are not reliable, while values close to 0 indicate very low imputation error. For the meaning of the variables, please refer to the attached **documentation**.
+The table below presents the *out-of-bag (OOB) imputation error* estimates for each type of variable (computed as the Normalized Root Mean Squared Error (NRMSE) for numeric variables, and the Proportion of Falsely Classified entries (PFC) for categorical variables). OOB values near 1 indicate that imputations are not reliable, while values close to 0 indicate very low imputation errors. For the meaning of the variables, please refer to the attached **documentation**.
 
 ```{r erad import & imput, include=FALSE}
 erad <- jk.dusz.tarping::model_datasets(response.var = "efficiency")
@@ -75,7 +79,7 @@ imput <- missForest::missForest(xmis = erad_mis, verbose = TRUE)
 knitr::kable(imput$OOBerror)
 ```
 
-Now, let's take a quick look at our dataset.
+Here are a few descriptive statistics of our sub-dataset.
 
 ```{r erad summary, include=TRUE, message=FALSE, comment=NA}
 erad[,3:ncol(erad)] <- imput$ximp # Replacing th original dataset with the imputed one!
@@ -86,12 +90,12 @@ rm(erad_mis, imput)
 \
 \
 
-#### - Investigation of correlation structures
-##### - Multivariate synthesis of environmental variables
+## - Investigation of correlation structures
+### - Multivariate synthesis of some contextual variables
 \
-We performed a **normed-PCA** on some of our environmental variables for which we do not have strong hypotheses (i.e. *difficulty_access*, *shade*, *forest*, *ruggedness*, *granulometry*) but we kept *slope*, *obstacles*, and *flood* because we suspected they might have a major influence on the success/failure of tarping. 
+We performed a **normed-PCA** on some of our environmental variables for which we did not have strong direct hypotheses (i.e. *difficulty_access*, *shade*, *forest*, *ruggedness*, *granulometry*) but we kept *slope*, *obstacles*, and *flood* because we suspected they might have a major influence on the success/failure of tarping. 
 
-```{r erad env PCAs, warning=FALSE, fig.align='center', fig.cap="**Figure 1.** Correlation plot of the normed-PCA on environmental variables for the *tarping efficiency* dataset"}
+```{r erad env PCAs, warning=FALSE, fig.align='center', fig.cap="**Figure 2.1.** Correlation plot of the normed-PCA on environmental variables for the *tarping efficiency* dataset"}
 xxx <- dplyr::select(.data = erad, c(difficulty_access, shade, forest, ruggedness, granulometry))
 
 # In order to get optimum results, we imputed missing values using the *Regularised Iterative PCA algorithm* (Josse & Husson, 2013) of the `missMDA` package (Josse & Husson, 2016). 
@@ -117,10 +121,12 @@ erad$coarse_env <- ttt # And I use this occasion to reduce the dataset and repla
 #gridExtra::grid.arrange(FIG_1, FIG_2, ncol = 2)
 ```
 
-As the first axis (PC) of our PCA satisfactorily synthesizes a large amount (`r round(res.pca$eig[1,2],1)`%) of the variance of the 5 environmental variables, we will use operations' coordinates on this axis to build a synthetic variable to summarize their environment. This new variable will be named **coarse_env** and will thus replace the other 5 variables in the dataset. Operations with *positive values* for this variable are located in sites that tend to be forested (and thus shaded), difficult to access, with uneven ground and a coarse soil texture (and vice-versa).
+As the first axis (PC) of the PCA satisfactorily synthesized a large amount (`r round(res.pca$eig[1,2],1)`%) of the variance of these 5 environmental variables, we used operations' coordinates on this axis to build a synthetic variable to summarize their environment. This new variable was named **coarse_env** and replaced the other 5 variables in the dataset. Operations with *positive values* for this variable were located in sites that tended to be forested (and thus shaded), difficult to access, with uneven ground and a coarse soil texture (and vice-versa).
+
+We also performed another **normed-PCA** on some of our follow-up variables that we thought could be synthesized (i.e. *add_control*, *repairs*, and *freq_monitoring*).
 
 
-```{r erad followups, warning=FALSE, fig.align='center', fig.cap="**Figure 1 bis.** Correlation plot of the normed-PCA on follow-up variables for the *tarping efficiency* dataset"}
+```{r erad followups, warning=FALSE, fig.align='center', fig.cap="**Figure 2.1 bis.** Correlation plot of the normed-PCA on follow-up variables for the *tarping efficiency* dataset"}
 erad %>% dplyr::select(freq_monitoring, repairs, add_control) %>%
   dplyr::mutate(repairs = as.numfactor(x = repairs),
                 add_control = as.numfactor(x = add_control))-> xxx
@@ -138,16 +144,16 @@ erad %>% dplyr::select(-freq_monitoring, -repairs) %>%
 erad$followups <- ttt # And I use this occasion to reduce the dataset and replace one variable with my new synthetic variable.
 ```
 
-As the first axis (PC) of our PCA satisfactorily synthesizes a large amount (`r round(res.pca$eig[1,2],1)`%) of the variance of the 3 follow-up variables, we will use operations' coordinates on this axis to build a synthetic variable to summarize their follow-up. This new variable will be named **followups** and will thus replace the other 3 variables in the dataset. High *positive values* for this variable represent operations that were frequently monitored and where additional control and repairs were performed (and vice-versa).
+As the first axis (PC) of the PCA satisfactorily synthesized a large amount (`r round(res.pca$eig[1,2],1)`%) of the variance of the 3 follow-up variables, we used operations' coordinates on this axis to build a synthetic variable to summarize their follow-up conditions. This new variable was named **followups** and thus replaced the other 3 variables in the dataset. High *positive values* for this variable represent operations that were frequently monitored and where additional control and repairs were performed (and vice-versa).
 \
 \
 
-##### - Correlation among variables
+### - Correlation among variables
 \
-To investigate potential correlations and colinearity among our variables, we will start by computing a **correlation matrix** of the data. As most of our factors are either ordered factors (i.e. ordinal variables) or binary factors (i.e. boolean), we can use them in a correlation matrix. To do that however, computations will be based on *Spearman*'s rank correlation coefficient.  
-To avoid giving too much weight to our own tarping experiments (those performed in Chalon s/ Saone with the French national railway company), we removed them from the data to compute correlations: their influence will be accounted for in further analyses by the use of **mixed-effect models**.
+To investigate potential correlations and collinearity among our variables, we started by computing a **correlation matrix** of the data. As most of our factors were either ordered factors (i.e. ordinal variables) or binary factors (i.e. boolean), we could use them in a correlation matrix. To do that however, computations were based on *Spearman*'s rank correlation coefficients.  
+To avoid giving too much weight to our own tarping experiments (those performed in Chalon s/ Saone with the French national railway company), we removed them from the data to compute correlations: their influence was accounted for in further analyses by the use of **mixed-effect models**.
 
-```{r erad corrplot, fig.align='center', fig.cap="**Figure 2.** Correlation matrix displaying *Spearman*'s $\\rho$ for the numeric variables and ordered factors of the *tarping efficiency* dataset. Only significant correlations are displayed (with $\\alpha$ = 0.05)", warning=FALSE}
+```{r erad corrplot, fig.align='center', fig.cap="**Figure 2.2.** Correlation matrix displaying *Spearman*'s $\\rho$ for the numeric variables and ordered factors of the *tarping efficiency* dataset. Only significant correlations are displayed (with $\\alpha$ = 0.05)", warning=FALSE}
 rm(res.pca, res.imput, xxx, ttt, nb)
 
 # To convert all ordered factors into numeric variables usable in a correlation matrix:
@@ -179,19 +185,19 @@ Many interesting patterns can be observed in this correlation matrix. Among them
 * *obstacles* is positively correlated with *slope* and *coarse_env* (which are also positively correlated), as well as with *pb_durability*, and negatively with *distance*: all these correlations seem quite straightforward. 
 * Interestingly, *flood* is positively correlated with *geotex*, *tarpfix_pierced*, and *pb_fixation*.
 
-It is worth reminding that accounting for multivariate relationships, interactions and the effect of our tarping operations (dropped for the current correlation matrix) will certainly give very different patterns.
+It is worth reminding that accounting for multivariate relationships, interactions and the effect of our tarping operations (dropped for the current correlation matrix) will certainly affect the observed patterns.
 \
 \
    
-##### - Multicollinearity
+### - Multicollinearity
 \
-As multicollinearity is one of the biggest issues for inference modelling, we need to assess which explanatory variables and covariates are collinear and will possibly become problematic for modelling. To do so, our intention was to compute *Variance Inflation Factors* (VIF) for each variable. However, as several variables are categorical and as we will not be working with models fitted with ordinary least squares, we will rather use *Generalized VIF* (Fox & Monette, 1992).
+As multicollinearity is one of the biggest issues for inference modelling, we wanted to assess which explanatory variables and covariates were collinear and would possibly become problematic during modelling stages. To do so, our intention was to compute *Variance Inflation Factors* (VIF) for each variable. However, as several variables were categorical and as we will not be working with models fitted with ordinary least squares, we computed *Generalized VIF* values instead (Fox & Monette, 1992).
 
 ```{r erad init GVIF}
 modvif <- stats::glm((efficiency/10)~latitude+longitude+elevation+slope+coarse_env+obstacles+flood+geomem+geotex+weedsp_geotex+maxveg+uprootexcav+stand_surface+fully_tarped+distance+tarping_duration+stripsoverlap_ok+tarpfix_multimethod+tarpfix_pierced+sedicover_height+trench_depth+plantation+followups+degradation+pb_fixation+pb_durability, data = erad, family = quasibinomial)
 #summary(modvif)
 
-knitr::kable(car::vif(modvif))
+knitr::kable(car::vif(modvif), digits = 3, col.names = "GVIF", caption = "Table 1. Test")
 ```
 
 As one could expect, there is evidence for **multicollinearity** among our 26 potential explanatory variables. However, strong collinearity among variables is only a problem if these variables are included together in the same model, hence we should reevaluate collinearity more precisely when actual working models will be built. Here, we will simply identify which variables will be generally too problematic across likely models and, possibly, drop them (we will try to lower GVIF values as much as possible, considering that, even GVIF of 2 could still be problematic if ecological signals are weak; cf. Zuur *et al.*, 2010):
@@ -201,13 +207,13 @@ As one could expect, there is evidence for **multicollinearity** among our 26 po
 * Since our dataset contains sites on both sides of the Atlantic and since we do not have strong hypotheses regarding the effects of *longitude* (because our sites are located well within the longitudinal range of knotweeds), we decide to drop it.
 * Since *degradation* contains most of the information contained in *pb_fixation* and *pb_durability*, we decide to drop it to reduce the number of variables. 
 
-After iteratively dropping these collinear variables and re-assessing GVIF values, we obtain a subset of potential explanatory variables with GVIF values globally < 2.5 and GVIF values will likely be even lower in later stages as models will not include so many variables at the same time. Naturally, we will also bear in mind the potential effects of the dropped variables in the discussion.
+After iteratively dropping these collinear variables and re-assessing GVIF values, we obtained a subset of potential explanatory variables with GVIF values globally < 2.5. Naturally, it will be important not to forget about the potential effect of the dropped variables in the discussion of our results.
 
 ```{r erad final GVIF}
 modvif <- stats::glm((efficiency/10)~latitude+elevation+slope+coarse_env+obstacles+flood+geomem+maxveg+uprootexcav+stand_surface+fully_tarped+distance+tarping_duration+stripsoverlap_ok+tarpfix_multimethod+tarpfix_pierced+sedicover_height+trench_depth+followups+pb_fixation+pb_durability, data = erad, family = quasibinomial)
 #summary(modvif)
 
-knitr::kable(car::vif(modvif))
+knitr::kable(car::vif(modvif), digits = 3, col.names = "GVIF")
 
 erad %>% dplyr::select(-geotex, -weedsp_geotex, -longitude, -degradation) -> erad
 
@@ -216,12 +222,12 @@ rm(modvif)
 \
 \
     
-#### - Distributions and dispersion parameters
-##### - Looking for outliers
+## - Distributions and dispersion parameters
+### - Looking for outliers
 \
-We will look for potential outliers in the data using **boxplots** and **Cleveland dotplots** on our quantitative variables. 
+The next step in our data exploration was to look for potential outliers in the data using **boxplots** and **Cleveland dotplots** on our quantitative variables. 
 
-```{r erad boxplot outliers, fig.align='center', fig.cap="**Figure 3.** Boxplots for all quantitative variables of the *eradication efficiency* dataset", warning=FALSE}
+```{r erad boxplot outliers, fig.align='center', fig.cap="**Figure 2.3.** Boxplots for all quantitative variables of the *eradication efficiency* dataset", warning=FALSE}
 ### IMPORTANT NOTE: as ggplot2 requires data in the long format to be able to do multi-panels plots (known as facets), we need to transform our data using the pivot_longer() function of {tidyr}. 
 # To keep only numeric columns: num.erad <- erad[, sapply(erad, is.numeric)]; or we can do:
 
@@ -239,7 +245,7 @@ We will look for potential outliers in the data using **boxplots** and **Clevela
 jk.dusz.tarping::uni.boxplots(dataset = erad)
 ```
 
-```{r erad dotplot, fig.align='center', fig.cap="**Figure 4.** Cleveland dotplots for all quantitative variables of the *eradication efficiency* dataset"}
+```{r erad dotplot, fig.align='center', fig.cap="**Figure 2.4.** Cleveland dotplots for all quantitative variables of the *eradication efficiency* dataset"}
 jk.dusz.tarping::uni.dotplots(dataset = erad)
 ```
 
@@ -248,7 +254,7 @@ By the look of these graphs, it is clear that we have many *extreme values* (pos
 * The *latitude*, *slope* and *coarse_env* variables look fine.
 * The *efficiency*, *obstacles*, *flood*, *distance*, *tarping_duration*, *trench_depth*, and *followups* variables may require mild transformations to be normalized but do not seem to contain too extreme values.
 * The *elevation* and *sedicover_height* variables may require important transformations to be normalized. It would be interesting to see if their extreme values are too far from what could be expected from a Normal or a Poisson distribution (see below).
-* The *stand_surface* variable contains a problematic patterns/outliers.
+* The *stand_surface* variable contains problematic patterns/outliers.
 
 
 ```{r erad simu.distrib, include=FALSE, eval=FALSE}
@@ -261,8 +267,8 @@ rm(simu.var)
 
 ```
 
-After analysing random samples drawn from log-normal distributions (based on the parameters of our potentially problematic variables), we have good reason to believe that only *stand_surface* should be problematic. Consequently, we choose to delete the spotted outlier within *stand_surface* (i.e. the *stand_surface* of ca. 5000 m^2^).    
-The other variables do not have distribution that a transformation could not fix. We will see later on whether we actually need such transformation (e.g log) or not. 
+After analysing random samples drawn from log-normal distributions (based on the parameters of our potentially problematic variables), we have good reason to believe that only *stand_surface* should be problematic. Consequently, we chose to delete the spotted outlier within *stand_surface* (i.e. the *stand_surface* of ca. 5000 m^2^).    
+The other variables do not seem have values that are too extreme to be possibly drawn from Normal, log-Normal or Poisson distributed variables. 
 
 
 ```{r erad update, include=FALSE}
@@ -271,22 +277,34 @@ erad <- erad[-(which.max(erad$stand_surface)),]
 \
 \
    
-##### - Normality
+### - Normality
 \
-We already got a pretty good idea of the distribution of our variables and not all statistical methods involve a Normality assumption (for instance, multiple linear regressions assume that residuals are normally distributed, not the variable themselves). Still, it's interesting and often useful to have a precise view of variables distributions, even for predictors and covariates. 
+Although we already gained pretty good insights into the probability distribution followed by our variables, it is usually interesting and often useful to have a precise view of the variables' distributions.
+Consequently, we described the shapes of the distribution of our quantitative variables using histograms as well as skewness and kurtosis values. Skewness is a measure of the symmetry of a variable's distribution (a perfectly normal distribution has a skewness of 0), while kurtosis gives information on the combined amount of probability contained in the two tails of a distribution (often reported as *excess kurtosis*, that is kurtosis - 3, since a perfectly normally distributed variable has a kurtosis of 3). There is much debate regarding what constitutes "acceptable" values for these statistics or whether this question actually makes any sense at all. Yet, various authors suggest that values of ±2 should not be too problematic for procedures requiring approximately normally distributed variables (Field, 2009; Gravetter & Wallnau, 2014). Nonetheless, many statistical methods do not possess a direct normality assumption (linear regression models, for instance and contrarily to popular beliefs, do not assume the normality of either the response variable nor of any predictor/covariate but do assume that the replicated observations of the response variable for any fixed predictor value should be normally distributed (Montgomery & Peck, 1992); an assumption that is often difficult to verify, hence the usual focus on models residuals).
+For all these reasons, here, we only used these statistics as descriptive tools to foresee potential future complications related to the distribution of our variables, but not as bases for actual decision making. 
 
-```{r erad histo, fig.align='center', fig.cap="**Figure 5.** Histograms for all quantitative variables of the *eradication efficiency* dataset"}
+```{r erad normality, fig.align='center', fig.cap="**Figure 2.5.** Histograms for all quantitative variables of the *eradication efficiency* dataset"}
 uni.histograms(dataset = erad)
+
+num.data <- erad[, sapply(erad, is.numeric)]
+tab <- data.frame(moments::skewness(x = num.data), moments::kurtosis(x = num.data)-3)
+knitr::kable(x = tab, digits = 3, col.names = c("Skewness", "Excess kurtosis"))
+rm(num.data, tab)
 ```
+
+From the above histograms and table, we can see that:
+* Very few of our sampled variables are close to approximate a normal distribution: perhaps *latitude*, *coarse_env*, and *followups*. Surprisingly, *efficiency* possesses "acceptable" skewness and kurtosis values yet is clearly far from a normal variable (left-dissymmetric and bounded), perhaps attesting the limited usefulness of these statistics.
+* Most variables are skewed to the right but in relatively reasonable proportions. 
+* Some variables (*elevation*, *stand_surface*, *distance*, and *sedicover_height*) have skewness and/or kurtosis values possibly high enough to have undue influence on regression coefficients. These variables will perhaps require some transformations.
 \
 \
 
-#### - Bivariate relationships
-##### - Relationships among variables
+## - Bivariate relationships
+### - Relationships among variables
 \
-The next step in our data exploration is to plot the response variables against each predictors and covariates in order to assess the **linearity** and **homoscedasticity** assumptions as well as identify potential **interactions** and **multivariate outliers**. It would be interesting to plot all variables against each other, but we have too many potential predictors and covariates for that.
+The next step in our data exploration was to plot the response variables against each predictors and covariates in order to assess the **linearity** and **homoscedasticity** of these relationships and identify potential **multivariate outliers**. It would have been interesting to plot all variables against each other, but the number of potential predictors and covariates was too high for that.
 
-```{r erad bivariate plot, fig.align='center', fig.cap="**Figure 6.** Multivariate representation of the *efficiency score* against each potential explanatory variable with a focus on whether knotweed stands were fully tarped or not", fig.width=12, fig.height=9, message=FALSE, comment=NA, warning=FALSE}
+```{r erad bivariate plot, fig.align='center', fig.cap="**Figure 2.6.** Multivariate representation of the *efficiency score* against each potential explanatory variable with a focus on whether knotweed stands were fully tarped or not", fig.width=12, fig.height=9, message=FALSE, comment=NA, warning=FALSE}
 ### To plot all variables against each other, we can use pairs() or ggpairs():
 # ggplot2::theme_set(ggplot2::theme_bw())
 # erad %>% dplyr::select(-xp_id, -goals) %>% GGally::ggpairs()
@@ -327,9 +345,9 @@ Various interesting observations can be made from these scatterplots:
 * Third, surprisingly, the *efficiency* score also seems to increase with increasing *elevation*. If this is not due to measurement error, then it could be a sign of stronger abiotic constraints on knotweeds. *Follow-ups* similarly seems to improve *efficiency*.
 * Fourth, there may be signs of interesting interactions between the *fully tarped* variable and *coarse_env*, *pb_durability*, *slope*, *stand_surface*, *tarpfix_pierced*, *tarping_duration*, *trench_depth* and *uprootexcav*, although caution is required as variances are quite high. Furthermore, if interactions with *stand_surface* or *pb_durability* are relatively straightforward, the other ones are trickier do grasp and could simply be spurious.
 
-To further investigate multivariate relationship, we will create another set of scatterplots (but we do not intend on investigating all possible combinations between variables).
+To further investigate multivariate relationship, we created another set of scatterplots (but we did not intend on investigating all possible combinations between variables).
 
-```{r erad bivariate plot2, fig.align='center', fig.cap="**Figure 6bis.** Multivariate representation of the *efficiency score* against each potential explanatory variable with a focus on whether knotweed stands were fully tarped or not", fig.width=12, fig.height=9, message=FALSE, comment=NA, warning=FALSE}
+```{r erad bivariate plot2, fig.align='center', fig.cap="**Figure 2.6bis.** Multivariate representation of the *efficiency score* against each potential explanatory variable with a focus on whether knotweed stands were fully tarped or not", fig.width=12, fig.height=9, message=FALSE, comment=NA, warning=FALSE}
 erad %>% dplyr::select(-manager_id, -xp_id, -goals, -eff_eradication, -high_eff) %>%
   dplyr::mutate_if(is.factor, as.numfactor) %>% 
   tidyr::pivot_longer(-c(efficiency, plantation), 
@@ -357,6 +375,56 @@ erad %>% dplyr::select(-manager_id, -xp_id, -goals, -eff_eradication, -high_eff)
 ```
 
 We can see from this new panel of plots that the *efficiency* score seems to increase when knotweeds are *fully tarped*, as we hypothesized. 
+\
+\
+   
+### - Homogeneity of variances
+
+To further investigate potential **heteroscedasticity** and need for transformations, we also plotted some conditional boxplots of our only continuous response variable
+
+```{r}
+fields::bplot.xy(y = erad$efficiency, x = erad$slope, outlier = TRUE) 
+
+erad %>% dplyr::select(-manager_id, -xp_id, -goals, -eff_eradication, -high_eff) %>%
+  dplyr::mutate_if(is.factor, as.numfactor) -> dataset
+Y <- 1
+X <- 2:23
+N <- 8
+outlier <- TRUE
+
+cond.boxplots <- function(dataset, Y, Xs, outlier, N = 6,
+                        MAR = c(0.5,4.1,1.1,1.5), CEX.LAB = 1, FONT.LAB = 2, BTY = "n", FG = "gray35",
+                        COL.AXIS = "gray35", COL.LAB = "gray20", CEX.PAR = 0.8, TCL = -0.3,
+                        MGP = c(2.4, 0.6, 0), OMA = c(1, 0, 0, 0),
+                        TYPE = "n", BORDER = "lightgoldenrod2", COL = "gray38",  LTY = 1, STAPLEWEX = 0,
+                        WHISKLWD = 2, BOXWEX = 0.7, BOXLWD = 0.1, MEDLWD = 2.6, PCH = 19, ...){
+  dataset %>% dplyr::mutate_if(is.factor, as.numfactor) -> num.data
+  
+  if (any(sapply(num.data, is.numeric)) != TRUE) {
+    warning("The input dataset must only contain numeric or dummy variables (i.e. binary factors coded exclusively with 0 and 1)! Please check the class of your columns before proceeding.")
+  }
+  if(missing(Y || X)){
+    stop("Please specify the Y and X(s) variables to be used, as required. See ?cond.boxplots for details.")
+  }
+  
+  num.data <- as.matrix(num.data)
+  nam <- names(num.data)
+  ncol.data <- ncol(num.data)
+  ncol.adjust <- ceiling(x = ncol.data/4) # Round to the next integer (e.g. ceiling(x = 7.12) returns 8)!
+  minX <- min(X)
+  maxX <- max(X)
+
+  graphics::par(mfrow= c(ncol.adjust,4), mar=MAR, cex.lab=CEX.LAB, font.lab=FONT.LAB, bty=BTY, fg=FG,
+      col.axis=COL.AXIS, col.lab=COL.LAB, cex=CEX.PAR, tcl=TCL, mgp=MGP, oma=OMA)
+  for (i in c(minX:maxX)) {
+    fields::bplot.xy(y = num.data[,Y], x = num.data[,i], outlier=outlier, N=N,
+      xlab =(nam[i]), type=TYPE, border=BORDER, col = COL,
+            lty=LTY, staplewex=STAPLEWEX, whisklwd=WHISKLWD, boxwex=BOXWEX, boxlwd=BOXLWD,
+            medlwd=MEDLWD, pch=PCH, cex=0.7) }
+}
+#### CORRIGER LES MARGES etc.§§§§§§
+```
+
 
 ```{r erad export, include=FALSE}
 ### Finally, I export the dataset to be used for modelling in my "mydata" folder:
@@ -1133,7 +1201,14 @@ readr::write_csv(x = roverlaps, file = here::here("mydata", "roverlaps.csv"), ap
 
 ## Next steps
 
-1) Set drake + co-plots? + ask questions SO/CV !!! + Conditional boxplot (homoschedasticity for the continuous Y)§§§§§§§ 
+1) Set drake + ask questions SO/CV !!! + Conditional boxplot (homoschedasticity for the continuous Y)§§§§§§§ kurtosis + skewness + cond box + coplot + kernel density§§§§§§§§§§§ + TESTER si stand_surface change de coef quand /10 (en dizaine de m2)
 2) Transformations and standardization (for scaling, especially important when I use interactions terms)
 3) Write models!
 
+# - References
+
+To do!
+
+Gravetter, F., & Wallnau, L. (2014). Essentials of statistics for the behavioral sciences (8th ed.). Belmont, CA: Wadsworth.
+Field, A. (2009). Discovering statistics using SPSS. London: SAGE.
+Montgomery, D.C. & Peck, E.A. (1992) Introduction to Linear Regression Analysis. Wiley,New York.
