@@ -450,7 +450,7 @@ uni.simudistrib <- function(simu.var, distribution){
 
 
 # _________________________________________
-### Creation of a function that generate histograms for each numeric variable:
+### Creation of a function that generates histograms for each numeric variable:
 
 #' Histogram Panel
 #'
@@ -525,5 +525,123 @@ uni.histograms <- function(dataset, MAR=c(3,2,0.5,1.5), CEX.LAB = 1.2, FONT.LAB 
   for (i in c(1:ncol(num.data))) {
     graphics::hist(num.data[,i], breaks = BREAKS, col = COL, border = BORDER,
                    main = "", xlab = nam[i], ylab = "")
+  }
+}
+
+
+
+
+
+# ___________________________________________________________
+### Creation of a function that generates conditional boxplots between the given variables:
+
+#' Bivariate Conditional Boxplots
+#'
+#' @description The `cond.boxplots` function draws, within a single panel, conditional boxplots (i.e.
+#' a plot of a continuous Y variable against one or several categorical X(s) variable(s) (factor),
+#' or \strong{discretized} numeric variable(s)) in order to explore bivariate relationships or
+#' assess \strong{heteroscedasticity}. \cr
+#' If some of the X variables are quantitative (numeric), they will consequently be transformed into
+#' factors and discretized into a given number of classes, set approximately by the `N` parameter. This
+#' factorisation is required because boxplots are not meant to plot two quantitative variables (without
+#' factorisation, the function would plot as many boxplots as there are values in X).
+#'
+#' @param dataset The input `data.frame` containing the variables to plot (both the Y and the X(s)). Must
+#' only contain numeric or factor variables!
+#' @param Y The number of the column of `dataset` containing the variable to be plotted as Y. This
+#' parameter should be specified as an integer. For instance, if the variable to be used as Y is called
+#' "blip" and is the second column of the `dataset`, the `Y` parameter should be `2` (and NOT "two",
+#' `dataset$blip`, or `dataset[,2]`).
+#' @param Xs The numbers of the columns to be plotted as Xs (e.g. `4:10`, if all the columns from the
+#' fourth to the tenth are to be plotted against `Y`).
+#' @param outlier Logical (`TRUE` or `FALSE`). Should outliers be plotted or not?
+#' @param N Integer. The number of bins on X. Default is 6.
+#'
+#' @param MAR A numerical vector of the form `c(bottom, left, top, right)` which gives the number of lines
+#' of margin to be specified on the four sides of the plot. The default is `c(2.2,2.1,0.5,1.7)`.
+#' @param CEX.LAB The magnification to be used for x and y labels relative to the current setting
+#' of `CEX.PAR`.
+#' @param FONT.LAB The font to be used for x and y labels.
+#' @param BTY A character string which determined the type of box which is drawn about plots. If `BTY` is
+#' one of "o", "l", "7", "c", "u", or "]" the resulting box resembles the corresponding upper
+#' case letter. A value of "n" suppresses the box (the default).
+#' @param FG The color to be used for the foreground of plots. This is the default color used for things
+#' like axes and boxes around plots (defaults to "gray35").
+#' @param COL.AXIS The color to be used for axis annotation. Defaults to "gray35".
+#' @param COL.LAB The color to be used for x and y labels. Defaults to "gray20".
+#' @param CEX.PAR A numerical value giving the amount by which plotting text and symbols should be
+#' magnified relative to the default (for `par`, the panel manager). This starts as 1 when a device
+#' is opened, and is reset when the layout is changed, e.g. by setting `mfrow`. Defaults to 0.8.
+#' @param TCL The length of tick marks as a fraction of the height of a line of text. The default
+#' value is -0.3.
+#' @param MGP The margin line (in `mex` units) for the axis title, axis labels and axis line.
+#' Note that `mgp[1]` affects title whereas `mgp[2:3]` affect axis. The default is c(1.2, 0.4, 0.2).
+#' @param OMA A vector of the form `c(bottom, left, top, right)` giving the size of the outer margins
+#' in lines of text.
+#' @param TYPE The type of boxplot to draw. Default is "n".
+#' @param BORDER An optional vector of colors for the outlines of the boxplots. The values in border
+#' are recycled if the length of border is less than the number of plots. Default is "lightcoral".
+#' @param COL If col is non-null it is assumed to contain colors to be used to colour the bodies of
+#' the boxplots. Default is "moccasin".
+#' @param LTY The line type. Line types can either be specified as an integer (0=blank, 1=solid (default),
+#' 2=dashed, 3=dotted, 4=dotdash, 5=longdash, 6=twodash) or as one of the character strings "blank",
+#' "solid", "dashed", "dotted", "dotdash", "longdash", or "twodash", where "blank" uses ‘invisible lines’
+#' (i.e., does not draw them).
+#' @param STAPLEWEX Staple line width expansion, proportional to box width. Default is 0.
+#' @param WHISKLWD Whisker line width expansion. Default is 2.
+#' @param BOXWEX A scale factor to be applied to all boxes. When there are only a few groups, the
+#' appearance of the plot can be improved by making the boxes narrower. Default is 0.7.
+#' @param BOXLWD Width of boxplot outer lines. Default is 0.1.
+#' @param MEDLWD Width of the median line. Default is 2.6.
+#' @param PCH The type of points to be drawn for outliers. Default is 19. See \code{\link[graphics:points]{points}}
+#' for possible values and their interpretation.
+#' @param ... Any other graphical parameter of `boxplot()`.
+#'
+#' @return A panel of conditional boxplots.
+#' @export
+#' @import graphics
+#' @importFrom fields bplot.xy
+#'
+#' @examples
+#' cond.boxplots(dataset = iris, Y = 1, Xs = 2:5, outlier = TRUE)
+cond.boxplots <- function(dataset, Y, Xs, outlier, N = 6,
+                          MAR = c(2.2,2.1,0.5,1.7), CEX.LAB = 0.9, FONT.LAB = 2, BTY = "n", FG = "gray35",
+                          COL.AXIS = "gray35", COL.LAB = "gray20", CEX.PAR = 0.8, TCL = -0.3,
+                          MGP = c(1.2, 0.4, 0.2), OMA = c(1, 0, 0, 0),
+                          TYPE = "n", BORDER = "moccasin", COL = "gray50", LTY = 1, STAPLEWEX = 0,
+                          WHISKLWD = 2, BOXWEX = 0.5, BOXLWD = 0.1, MEDLWD = 2.6, PCH = 19, ...){
+  mydata <- as.data.frame(dataset)
+
+  if(!is.numeric(mydata[,Y])){
+    stop("The Y variable must be numeric! Please check the class of your columns before proceeding.")
+  }
+  if(!any(sapply(mydata, is.numeric)) && !any(sapply(mydata, is.factor))){
+    stop("Input dataset should only contain numeric or factor variables!  Please check the class of your columns before proceeding.")
+  }
+  if(missing(Y)){
+    stop("Please specify the Y and X(s) variables to be used and respect the required format. See ?cond.boxplots for details.")
+  }
+
+  nam <- names(mydata)
+  ncol.data <- ncol(mydata[,Xs])
+  ncol.adjust <- ceiling(x = ncol.data/4) # Round to the next integer (e.g. ceiling(x = 7.12) returns 8)!
+  minX <- min(Xs)
+  maxX <- max(Xs)
+  yyy <- as.matrix(mydata[,Y])
+
+  graphics::par(mfrow= c(ncol.adjust,4), mar=MAR, cex.lab=CEX.LAB, font.lab=FONT.LAB, bty=BTY, fg=FG,
+                col.axis=COL.AXIS, col.lab=COL.LAB, cex=CEX.PAR, tcl=TCL, mgp=MGP, oma=OMA)
+  for (i in c(minX:maxX)) {
+
+    if (is.numeric(mydata[,i])) {
+      fields::bplot.xy(y = mydata[,Y], x = mydata[,i], outlier=outlier, N=N,
+                       xlab=(nam[i]), type=TYPE, border=BORDER, col=COL,lty=LTY, staplewex=STAPLEWEX,
+                       whisklwd=WHISKLWD, boxwex=BOXWEX, boxlwd=BOXLWD, medlwd=MEDLWD, pch=PCH, cex=0.7, ...)
+    }else if (is.factor(mydata[,i])) {
+      xxx <- as.matrix(mydata[,i])
+      graphics::boxplot(yyy~xxx, outline=outlier, ylab="",
+                        xlab=(nam[i]), type=TYPE, border=BORDER, col=COL, lty=LTY, staplewex=STAPLEWEX,
+                        whisklwd=WHISKLWD, boxwex=BOXWEX, boxlwd=BOXLWD,medlwd=MEDLWD, pch=PCH, cex=0.7, ...)
+    }
   }
 }

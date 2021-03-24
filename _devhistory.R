@@ -133,7 +133,7 @@ devtools::check() # Ok!
 
 # To finally install the package:
 devtools::install()
-usethis::use_git(message = ":metal: Functions updated!")
+usethis::use_git(message = ":boom: New function: cond.boxplots()!")
 system("git push")
 
 

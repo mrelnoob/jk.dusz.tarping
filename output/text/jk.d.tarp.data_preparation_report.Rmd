@@ -383,46 +383,55 @@ We can see from this new panel of plots that the *efficiency* score seems to inc
 To further investigate potential **heteroscedasticity** and need for transformations, we also plotted some conditional boxplots of our only continuous response variable
 
 ```{r}
-fields::bplot.xy(y = erad$efficiency, x = erad$slope, outlier = TRUE) 
-
-erad %>% dplyr::select(-manager_id, -xp_id, -goals, -eff_eradication, -high_eff) %>%
-  dplyr::mutate_if(is.factor, as.numfactor) -> dataset
-Y <- 1
-X <- 2:23
-N <- 8
-outlier <- TRUE
+# erad %>% dplyr::select(-manager_id, -xp_id, -goals, -eff_eradication, -high_eff) %>%
+#   dplyr::mutate_if(is.factor, as.numfactor) -> dataset
+# erad -> num.data
+# Y <- 3
+# Xs <- 6:21
+# N <- 6
+# outlier <- TRUE
 
 cond.boxplots <- function(dataset, Y, Xs, outlier, N = 6,
-                        MAR = c(0.5,4.1,1.1,1.5), CEX.LAB = 1, FONT.LAB = 2, BTY = "n", FG = "gray35",
+                        MAR = c(2.2,2.1,0.5,1.7), CEX.LAB = 0.9, FONT.LAB = 2, BTY = "n", FG = "gray35",
                         COL.AXIS = "gray35", COL.LAB = "gray20", CEX.PAR = 0.8, TCL = -0.3,
-                        MGP = c(2.4, 0.6, 0), OMA = c(1, 0, 0, 0),
-                        TYPE = "n", BORDER = "lightgoldenrod2", COL = "gray38",  LTY = 1, STAPLEWEX = 0,
-                        WHISKLWD = 2, BOXWEX = 0.7, BOXLWD = 0.1, MEDLWD = 2.6, PCH = 19, ...){
-  dataset %>% dplyr::mutate_if(is.factor, as.numfactor) -> num.data
-  
-  if (any(sapply(num.data, is.numeric)) != TRUE) {
-    warning("The input dataset must only contain numeric or dummy variables (i.e. binary factors coded exclusively with 0 and 1)! Please check the class of your columns before proceeding.")
+                        MGP = c(1.2, 0.4, 0.2), OMA = c(1, 0, 0, 0),
+                        TYPE = "n", BORDER = "moccasin", COL = "gray50", LTY = 1, STAPLEWEX = 0,
+                        WHISKLWD = 2, BOXWEX = 0.5, BOXLWD = 0.1, MEDLWD = 2.6, PCH = 19, ...){
+  mydata <- as.data.frame(dataset)
+
+  if(!is.numeric(mydata[,Y])){
+    stop("The Y variable must be numeric! Please check the class of your columns before proceeding.")
   }
-  if(missing(Y || X)){
-    stop("Please specify the Y and X(s) variables to be used, as required. See ?cond.boxplots for details.")
+  if(!any(sapply(mydata, is.numeric)) && !any(sapply(mydata, is.factor))){
+    stop("Input dataset should only contain numeric or factor variables!  Please check the class of your columns before proceeding.")
+  }
+  if(missing(Y)){
+    stop("Please specify the Y and X(s) variables to be used and respect the required format. See ?cond.boxplots for details.")
   }
   
-  num.data <- as.matrix(num.data)
-  nam <- names(num.data)
-  ncol.data <- ncol(num.data)
+  nam <- names(mydata)
+  ncol.data <- ncol(mydata[,Xs])
   ncol.adjust <- ceiling(x = ncol.data/4) # Round to the next integer (e.g. ceiling(x = 7.12) returns 8)!
-  minX <- min(X)
-  maxX <- max(X)
+  minX <- min(Xs)
+  maxX <- max(Xs)
+  yyy <- as.matrix(mydata[,Y])
 
   graphics::par(mfrow= c(ncol.adjust,4), mar=MAR, cex.lab=CEX.LAB, font.lab=FONT.LAB, bty=BTY, fg=FG,
       col.axis=COL.AXIS, col.lab=COL.LAB, cex=CEX.PAR, tcl=TCL, mgp=MGP, oma=OMA)
   for (i in c(minX:maxX)) {
-    fields::bplot.xy(y = num.data[,Y], x = num.data[,i], outlier=outlier, N=N,
-      xlab =(nam[i]), type=TYPE, border=BORDER, col = COL,
-            lty=LTY, staplewex=STAPLEWEX, whisklwd=WHISKLWD, boxwex=BOXWEX, boxlwd=BOXLWD,
-            medlwd=MEDLWD, pch=PCH, cex=0.7) }
+    
+    if (is.numeric(mydata[,i])) {
+      fields::bplot.xy(y = mydata[,Y], x = mydata[,i], outlier=outlier, N=N,
+            xlab=(nam[i]), type=TYPE, border=BORDER, col=COL,lty=LTY, staplewex=STAPLEWEX,
+            whisklwd=WHISKLWD, boxwex=BOXWEX, boxlwd=BOXLWD, medlwd=MEDLWD, pch=PCH, cex=0.7, ...)
+      }else if (is.factor(mydata[,i])) {
+      xxx <- as.matrix(mydata[,i])
+      graphics::boxplot(yyy~xxx, outline=outlier, ylab="",
+            xlab=(nam[i]), type=TYPE, border=BORDER, col=COL, lty=LTY, staplewex=STAPLEWEX,
+            whisklwd=WHISKLWD, boxwex=BOXWEX, boxlwd=BOXLWD,medlwd=MEDLWD, pch=PCH, cex=0.7, ...)
+      }
+     }
 }
-#### CORRIGER LES MARGES etc.§§§§§§
 ```
 
 

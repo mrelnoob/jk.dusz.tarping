@@ -28,7 +28,8 @@ Imports:
     ade4,
     FactoMineR,
     factoextra,
-    gridExtra
+    gridExtra,
+    fields
 Suggests: 
     testthat
 URL: https://github.com/mrelnoob/jk.dusz.tarping
