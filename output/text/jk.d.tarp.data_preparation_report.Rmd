@@ -393,12 +393,50 @@ According to Fox (2008), for simple linear regression models, problematic hetero
    
 ### - Interactions among variables
 
-Finally, to further investigate potentially meaningful **interactions** among our predictors, we used co-plots (i.e. conditional plots) for some of them. 
+Finally, to further investigate potentially meaningful **interactions** among our variables, we used co-plots (i.e. conditioning plots) between some of our predictors, based on plausible hypotheses. However, to avoid overloading the present document, we only display some of the tested plots (do we? §§§§§§§§§§§§§§§§§§§§§§§
 
-```{r}
+VERIFY before submitting, you piece of jelly!!!
 
+§§§§§§§§§§§§§§§§§§§§§§§§§§****************).
+
+```{r erad coplot}
+### Three-way interaction between elevation, fully_tarped, and stand_surface
+graphics::coplot(efficiency ~ elevation | fully_tarped * log(stand_surface), data = erad, 
+                 panel=function(x,y,...) { points(x,y, col = wesanderson::wes_palette(n=4, name="GrandBudapest1"), pch = 19); abline(line(y~x)) }, # The function in the `panel` argument is what enables the drawing of the regression lines! In the col argument, I simply created a palette of colours based on the movies of Wes Anderson (just to make the plot prettier).
+                 number = 3, overlap = 0.05) # `number` indicates the number of groups by which the quantitative grouping variable (here, stand_surface) should be divided into. The `overlap` argument controls the proportion of points that are shared between the groups (here, 5%).
+
+### Three-way interaction between elevation, fully_tarped and maxveg
+graphics::coplot(efficiency ~ elevation | fully_tarped * maxveg, data = erad, 
+                 panel=function(x,y,...) { points(x,y, col = wesanderson::wes_palette(n=4, name="GrandBudapest1"), pch = 19); abline(line(y~x)) }, 
+                 number = 3, overlap = 0.05)
+
+### Three-way interaction between elevation, maxveg and uprootexcav
+graphics::coplot(efficiency ~ elevation | maxveg * uprootexcav, data = erad, 
+                 panel=function(x,y,...) { points(x,y, col = wesanderson::wes_palette(n=4, name="GrandBudapest1"), pch = 19); abline(line(y~x)) }, 
+                 number = 3, overlap = 0.05)
+
+# Interactions à tester:
+elevation*fullyT*surface
+elevation*(fullyT)*maxveg
+elevation*maxveg*uprootexcav
+elevation*time
+elevation*plantation*followups
+
+distance*surface
+fully_tarped*surface
+
+distance | surface*fullyT
+surface | distance*followups
+distance*obstacle
+distance*slope
+obstacles | distance*followups
+
+geomem*followups
+
+#AVEC GOALS???? est-ce que ceux qui veulent exterminer y arrivent mieux?
 ```
 
+Our data are opportunistic blabla...
 
 ```{r erad export, include=FALSE}
 ### Finally, I export the dataset to be used for modelling in my "mydata" folder:
