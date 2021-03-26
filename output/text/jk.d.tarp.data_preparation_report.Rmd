@@ -32,6 +32,8 @@ The data and code used to analyse it can furthermore be found here: https://gith
 ```{r data import and summary, include=FALSE}
 library(jk.dusz.tarping)
 zzz_mydata_cleaned <- jk.dusz.tarping::clean_my_data()
+
+.pardefault <- par() # To save the default graphical parameters (in case I want to restore them).
 ```
 \
 In our efforts to build valid and meaningful models to explain or predict the success/failure of tarping operations for the control of Japanese knotweed *s.l.*, we had to learn more about our data. This *data preparation report* presents the results of the **exploratory data analyses** performed on the data we collected for this study.  
@@ -396,27 +398,32 @@ According to Fox (2008), for simple linear regression models, problematic hetero
 Finally, to further investigate potentially meaningful **interactions** among our variables, we used co-plots (i.e. conditioning plots) between some of our predictors, based on plausible hypotheses. However, to avoid overloading the present document, we only display some of the most informative plots. 
 
 ```{r erad coplot 1, fig.align='center', fig.cap="**Figure 2.8.** Coplot of the *efficiency score* displaying a three-way interaction between *elevation*, *fully_tarped* and *stand_surface* (in log-scale). There is a 5% overlap between each group, explaining why there are more than *n* = 85 points. Colours are meaningless and are just here for aesthetical reasons", fig.width=12, fig.height=9, message=FALSE, comment=NA, warning=FALSE}
+
+par(.pardefault) # To restore defaults graphical parameters
+
 ### Three-way interaction between elevation, fully_tarped, and stand_surface
 graphics::coplot(efficiency ~ elevation | fully_tarped * log(stand_surface), data = erad, 
                  panel=function(x,y,...) { points(x,y, col = wesanderson::wes_palette(n=4, name="GrandBudapest1"), pch = 19); abline(line(y~x)) }, # The function in the `panel` argument is what enables the drawing of the regression lines! In the col argument, I simply created a palette of colours based on the movies of Wes Anderson (just to make the plot prettier).
                  number = 3, overlap = 0.05) # `number` indicates the number of groups by which the quantitative grouping variable (here, stand_surface) should be divided into. The `overlap` argument controls the proportion of points that are shared between the groups (here, 5%).
+# Note that, sometimes coplot will create several rows for the same variable, but this can be controlled using the `rows` argument (e.g. rows = 1).
 ```
 
-This coplot is very interesting because it shows an inconsistent pattern within each category (single row or single column) suggesting that our sample prevents us to satisfactorily test a three-way interaction between those variables. Additionally, we can see that there are very few observations of not entirely tarped knotweed stands (*n* = 17) as well as very few observations above 500m a.s.l. (*n* = 9; which is not a very high elevation for knotweeds (Martin *et al.*, 2019)). As our dataset was gathered opportunistically it is not surprising, yet it means that our sampled dataset will only be able to highlight strong effects of elevation and of partially tarped control operations, which is not the case here. All this may explain the very odd pattern displayed by the lower-right panel: Figure 2.2, Figure 2.6 and the other panels (save one) seem to indicate that there is a positive correlation between elevation and tarping efficiency; however, the fact that this pattern is reversed for smaller knotweed stands (and thus weaker ones) that are entirely covered does not make any sense. It is therefore possible that the seemingly higher efficiency of tarping at higher elevations actually reflects chance.\
+This coplot is very interesting because it shows an inconsistent pattern within each category (single row or single column) suggesting that our sample prevents us to satisfactorily test a three-way interaction between those variables. Additionally, we can see that there are very few observations of not entirely tarped knotweed stands (*n* = 17) as well as very few observations above 500m a.s.l. (*n* = 9; which is not a very high elevation for knotweeds (Martin *et al.*, 2019)). As our dataset was gathered opportunistically it is not surprising, yet it means that our sampled dataset will only be able to highlight strong effects of elevation and of partially tarped control operations, which is not the case here. All this may explain the very odd pattern displayed by the lower-right panel: Figure 2.2, Figure 2.6 and the other panels (save one) seem to indicate that there is a positive correlation between elevation and tarping efficiency; however, the fact that this pattern is reversed for smaller knotweed stands (and thus weaker ones) that are entirely covered does not make any sense. It is therefore possible that the seemingly higher efficiency of tarping at higher elevations actually reflects chance.
+
 As we already have too many candidate predictors, we may consider dropping the *elevation* variable for further analyses. 
 
 ```{r}
 ### 
-graphics::coplot(efficiency ~ distance, data = erad, 
+graphics::coplot(efficiency ~ log(stand_surface) | fully_tarped, data = erad, 
                  panel=function(x,y,...) { points(x,y, col = wesanderson::wes_palette(n=4, name="GrandBudapest2"), pch = 19); abline(line(y~x)) }, 
-                 number = 3, overlap = 0.05, rows = 1)
+                 number = 4, overlap = 0.05, rows = 1)
 
 
 
 # Interactions à tester:
 
-distance*surface
-fully_tarped*surface
+distance*surface # NOPE (here)
+surface*fully_tarped # Eventuellement: assez intéressant (le fait bacher en entier supprime l'effet négatif de la taille des taches sur l'efficacité)
 
 distance | surface*fullyT
 surface | distance*followups
