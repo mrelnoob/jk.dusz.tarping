@@ -397,7 +397,7 @@ According to Fox (2008), for simple linear regression models, problematic hetero
 
 Finally, to further investigate potentially meaningful **interactions** among our variables, we used co-plots (i.e. conditioning plots) between some of our predictors, based on plausible hypotheses. However, to avoid overloading the present document, we only display some of the most informative plots. 
 
-```{r erad coplot 1, fig.align='center', fig.cap="**Figure 2.8.** Coplot of the *efficiency score* displaying a three-way interaction between *elevation*, *fully_tarped* and *stand_surface* (in log-scale). There is a 5% overlap between each group, explaining why there are more than *n* = 85 points. Colours are meaningless and are just here for aesthetical reasons", fig.width=12, fig.height=9, message=FALSE, comment=NA, warning=FALSE}
+```{r erad coplot 1, fig.align='center', fig.cap="**Figure 2.8a.** Coplot of the *efficiency score* displaying a three-way interaction between *elevation*, *fully_tarped* and *stand_surface* (in log-scale). There is a 5% overlap between each group, explaining why there are more than *n* = 85 points. Colours are meaningless and are just here for aesthetical reasons", fig.width=12, fig.height=9, message=FALSE, comment=NA, warning=FALSE}
 
 par(.pardefault) # To restore defaults graphical parameters
 
@@ -412,11 +412,16 @@ This coplot is very interesting because it shows an inconsistent pattern within 
 
 As we already have too many candidate predictors, we may consider dropping the *elevation* variable for further analyses. 
 
-```{r}
+```{r erad coplot 2, fig.align='center', fig.cap="**Figure 2.8b.** Coplot of the *efficiency score* displaying a two-way interaction between *fully_tarped* and *stand_surface* (in log-scale). There is a 5% overlap between each group, explaining why there are more than *n* = 85 points. Colours are meaningless and are just here for aesthetical reasons", fig.width=12, fig.height=9, message=FALSE, comment=NA, warning=FALSE}
 ### 
 graphics::coplot(efficiency ~ log(stand_surface) | fully_tarped, data = erad, 
                  panel=function(x,y,...) { points(x,y, col = wesanderson::wes_palette(n=4, name="GrandBudapest2"), pch = 19); abline(line(y~x)) }, 
                  number = 4, overlap = 0.05, rows = 1)
+```
+
+
+
+```{r}
 
 
 
