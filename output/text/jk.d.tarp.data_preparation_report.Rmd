@@ -387,6 +387,7 @@ To further investigate potential **heteroscedasticity** and need for transformat
 ```{r erad cond.boxplots, fig.align='center', fig.cap="**Figure 2.7.** Bivariate conditional boxplots of the *efficiency score* against each potential explanatory variable", fig.width=12, fig.height=9, message=FALSE, comment=NA, warning=FALSE}
 erad %>% dplyr::select(-goals) -> erad1
 jk.dusz.tarping::cond.boxplots(dataset = erad1, Y = 3, Xs = 6:ncol(erad1), outlier = TRUE)
+rm(erad1)
 ```
 
 According to Fox (2008), for simple linear regression models, problematic heterogeneity of variance occurs when the ratio between the largest and smallest variance is 4 or more. Consequently, there is a possibility for the following variables to become problematic for modelling: *elevation*, *flood*, *stand_surface*, *tarping_duration*, *sedicover_height*, and *trench_depth*. Nonetheless, actual problematic heteroscedasticity will only be observable by plotting residuals against models fitted values.
@@ -419,48 +420,38 @@ graphics::coplot(efficiency ~ log(stand_surface) | fully_tarped, data = erad,
                  number = 4, overlap = 0.05, rows = 1)
 ```
 
+This above coplot seems to indicate that entirely covered (tarped) knotweed stands prevent the drop in tarping efficiency with increasing stand surface. Caution is however still required as the relationships do not seem very strong.
 
 
+```{r erad coplot 3, fig.align='center', fig.cap="**Figure 2.8c.** Coplot of the *efficiency score* displaying a two-way interaction between *followups* and *pb_fixation*. There is a 5% overlap between each group, explaining why there are more than *n* = 85 points. Colours are meaningless and are just here for aesthetical reasons", fig.width=12, fig.height=9, message=FALSE, comment=NA, warning=FALSE}
+graphics::coplot(efficiency ~ followups | pb_fixation, data = erad, 
+                 panel=function(x,y,...) { points(x,y, col = wesanderson::wes_palette(n=4, name="Royal2"), pch = 19); abline(line(y~x)) }, 
+                 number = 2, overlap = 0.05, rows = 1)
+```
+```{r erad coplot 4, fig.align='center', fig.cap="**Figure 2.8d.** Coplot of the *efficiency score* displaying a two-way interaction between *followups* and *pb_durability*. There is a 5% overlap between each group, explaining why there are more than *n* = 85 points. Colours are meaningless and are just here for aesthetical reasons", fig.width=12, fig.height=9, message=FALSE, comment=NA, warning=FALSE}
+graphics::coplot(efficiency ~ followups | pb_durability, data = erad, 
+                 panel=function(x,y,...) { points(x,y, col = wesanderson::wes_palette(n=4, name="Royal2"), pch = 19); abline(line(y~x)) }, 
+                 number = 2, overlap = 0.05, rows = 1)
+```
+
+Quite logically, these two coplots seem to confirm that follow-up operations increase tarping efficiency especially when there are some problems regarding fabrics fixation or durability. The pattern is particularly clear for fixation problems (Figure 2.8c).
+
+
+
+
+
+
+§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§
+§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§
+§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§
 ```{r}
-
-
-
-# Interactions à tester:
-
-distance*surface # NOPE (here)
-surface*fully_tarped # Eventuellement: assez intéressant (le fait bacher en entier supprime l'effet négatif de la taille des taches sur l'efficacité)
-
-distance | surface*fullyT
-surface | distance*followups
-distance*obstacle
-distance*slope
-obstacles | distance*followups
-
-geomem*followups
-maxveg*surface
-uproot*surface
-uproot/maxvag * plantation
-
-time*pb_durab
-time*followups
-time | followups * PBs (les 2)
-
-trench*surface
-
-surface*plantation
-slope*plantation
-plantation*pb_durab
-#AVEC GOALS???? est-ce que ceux qui veulent exterminer y arrivent mieux?
-
 ### Pour plotter des régressions logistiques
 fit = glm(vs ~ hp, data=mtcars, family=binomial)
 newdat <- data.frame(hp=seq(min(mtcars$hp), max(mtcars$hp),len=100))
 newdat$vs = predict(fit, newdata=newdat, type="response")
 plot(jitter(vs,amount = 0.03)~hp, data=mtcars, col="red4")
 lines(vs ~ hp, newdat, col="green4", lwd=2)
-
 ```
-
 
 
 
