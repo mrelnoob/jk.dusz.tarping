@@ -396,7 +396,7 @@ According to Fox (2008), for simple linear regression models, problematic hetero
    
 ### - Interactions among variables
 
-Finally, to further investigate potentially meaningful **interactions** among our variables, we used co-plots (i.e. conditioning plots) between some of our predictors, based on plausible hypotheses. However, to avoid overloading the present document, we only display some of the most informative plots. 
+Finally, to further investigate potentially meaningful **interactions** among our variables, we used co-plots (i.e. conditioning plots) between some of our predictors and *efficiency*, based on plausible hypotheses. However, to avoid overloading the present document, we only display some of the most informative plots. 
 
 ```{r erad coplot 1, fig.align='center', fig.cap="**Figure 2.8a.** Coplot of the *efficiency score* displaying a three-way interaction between *elevation*, *fully_tarped* and *stand_surface* (in log-scale). There is a 5% overlap between each group, explaining why there are more than *n* = 85 points. Colours are meaningless and are just here for aesthetical reasons", fig.width=12, fig.height=9, message=FALSE, comment=NA, warning=FALSE}
 
@@ -700,11 +700,6 @@ Various interesting observations can be made from these scatterplots:
 * First, heteroscedasticity will perhaps not be surprising in our models as the variances of many variables do not seem to be homogeneous. On the other hand, we do not see clear multivariate outliers.
 * Second, *lreg_edges* seems to increase with increasing *followups*, *freq_monitoring*, *geomem*, *obstacles* and *stripsoverlap_ok*. If the relationship with *obstacles* seems quite straightforward (and was one of our hypotheses), the other relationships are more surprising.
 * Third, conversely and as hypothesized, *lreg_edges* seems to decrease with increasing *distance*, *sedicover_height*, *trench depth*, *tarping_duration* and, more surprisingly, with *stand surface*.
-
-```{r redges export, include=FALSE}
-### Finally, I export the dataset to be used for modelling in my "mydata" folder:
-readr::write_csv(x = redges, file = here::here("mydata", "redges.csv"), append = FALSE)
-```
 \
 \
    
@@ -716,30 +711,57 @@ As our response variable (i.e. *lreg_edges*) is binomial, **heteroscedasticity**
    
 ### - Interactions among variables
 
-Finally, to further investigate potentially meaningful **interactions** among our variables, we used co-plots (i.e. conditioning plots) between some of our predictors, based on plausible hypotheses. However, to avoid overloading the present document, we only display some of the most informative plots. 
+Finally, to further investigate potentially meaningful **interactions** among our variables, we used co-plots (i.e. conditioning plots) between some of our predictors and *lreg_edges*, based on plausible hypotheses. 
+However, as *lreg_edges* is a binary factor, the use of coplots got more complicated. Visualizing categorical variables as a function of other variables, especially quantitative ones, is not ideal in a regular conditioning plot as points will tend to be stacked on each other and as logistic curves should be fitted instead of regression lines, which is quite tedious to automatise in R. Consequently, we chose to draw **spineplots within the coplot panels** by transforming quantitative variables into two-level factors ("low" and "high" - based on whether observations had values below or above average, meaning that the number of observations is not distributed equitably between the two categories). The plots created could be viewed as some sort of *graphical contingency tables*. Unfortunately, combining spineplots with coplots creates a graphic bug in the drawing of the axes (linked to the coplot function internals) that we could not fix. We apologize for that.
 
-```{r redges coplot 1, fig.align='center', fig.cap="**Figure 2.8a.** Coplot of the *efficiency score* displaying a three-way interaction between *elevation*, *fully_tarped* and *stand_surface* (in log-scale). There is a 5% overlap between each group, explaining why there are more than *n* = 85 points. Colours are meaningless and are just here for aesthetical reasons", fig.width=12, fig.height=9, message=FALSE, comment=NA, warning=FALSE}
+To avoid overloading the present document, only the most informative plots are displayed. 
+
+```{r redges coplot 1, fig.align='center', fig.cap="**Figure 3.7a.** Coplot of *lreg_edges* displaying a three-way interaction between *elevation*, *fully_tarped* and *stand_surface* (in log-scale). There is a 5% overlap between each group, explaining why there are more than *n* = 85 points. Colours are meaningless and are just here for aesthetical reasons", fig.width=12, fig.height=9, message=FALSE, comment=NA, warning=FALSE}
 
 par(.pardefault) # To restore defaults graphical parameters
 
+redges %>% dplyr::mutate(distance = ifelse(distance <= mean(distance), "Low", "High")) %>%
+  dplyr::mutate(distance = factor(distance, levels=c("Low", "High"))) -> rrr
+
+pan.fun = function(x, y, ...){
+    par(new=T)
+    spineplot(as.factor(x), as.factor(y), main="", xlab="", ylab="", axes=F, col = c("#FF9933","#FFCC99"))
+}
+
 ### WHAT??? voir pour mixer ça avec des spineplots (GUNG sur CV, favoris stats!!)
-graphics::coplot(lreg_edges ~ elevation | log(stand_surface), data = redges, 
-                 panel=function(x,y,...) { 
-                   fit <- glm(y~x, family = binomial);
-                   newdat <- data.frame(x=seq(min(redges$elevation), max(redges$elevation),len=100));
-                   newdat$y = predict(fit, newdata=newdat, type="response");
-                   points(x,y, col = wesanderson::wes_palette(n=4, name="GrandBudapest1"), pch = 19);
-                   lines(y ~ x, newdat, col="green4", lwd=2)
-                   }, 
-                 number = 3, overlap = 0.05, rows = 1)
+graphics::coplot(lreg_edges ~ distance | log(stand_surface) * trench_depth, data = rrr, 
+                 panel = pan.fun, number = 3, overlap = 0.01, rows = 1)
 
 
+slope*flood*obstacles
+slope*distance
+slope*tarpfix_multimethod
+flood*tarpfix_multimethod
+slope*trench_depth
+flood*trench_depth
+slope*plantation
+slope*followups
+slope*pb_fixation
+slope*tarping_duration
+# OR FLOOOOOOOD????
 
-fit = glm(vs ~ hp, data=mtcars, family=binomial)
-newdat <- data.frame(hp=seq(min(mtcars$hp), max(mtcars$hp),len=100))
-newdat$vs = predict(fit, newdata=newdat, type="response")
-plot(jitter(vs,amount = 0.03)~hp, data=mtcars, col="red4")
-lines(vs ~ hp, newdat, col="green4", lwd=2)
+obstacles*stand_surface
+obstacles*geomem
+obstacles*uprootexcav
+obstacles*distance
+obstacles*tarpfix_multimethod
+obstacles*trench_depth
+obstacles*plantation
+obstacles*followups
+obstacles*pb_fixation
+
+distance*stand_surface*trench_depth
+distance*stand_surface*maxveg/uproot
+distance*trench_depth
+distance*plantation
+distance*duration
+distance*pb_fixation
+distance*tarpfix_multimethod
 ```
 
 This coplot is very interesting because it shows an inconsistent pattern within each category (single row or single column) suggesting that our sample prevents us to satisfactorily test a three-way interaction between those variables. Additionally, we can see that there are very few observations of not entirely tarped knotweed stands (*n* = 17) as well as very few observations above 500m a.s.l. (*n* = 9; which is not a very high elevation for knotweeds (Martin *et al.*, 2019)). As our dataset was gathered opportunistically it is not surprising, yet it means that our sampled dataset will only be able to highlight strong effects of elevation and of partially tarped control operations, which is not the case here. All this may explain the very odd pattern displayed by the lower-right panel: Figure 2.2, Figure 2.6 and the other panels (save one) seem to indicate that there is a positive correlation between elevation and tarping efficiency; however, the fact that this pattern is reversed for smaller knotweed stands (and thus weaker ones) that are entirely covered does not make any sense. It is therefore possible that the seemingly higher efficiency of tarping at higher elevations actually reflects chance.
@@ -786,6 +808,11 @@ plot(jitter(vs,amount = 0.03)~hp, data=mtcars, col="red4")
 lines(vs ~ hp, newdat, col="green4", lwd=2)
 ```
 
+
+```{r redges export, include=FALSE}
+### Finally, I export the dataset to be used for modelling in my "mydata" folder:
+readr::write_csv(x = redges, file = here::here("mydata", "redges.csv"), append = FALSE)
+```
 
 ******
 
