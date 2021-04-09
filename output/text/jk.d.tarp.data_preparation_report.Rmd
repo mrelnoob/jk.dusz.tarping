@@ -739,8 +739,8 @@ This conditioning spineplot is quite informative because it shows a changing pat
 
 ```{r redges coplot 2, fig.align='center', fig.cap="**Figure 3.7b.** Conditioning spineplot of *lreg_edges* displaying a three-way interaction between *distance*, *stand_surface* (in log-scale) and *trench_depth*. Within each panel, the proportion of operations that found knotweed regrowths at the edge of the tarped area (dark orange) and the proportion of those that did not (light orange) is displayed, while the left-hand rectangles display these proportions for "low" tarping distances (below average) and the right-hand rectangles display them for "high" tarping distances (above average)", fig.width=12, fig.height=9, message=FALSE, comment=NA, warning=FALSE}
 
-redges %>% dplyr::mutate(distance = ifelse(distance <= mean(distance), "Low", "High")) %>%
-  dplyr::mutate(distance = factor(distance, levels=c("Low", "High"))) -> rrr
+redges %>% dplyr::mutate(obstacles = ifelse(obstacles <= mean(obstacles), "Low", "High")) %>%
+  dplyr::mutate(obstacles = factor(obstacles, levels=c("Low", "High"))) -> rrr
 
 pan.fun = function(x, y, ...){
     usr <- par("usr"); on.exit(par(usr)) # Frankly, I don't understand what these two lines do (only new = TRUE seems to be doing something), and the spineplot messes with the axes of the coplots below.
@@ -748,8 +748,8 @@ pan.fun = function(x, y, ...){
     spineplot(as.factor(x), as.factor(y), main="", xlab="", ylab="", axes=F, col = c("#FF9933","#FFCC99"))
 }
 
-### Three-way interaction between distance, stand_surface and trench_depth:
-graphics::coplot(lreg_edges ~ distance | log(stand_surface) * trench_depth, data = rrr, 
+### Three-way interaction between obstacles, stand_surface and trench_depth:
+graphics::coplot(lreg_edges ~ obstacles | pb_fixation, data = rrr, 
                  panel = pan.fun, number = 3, overlap = 0.01, rows = 1)
 
 
@@ -765,23 +765,23 @@ slope*pb_fixation
 slope*tarping_duration
 # OR FLOOOOOOOD????
 
-obstacles*stand_surface
-obstacles*geomem
-obstacles*uprootexcav
-obstacles*distance
-obstacles*tarpfix_multimethod
-obstacles*trench_depth
-obstacles*plantation
-obstacles*followups
-obstacles*pb_fixation
+obstacles*stand_surface # Nope!
+obstacles*geomem # WHY NOT§§§§§§§§§§§§
+obstacles*uprootexcav # Mouais
+obstacles*distance # Ok!
+obstacles*tarpfix_multimethod #Mouais
+obstacles*trench_depth # Nope!
+obstacles*plantation # Nope!
+obstacles*followups # Nope!
+obstacles*pb_fixation # Nope!
 
-distance*stand_surface*trench_depth
-distance*stand_surface*maxveg/uproot
-distance*trench_depth
-distance*plantation
-distance*duration
-distance*pb_fixation
-distance*tarpfix_multimethod
+distance*stand_surface*trench_depth # Ok!
+distance*stand_surface*maxveg/uproot # Nope!
+distance*trench_depth # Nope!
+distance*plantation # Nope!
+distance*duration # Nope!
+distance*pb_fixation # Nope!
+distance*tarpfix_multimethod # Nope!
 ```
 
 This above coplot seems to indicate that entirely covered (tarped) knotweed stands prevent the drop in tarping efficiency with increasing stand surface. Caution is however still required as the relationships do not seem very strong.
