@@ -1085,7 +1085,29 @@ coarse_env*plantation
 coarse_env*followups
 coarse_env*tarping_duration
 
+stand_surface*geomem/woven
+stand_surface*levelling*flood
+stand_surface*stripsoverlap_ok
+stand_surface*tarpfix
+stand_surface*piercedinstall*followups
+stand_surface*plantation
+stand_surface*followups
+stand_surface*duration
 
+woven/geomem*tarpfix_pierced*levelling/followups
+woven/geomem*duration*???
+
+levelling*flood?
+levelling*duration
+levelling*tarpfix_pirced
+
+stripsoverlap_ok*flood
+stripsoverlap_ok*woven
+stripsoverlap_ok*levelling
+stripsoverlap_ok*tarpfix_multimethod
+stripsoverlap_ok*piercedinstal
+stripsoverlap_ok*followups
+stripsoverlap_ok*plantation*followups/tarpfixmulti
 ```
 
 This conditioning spineplot is quite informative because
