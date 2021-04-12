@@ -449,7 +449,7 @@ readr::write_csv(x = erad, file = here::here("mydata", "erad.csv"), append = FAL
 
 
 
-# - Exploration of the sub-dataset related to the response variables indicating knotweed regrowths at the edge of the tarped area (i.e. *lreg_edges*)
+# - Exploration of the sub-dataset related to the response variable indicating knotweed regrowths at the edge of the tarped area (i.e. *lreg_edges*)
 \
 The first thing to do here was to prepare the sub-dataset that will be used to model the responses of the *lreg_edges* variable. To do so, the following steps have been performed:
 
@@ -712,7 +712,7 @@ As our response variable (i.e. *lreg_edges*) is binomial, **heteroscedasticity**
 ### - Interactions among variables
 
 Finally, to further investigate potentially meaningful **interactions** among our variables, we used co-plots (i.e. conditioning plots) between some of our predictors and *lreg_edges*, based on plausible hypotheses. 
-However, as *lreg_edges* is a binary factor, the use of coplots got more complicated. Visualizing categorical variables as a function of other variables, especially quantitative ones, is not ideal in a regular conditioning plot as points will tend to be stacked on each other and as logistic curves should be fitted instead of regression lines, which is quite tedious to automatise in R. Consequently, we chose to draw *spineplots within the coplot panels* (**conditioning spineplots**) by transforming quantitative variables into two-level factors ("low" and "high" - based on whether observations had values below or above average, meaning that the number of observations is not distributed equitably between the two categories). The plots created could be viewed as some sort of *graphical contingency tables*. Unfortunately, combining spineplots with coplots creates a graphic bug in the drawing of the axes (linked to the coplot function internals) that we could not fix yet. We apologize for that.
+However, as *lreg_edges* is a binary factor, the use of coplots was more complicated than for a numeric variable. Visualizing categorical variables as a function of other variables, especially quantitative ones, is not ideal in a regular conditioning plot as points will tend to be stacked on each other and as logistic curves should be fitted instead of regression lines, which is quite tedious to automatise in R. Consequently, we chose to draw *spineplots within the coplot panels* (**conditioning spineplots**) by transforming quantitative variables into two-level factors ("low" and "high" - based on whether observations had values below or above average, meaning that the number of observations is not distributed equitably between the two categories). The plots created could be viewed as some sort of *graphical contingency tables*. Unfortunately, combining spineplots with coplots creates a graphic bug in the drawing of the axes (linked to the coplot function internals) that we could not fix yet. We apologize for that.
 
 To avoid overloading the present document, only the most informative plots are displayed. 
 
@@ -734,10 +734,29 @@ graphics::coplot(lreg_edges ~ distance | log(stand_surface) * trench_depth, data
                  panel = pan.fun, number = 3, overlap = 0.01, rows = 1)
 ```
 
-This conditioning spineplot is quite informative because it shows a changing pattern as we move from bottom to top, but globally not from left to right. It could be the sign of an existing interaction between *distance* and *trench depth*, but not with *stand surface*: with increasing trench depth, the proportion of tarping operations that found no knotweed regrowths at the edges (i.e. light orange rectangles) when tarping distances were above average (i.e. right-hand rectangles within each of the 9 panels) increases, regardless of the size of the knotweed stands. Actually, it is hard to say if stand surface does not play any role here but it appears that there is no unequivocal trend.
+This conditioning spineplot is quite informative because it shows a changing pattern as we move from bottom to top, but globally not from left to right. It could be the sign of an existing interaction between *distance* and *trench depth*, but not with *stand surface*: with increasing trench depth, the proportion of tarping operations that found no knotweed regrowths at the edges (i.e. light orange rectangles) when tarping distances were above average (i.e. right-hand rectangles within each of the 9 panels) increased, regardless of the size of the knotweed stands. Actually, it is hard to say if stand surface did not play any role here but it appears that there was no unequivocal trend.
 
 
-```{r redges coplot 2, fig.align='center', fig.cap="**Figure 3.7b.** Conditioning spineplot of *lreg_edges* displaying a three-way interaction between *distance*, *stand_surface* (in log-scale) and *trench_depth*. Within each panel, the proportion of operations that found knotweed regrowths at the edge of the tarped area (dark orange) and the proportion of those that did not (light orange) is displayed, while the left-hand rectangles display these proportions for "low" tarping distances (below average) and the right-hand rectangles display them for "high" tarping distances (above average)", fig.width=12, fig.height=9, message=FALSE, comment=NA, warning=FALSE}
+```{r redges coplot 2, fig.align='center', fig.cap="**Figure 3.7b.** Conditioning spineplot of *lreg_edges* displaying a two-way interaction between *slope* and *obstacles*. Within each panel, the proportion of operations that found knotweed regrowths at the edge of the tarped area (dark orange) and the proportion of those that did not (light orange) is displayed, while the left-hand rectangles display these proportions for "low" slopes (below average) and the right-hand rectangles display them for "high" slopes (above average)", fig.width=12, fig.height=9, message=FALSE, comment=NA, warning=FALSE}
+
+redges %>% dplyr::mutate(slope = ifelse(slope <= mean(slope), "Low", "High")) %>%
+  dplyr::mutate(slope = factor(slope, levels=c("Low", "High"))) -> rrr
+
+pan.fun = function(x, y, ...){
+    usr <- par("usr"); on.exit(par(usr)) # Frankly, I don't understand what these two lines do (only new = TRUE seems to be doing something), and the spineplot messes with the axes of the coplots below.
+    par(usr = c(usr[1:2], 0, 1.5), new=T)
+    spineplot(as.factor(x), as.factor(y), main="", xlab="", ylab="", axes=F, col = c("#FF9933","#FFCC99"))
+}
+
+### Two-way interaction between slope and obstacles:
+graphics::coplot(lreg_edges ~ slope | obstacles, data = rrr, 
+                 panel = pan.fun, number = 3, overlap = 0.01, rows = 1)
+```
+
+This above conditioning spineplot seems to indicate that the effect of increasing *slopes* on the proportion of regrowths at the edge increased when there were many *obstacles* on the tarped area.
+
+
+```{r redges coplot 2, fig.align='center', fig.cap="**Figure 3.7c.** Conditioning spineplot of *lreg_edges* displaying a three-way interaction between *obstacles*, *geomem* and *tarpfix_multimethod*. Within each panel, the proportion of operations that found knotweed regrowths at the edge of the tarped area (dark orange) and the proportion of those that did not (light orange) is displayed, while the left-hand rectangles display these proportions for "low" obstacle proportions (below average) and the right-hand rectangles display them for "high" obstacle proportions (above average)", fig.width=12, fig.height=9, message=FALSE, comment=NA, warning=FALSE}
 
 redges %>% dplyr::mutate(obstacles = ifelse(obstacles <= mean(obstacles), "Low", "High")) %>%
   dplyr::mutate(obstacles = factor(obstacles, levels=c("Low", "High"))) -> rrr
@@ -748,91 +767,43 @@ pan.fun = function(x, y, ...){
     spineplot(as.factor(x), as.factor(y), main="", xlab="", ylab="", axes=F, col = c("#FF9933","#FFCC99"))
 }
 
-### Three-way interaction between obstacles, stand_surface and trench_depth:
-graphics::coplot(lreg_edges ~ obstacles | pb_fixation, data = rrr, 
+### Three-way interaction between obstacles, geomem and tarpfix_multimethod:
+graphics::coplot(lreg_edges ~ obstacles | geomem * tarpfix_multimethod, data = rrr, 
                  panel = pan.fun, number = 3, overlap = 0.01, rows = 1)
-
-
-slope*flood*obstacles
-slope*distance
-slope*tarpfix_multimethod
-flood*tarpfix_multimethod
-slope*trench_depth
-flood*trench_depth
-slope*plantation
-slope*followups
-slope*pb_fixation
-slope*tarping_duration
-# OR FLOOOOOOOD????
-
-obstacles*stand_surface # Nope!
-obstacles*geomem # WHY NOT§§§§§§§§§§§§
-obstacles*uprootexcav # Mouais
-obstacles*distance # Ok!
-obstacles*tarpfix_multimethod #Mouais
-obstacles*trench_depth # Nope!
-obstacles*plantation # Nope!
-obstacles*followups # Nope!
-obstacles*pb_fixation # Nope!
-
-distance*stand_surface*trench_depth # Ok!
-distance*stand_surface*maxveg/uproot # Nope!
-distance*trench_depth # Nope!
-distance*plantation # Nope!
-distance*duration # Nope!
-distance*pb_fixation # Nope!
-distance*tarpfix_multimethod # Nope!
 ```
 
-This above coplot seems to indicate that entirely covered (tarped) knotweed stands prevent the drop in tarping efficiency with increasing stand surface. Caution is however still required as the relationships do not seem very strong.
+This very interesting conditioning spineplot seems to indicate that when not much efforts had been taken to fix fabrics to the ground, increasing *obstacles* increased the likelihood of finding regrowths at the edge of the tarped area. However, when multiple methods were used for fixation, this trend seemed to be quite reduced except when *geomembranes* were used! This could mean that *geomembranes* are harder to properly fix to the ground and/or around obstacles (compared to *geotextiles*).
 
 
-```{r redges coplot 3, fig.align='center', fig.cap="**Figure 2.8c.** Coplot of the *efficiency score* displaying a two-way interaction between *followups* and *pb_fixation*. There is a 5% overlap between each group, explaining why there are more than *n* = 85 points. Colours are meaningless and are just here for aesthetical reasons", fig.width=12, fig.height=9, message=FALSE, comment=NA, warning=FALSE}
-graphics::coplot(efficiency ~ followups | pb_fixation, data = redges, 
-                 panel=function(x,y,...) { points(x,y, col = wesanderson::wes_palette(n=4, name="Royal2"), pch = 19); abline(line(y~x)) }, 
-                 number = 2, overlap = 0.05, rows = 1)
-```
-```{r redges coplot 4, fig.align='center', fig.cap="**Figure 2.8d.** Coplot of the *efficiency score* displaying a two-way interaction between *followups* and *pb_durability*. There is a 5% overlap between each group, explaining why there are more than *n* = 85 points. Colours are meaningless and are just here for aesthetical reasons", fig.width=12, fig.height=9, message=FALSE, comment=NA, warning=FALSE}
-graphics::coplot(efficiency ~ followups | pb_durability, data = redges, 
-                 panel=function(x,y,...) { points(x,y, col = wesanderson::wes_palette(n=4, name="Royal2"), pch = 19); abline(line(y~x)) }, 
-                 number = 2, overlap = 0.05, rows = 1)
+```{r redges coplot 2, fig.align='center', fig.cap="**Figure 3.7d.** Conditioning spineplot of *lreg_edges* displaying a two-way interaction between *obstacles* and *distance*. Within each panel, the proportion of operations that found knotweed regrowths at the edge of the tarped area (dark orange) and the proportion of those that did not (light orange) is displayed, while the left-hand rectangles display these proportions for "low" obstacle proportions (below average) and the right-hand rectangles display them for "high" obstacle proportions (above average)", fig.width=12, fig.height=9, message=FALSE, comment=NA, warning=FALSE}
+
+### Two-way interaction between obstacles and obstacles:
+graphics::coplot(lreg_edges ~ obstacles | distance, data = rrr, 
+                 panel = pan.fun, number = 3, overlap = 0.01, rows = 1)
 ```
 
-Quite logically, these two coplots seem to confirm that follow-up operations increase tarping efficiency especially when there are some problems regarding fabrics fixation or durability. The pattern is particularly clear for fixation problems (Figure 2.8c).
-
-
-
-
-
-
-§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§
-§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§
-§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§
-```{r}
-### Pour plotter des régressions logistiques
-fit = glm(vs ~ hp, data=mtcars, family=binomial)
-newdat <- data.frame(hp=seq(min(mtcars$hp), max(mtcars$hp),len=100))
-newdat$vs = predict(fit, newdata=newdat, type="response")
-plot(jitter(vs,amount = 0.03)~hp, data=mtcars, col="red4")
-lines(vs ~ hp, newdat, col="green4", lwd=2)
-```
-
-
-```{r redges export, include=FALSE}
-### Finally, I export the dataset to be used for modelling in my "mydata" folder:
-readr::write_csv(x = redges, file = here::here("mydata", "redges.csv"), append = FALSE)
-```
+This figure suggests that the effect of increasing *obstacle proportion* on the likelihood of finding regrowths at the edge of the tarped area might me be reduced when larger covering *distances* are applied.
 
 ******
 
-# - Exploration of the sub-dataset related to the response variables indicating knotweed regrowths within the tarped area (i.e. *lreg_tarpedarea*)
+```{r redges export, include=FALSE}
+rm(rrr)
+### Finally, I export the dataset to be used for modelling in my "mydata" folder:
+readr::write_csv(x = redges, file = here::here("mydata", "redges.csv"), append = FALSE)
+```
 \
-The first thing to do here is to prepare the sub-dataset that will be used to model the responses of the *lreg_tarpedarea* variable. To do so, the following steps have been performed:
+\
+
+
+
+# - Exploration of the sub-dataset related to the response variable indicating knotweed regrowths within the tarped area (i.e. *lreg_tarpedarea*)
+\
+The first thing to do here was to prepare the sub-dataset that will be used to model the responses of the *lreg_tarpedarea* variable. To do so, the following steps have been performed:
 
 * We selected the subset of predictors and covariates that will be used to model *lreg_tarpedarea*;
 * Finally, we imputed missing values using **Random Forest** and the `missForest` package (Stekhoven & Buehlmann, 2012). 
 
-The table below presents the *out-of-bag (OOB) imputation error* estimates for each type of variables (computed as the Normalized Root Mean Squared Error (NRMSE) for the numeric variables, and Proportion of Falsely Classified entries (PFC) for the categorical variables). OOB values near 1 indicate that imputations are not reliable, while values close to 0 indicate very low imputation error. For the meaning of the variables, please refer to the attached **documentation**.
+The table below presents the *out-of-bag (OOB) imputation error* estimates for each type of variable (computed as the Normalized Root Mean Squared Error (NRMSE) for numeric variables, and the Proportion of Falsely Classified entries (PFC) for categorical variables). OOB values near 1 indicate that imputations are not reliable, while values close to 0 indicate very low imputation errors. For the meaning of the variables, please refer to the attached **documentation**.
 
 ```{r rtarped import & imput, include=FALSE}
 rtarped <- jk.dusz.tarping::model_datasets(response.var = "tarpedarea")
@@ -850,7 +821,7 @@ imput <- missForest::missForest(xmis = rtarped_mis, verbose = TRUE)
 knitr::kable(imput$OOBerror)
 ```
 
-Now, let's take a quick look at our dataset.
+Here are a few descriptive statistics of our sub-dataset.
 
 ```{r rtarped summary, include=TRUE, message=FALSE, comment=NA}
 rtarped[,3:ncol(rtarped)] <- imput$ximp # Replacing the original dataset with the imputed one!
@@ -861,12 +832,12 @@ rm(rtarped_mis, imput)
 \
 \
 
-#### - Investigation of correlation structures
-##### - Multivariate synthesis of environmental variables
+## - Investigation of correlation structures
+### - Multivariate synthesis of environmental variables
 \
-We performed a **normed-PCA** on some of our environmental variables for which we do not have strong hypotheses (i.e. *difficulty_access*, *shade*, *forest*, *ruggedness*, *granulometry*) but we kept *slope*, *obstacles*, and *flood* because we suspected they might have a strong influence on the presence of knotweed regrowths. 
+We performed a **normed-PCA** on some of our environmental variables for which we did not have strong direct hypotheses (i.e. *difficulty_access*, *shade*, *forest*, *ruggedness*, *granulometry*) but we kept *slope*, *obstacles*, and *flood* because we suspected they might have a major influence on the success/failure of tarping. 
 
-```{r rtarped env PCAs, warning=FALSE, fig.align='center', fig.cap="**Figure 13.** Correlation plot of the normed-PCA on environmental variables for the *regrowth within the tarped area* dataset"}
+```{r rtarped env PCAs, warning=FALSE, fig.align='center', fig.cap="**Figure 4.1.** Correlation plot of the normed-PCA on environmental variables for the *regrowth within the tarped area* dataset"}
 xxx <- dplyr::select(.data = rtarped, c(difficulty_access, shade, forest, ruggedness, granulometry))
 
 # Normed-PCA:
@@ -882,9 +853,12 @@ rtarped %>% dplyr::select(-difficulty_access, -shade, -forest, -ruggedness) %>%
 rtarped$coarse_env <- ttt # And I use this occasion to reduce the dataset and replace one variable with my new synthetic variable.
 ```
 
-As the first axis (PC) of our PCA satisfactorily synthesizes a large amount (`r round(res.pca$eig[1,2],1)`%) of the variance of the 5 environmental variables, we will use operations' coordinates on this axis to build a synthetic variable to summarize their environment. This new variable will be named **coarse_env** and will thus replace the other 5 variables in the dataset. Operations with *positive values* for this variable are located in sites that tend to be forested (and thus shaded), difficult to access, with uneven ground and a coarse soil texture (and vice-versa).
+As the first axis (PC) of our PCA satisfactorily synthesized a large amount (`r round(res.pca$eig[1,2],1)`%) of the variance of the 5 environmental variables, we used operations' coordinates on this axis to build a synthetic variable to summarize their environment. This new variable was named **coarse_env** and thus replaced the other 5 variables in the dataset. Operations with *positive values* for this variable were located in sites that tend to be forested (and thus shaded), difficult to access, with uneven ground and a coarse soil texture (and vice-versa).
 
-```{r rtarped followups, warning=FALSE, fig.align='center', fig.cap="**Figure 1 bis.** Correlation plot of the normed-PCA on follow-up variables for the *tarping efficiency* dataset"}
+We also performed another **normed-PCA** on some of our follow-up variables that we thought could be synthesized (i.e. *add_control*, *repairs*, and *freq_monitoring*).
+
+
+```{r rtarped followups, warning=FALSE, fig.align='center', fig.cap="**Figure 4.1 bis.** Correlation plot of the normed-PCA on follow-up variables for the *tarping efficiency* dataset"}
 rtarped %>% dplyr::select(freq_monitoring, repairs, add_control) %>%
   dplyr::mutate(repairs = as.numfactor(x = repairs),
                 add_control = as.numfactor(x = add_control))-> xxx
@@ -902,16 +876,16 @@ rtarped %>% dplyr::select(-freq_monitoring, -repairs) %>%
 rtarped$followups <- ttt # And I use this occasion to reduce the dataset and replace one variable with my new synthetic variable.
 ```
 
-As the first axis (PC) of our PCA satisfactorily synthesizes a large amount (`r round(res.pca$eig[1,2],1)`%) of the variance of the 3 follow-up variables, we will use operations' coordinates on this axis to build a synthetic variable to summarize their follow-up. This new variable will be named **followups** and will thus replace the other 3 variables in the dataset. High *positive values* for this variable represent operations that were frequently monitored and where additional control and repairs were performed (and vice-versa).
+As the first axis (PC) of our PCA satisfactorily synthesized a large amount (`r round(res.pca$eig[1,2],1)`%) of the variance of the 3 follow-up variables, we used operations' coordinates on this axis to build a synthetic variable to summarize their follow-up conditions. This new variable was named **followups** and thus replaced the other 3 variables in the dataset. High *positive values* for this variable represent operations that were frequently monitored and where additional control and repairs were performed (and vice-versa).
 \
 \
   
-##### - Correlation among variables
+### - Correlation among variables
 \
-To investigate potential correlations and colinearity among our variables, we will start by computing a **correlation matrix** of the data. As most of our factors are either ordered factors (i.e. ordinal variables) or binary factors (i.e. boolean), we can use them in a correlation matrix. To do that however, computations will be based on *Spearman*'s rank correlation coefficient.  
-To avoid giving too much weight to our own tarping experiments (those performed in Chalon s/ Saone with the French national railway company), we removed them from the data to compute correlations: their influence will be accounted for in further analyses by the use of **mixed-effect models**.
+To investigate potential correlations and collinearity among our variables, we started by computing a **correlation matrix** of the data. As most of our factors were either ordered factors (i.e. ordinal variables) or binary factors (i.e. boolean), we could use them in a correlation matrix. To do that however, computations were based on *Spearman*'s rank correlation coefficients.  
+To avoid giving too much weight to our own tarping experiments (those performed in Chalon s/ Saone with the French national railway company), we removed them from the data to compute correlations: their influence was accounted for in further analyses by the use of **mixed-effect models**.
 
-```{r rtarped corrplot, fig.align='center', fig.cap="**Figure 14.** Correlation matrix displaying *Spearman*'s $\\rho$ for the numeric variables and ordered factors of the *regrowth within the tarped area* dataset. Only significant correlations are displayed (with $\\alpha$ = 0.05)", warning=FALSE}
+```{r rtarped corrplot, fig.align='center', fig.cap="**Figure 4.2.** Correlation matrix displaying *Spearman*'s $\\rho$ for the numeric variables and ordered factors of the *regrowth within the tarped area* dataset. Only significant correlations are displayed (with $\\alpha$ = 0.05)", warning=FALSE}
 rm(res.pca, xxx, ttt)
 
 # To convert all ordered factors into numeric variables usable in a correlation matrix:
@@ -943,13 +917,13 @@ Many interesting patterns can be observed in this correlation matrix. Among them
 * Without surprise, *pierced_tarpinstall* seems to be strongly positively correlated with *obstacles* and *pb_durability*.
 * *stand_surface* seems positively correlated with *flood*, *geotex*, *woven_geotex*, *distance* and *pb_fixation*.
 
-It is worth reminding that accounting for multivariate relationships, interactions and the effect of our tarping operations (dropped for the current correlation matrix) will certainly give very different patterns.
+It is worth reminding that accounting for multivariate relationships, interactions and the effect of our tarping operations (dropped for the current correlation matrix) will certainly affect the observed patterns.
 \
 \
    
-##### - Multicollinearity
+### - Multicollinearity
 \
-As multicollinearity is one of the biggest issues for inference modelling, we need to assess which explanatory variables and covariates are collinear and will possibly become problematic for modelling. To do so, our intention was to compute *Variance Inflation Factors* (VIF) for each variable. However, as several variables are categorical and as we will not be working with models fitted with ordinary least squares, we will rather use *Generalized VIF* (Fox & Monette, 1992).
+As multicollinearity is one of the biggest issues for inference modelling, we wanted to assess which explanatory variables and covariates were collinear and would possibly become problematic during modelling stages. To do so, our intention was to compute *Variance Inflation Factors* (VIF) for each variable. However, as several variables were categorical and as we will not be working with models fitted with ordinary least squares, we computed *Generalized VIF* values instead (Fox & Monette, 1992).
 
 ```{r rtarped init GVIF}
 modvif <- stats::glm(lreg_tarpedarea~latitude+longitude+elevation+slope+flood+coarse_env+obstacles+stand_surface+geomem+geotex+woven_geotex+maxveg+uprootexcav+levelling+fully_tarped+distance+stripsoverlap_ok+tarpfix_multimethod+tarpfix_pierced+pierced_tarpinstall+sedicover_height+trench_depth+plantation+followups+pb_fixation+pb_durability+pb_trampiercing+reg_edges+tarping_duration, data = rtarped, family = binomial)
@@ -965,7 +939,7 @@ As one could expect, there is evidence for **multicollinearity** among our 31 po
 * Since our dataset contains sites on both sides of the Atlantic and since we do not have strong hypotheses regarding the effects of *longitude* (because our sites are located well within the longitudinal range of knotweeds), we decide to drop it.
 * As much of the information contained in *obstacles* is shared with *pierced_tarpinstall* and *coarse_env*, we decide to drop it in order to reduce multicollinearity as well as the number of variables. 
 
-After iteratively dropping these collinear variables and re-assessing GVIF values, we obtain a subset of potential explanatory variables with GVIF values globally < 2.5 and GVIF values will likely be even lower in later stages as models will not include so many variables at the same time. Naturally, we will also bear in mind the potential effects of the dropped variables in the discussion.
+After iteratively dropping these collinear variables and re-assessing GVIF values, we obtained a subset of potential explanatory variables with GVIF values globally < 2.5. Naturally, it will be important not to forget about the potential effect of the dropped variables in the discussion of our results.
 
 ```{r rtarped final GVIF}
 modvif <- stats::glm(lreg_tarpedarea~latitude+elevation+slope+flood+coarse_env+stand_surface+geomem+woven_geotex+maxveg+uprootexcav+levelling+fully_tarped+distance+stripsoverlap_ok+tarpfix_multimethod+tarpfix_pierced+pierced_tarpinstall+sedicover_height+trench_depth+followups+pb_fixation+pb_durability+pb_trampiercing+reg_edges+tarping_duration, data = rtarped, family = binomial)
@@ -980,16 +954,16 @@ rm(modvif)
 \
 \
     
-#### - Distributions and dispersion parameters
-##### - Looking for outliers
+## - Distributions and dispersion parameters
+### - Looking for outliers
 \
-We will look for potential outliers in the data using **boxplots** and **Cleveland dotplots** on our quantitative variables. 
+The next step in our data exploration was to look for potential outliers in the data using **boxplots** and **Cleveland dotplots** on our quantitative variables. 
 
-```{r rtarped boxplot outliers, fig.align='center', fig.cap="**Figure 15.** Boxplots for all quantitative variables of the *regrowth within the tarped area* dataset", warning=FALSE}
+```{r rtarped boxplot outliers, fig.align='center', fig.cap="**Figure 4.3.** Boxplots for all quantitative variables of the *regrowth within the tarped area* dataset", warning=FALSE}
 jk.dusz.tarping::uni.boxplots(dataset = rtarped)
 ```
 
-```{r rtarped dotplot, fig.align='center', fig.cap="**Figure 16.** Cleveland dotplots for all quantitative variables of the *regrowth within the tarped area* dataset"}
+```{r rtarped dotplot, fig.align='center', fig.cap="**Figure 4.4.** Cleveland dotplots for all quantitative variables of the *regrowth within the tarped area* dataset"}
 jk.dusz.tarping::uni.dotplots(dataset = rtarped)
 ```
 
@@ -1010,8 +984,8 @@ jk.dusz.tarping::uni.simudistrib(simu.var = simu.var, distribution = "poisson")
 rm(simu.var)
 ```
 
-After analysing random samples drawn from log-normal distributions (based on the parameters of our potentially problematic variables), we have good reason to believe that only *stand_surface* should be problematic. Consequently, we choose to delete the spotted outlier within *stand_surface* (i.e. the *stand_surface* of ca. 5000 m^2^).  
-The other variables do not have distribution that a transformation could not fix, except perhaps *latitude* (we will keep an eye on the influence of its single extreme value). We will see later on whether we actually need such transformation (e.g log) or not. 
+After analysing random samples drawn from log-normal distributions (based on the parameters of our potentially problematic variables), we have good reason to believe that only *stand_surface* should be problematic. Consequently, we chose to delete the spotted outlier within *stand_surface* (i.e. the *stand_surface* of ca. 5000 m^2^).    
+The other variables do not have distribution that a transformation could not fix, except perhaps *latitude* (we will keep an eye on the influence of its single extreme value). We will see later on whether we actually need such transformation (e.g log), and if we actually use this variable in modelling. 
 
 ```{r rtarped update, include=FALSE}
 rtarped <- rtarped[-(which.max(rtarped$stand_surface)),]
@@ -1019,22 +993,24 @@ rtarped <- rtarped[-(which.max(rtarped$stand_surface)),]
 \
 \
    
-##### - Normality
+### - Normality
 \
-We already got a pretty good idea of the distribution of our variables and not all statistical methods involve a Normality assumption (for instance, multiple linear regressions assume that residuals are normally distributed, not the variable themselves). Still, it's interesting and often useful to have a precise view of variables distributions, even for predictors and covariates. 
+Although we already gained pretty good insights into the probability distribution followed by our variables, it is usually interesting and often useful to have a precise view of the variables' distributions.
+Consequently, we described the shapes of the distribution of our quantitative variables using histograms as well as skewness and kurtosis values. Skewness is a measure of the symmetry of a variable's distribution (a perfectly normal distribution has a skewness of 0), while kurtosis gives information on the combined amount of probability contained in the two tails of a distribution (often reported as *excess kurtosis*, that is kurtosis - 3, since a perfectly normally distributed variable has a kurtosis of 3). There is much debate regarding what constitutes "acceptable" values for these statistics or whether this question actually makes any sense at all. Yet, various authors suggest that values of ±2 should not be too problematic for procedures requiring approximately normally distributed variables (Field, 2009; Gravetter & Wallnau, 2014). Nonetheless, many statistical methods do not possess a direct normality assumption (linear regression models, for instance and contrarily to popular beliefs, do not assume the normality of either the response variable nor of any predictor/covariate but do assume that the replicated observations of the response variable for any fixed predictor value should be normally distributed (Montgomery & Peck, 1992); an assumption that is often difficult to verify, hence the usual focus on models residuals).
+For all these reasons, here, we only used these statistics as descriptive tools to foresee potential future complications related to the distribution of our variables, but not as bases for actual decision making. 
 
-```{r rtarped histo, fig.align='center', fig.cap="**Figure 17.** Histograms for all quantitative variables of the *regrowth within the tarped area* dataset"}
+```{r rtarped histo, fig.align='center', fig.cap="**Figure 4.5.** Histograms for all quantitative variables of the *regrowth within the tarped area* dataset"}
 uni.histograms(dataset = rtarped)
 ```
 \
 \
 
-#### - Bivariate relationships
-##### - Relationships among variables
+## - Multivariate relationships
+### - Relationships among variables
 \
-The next step in our data exploration is to plot the response variables against each predictors and covariates in order to assess the **linearity** and **homoscedasticity** assumptions as well as identify potential **interactions** and **multivariate outliers**. It would be interesting to plot all variables against each other, but we have too many potential predictors and covariates for that.
+The next step in our data exploration was to plot the response variables against each predictors and covariates in order to assess the **linearity** and **homoscedasticity** of these relationships and identify potential **multivariate outliers**. It would have been interesting to plot all variables against each other, but the number of potential predictors and covariates was too high for that.
 
-```{r rtarped bivariate plot, fig.align='center', fig.cap="**Figure 18.** Multivariate representation of *lreg_tarpedarea* against each potential explanatory variable", fig.width=12, fig.height=9, message=FALSE, comment=NA, warning=FALSE}
+```{r rtarped bivariate plot, fig.align='center', fig.cap="**Figure 4.6.** Multivariate representation of *lreg_tarpedarea* against each potential explanatory variable", fig.width=12, fig.height=9, message=FALSE, comment=NA, warning=FALSE}
 ### To plot a response variable against all predictors/covariates, we will have to do use a for loop or the facet_wrap function of ggplot (or equivalent).
 # For the "lreg_tarpedarea" variable (bounded continuous variable):
 rtarped %>% dplyr::select(-manager_id, -xp_id) %>%
@@ -1066,8 +1042,65 @@ Various interesting observations can be made from these scatterplots:
 * First, heteroscedasticity will perhaps not be surprising in our models as the variances of many variables do not seem to be homogeneous. On the other hand, we do not see clear multivariate outliers.
 * Second, *lreg_tarpedarea* seems to increase with increasing *followups*, *flood*, *maxveg*, all *problem variables*, *stand-surface*, *stripsoverlap_ok* and *woven_geotextile*. If some relationships seem quite straightforward (and are in accordance with our hypotheses), others are more surprising and may just be noise. 
 * Third, *lreg_tarpedarea* seems to decrease with increasing *elevation*, *geomem*,and *pierced_tarpinstall*. If the first two relationships seem quite straightforward (and are in accordance with our hypotheses), the third one is more surprising!
+\
+\
+   
+### - Homogeneity of variances
 
+As our response variable (i.e. *lreg_tarpedarea*) is binomial, **heteroscedasticity** is not a problem as variance is assumed to be heterogeneous in logistic regression models.
+\
+\
+   
+### - Interactions among variables
+
+Finally, to further investigate potentially meaningful **interactions** among our variables, we used co-plots (i.e. conditioning plots) between some of our predictors and *lreg_tarpedarea*, based on plausible hypotheses. 
+However, as *lreg_tarpedarea* is a binary factor, the use of coplots was more complicated than for a numeric variable. Visualizing categorical variables as a function of other variables, especially quantitative ones, is not ideal in a regular conditioning plot as points will tend to be stacked on each other and as logistic curves should be fitted instead of regression lines, which is quite tedious to automatise in R. Consequently, we chose to draw *spineplots within the coplot panels* (**conditioning spineplots**) by transforming quantitative variables into two-level factors ("low" and "high" - based on whether observations had values below or above average, meaning that the number of observations is not distributed equitably between the two categories). The plots created could be viewed as some sort of *graphical contingency tables*. Unfortunately, combining spineplots with coplots creates a graphic bug in the drawing of the axes (linked to the coplot function internals) that we could not fix yet. We apologize for that.
+
+To avoid overloading the present document, only the most informative plots are displayed. 
+
+```{r rtarped coplot 1, fig.align='center', fig.cap="**Figure 4.7a.** Conditioning spineplot of *lreg_tarpedarea* displaying a three-way interaction between *distance*, *stand_surface* (in log-scale) and *trench_depth*. Within each panel, the proportion of operations that found knotweed regrowths within the tarped area (dark blue) and the proportion of those that did not (light blue) is displayed, while the left-hand rectangles display these proportions for "low" tarping distances (below average) and the right-hand rectangles display them for "high" tarping distances (above average)", fig.width=12, fig.height=9, message=FALSE, comment=NA, warning=FALSE}
+
+par(.pardefault) # To restore defaults graphical parameters
+
+rtarped %>% dplyr::mutate(stand_surface = ifelse(stand_surface <= mean(stand_surface), "Low", "High")) %>%
+  dplyr::mutate(stand_surface = factor(stand_surface, levels=c("Low", "High"))) -> rrr
+
+pan.fun = function(x, y, ...){
+    usr <- par("usr"); on.exit(par(usr)) # Frankly, I don't understand what these two lines do (only new = TRUE seems to be doing something), and the spineplot messes with the axes of the coplots below.
+    par(usr = c(usr[1:2], 0, 1.5), new=T)
+    spineplot(as.factor(x), as.factor(y), main="", xlab="", ylab="", axes=F, col = c("#33CCCC","#CCFFFF"))
+}
+
+### Three-way interaction between stand_surface, stand_surface and trench_depth:
+graphics::coplot(lreg_tarpedarea ~ stand_surface | flood, data = rrr, 
+                 panel = pan.fun, number = 3, overlap = 0.01, rows = 1)
+
+coarse_env*woven_geotex*followups
+coarse_env*geomem
+coarse_env*stand_surface
+coarse_env*levelling*woven/geomem
+coarse_env*stripsoverlap_ok
+coarse_env*tarpfix_multimethod
+coarse_env*plantation
+coarse_env*followups
+coarse_env*tarping_duration
+
+
+```
+
+This conditioning spineplot is quite informative because
+
+
+
+
+
+6§§§§§§§§§§§§§§§§§§§§§§§§§§§
+§§§§§§§§§§§§§§§§§§§§§§§§§§§
+§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§
+§§§§§§§§§§§§§§§§§§§§§§§§§§§
 ```{r rtarped export, include=FALSE}
+rm(rrr)
+
 ### Finally, I export the dataset to be used for modelling in my "mydata" folder:
 readr::write_csv(x = rtarped, file = here::here("mydata", "rtarped.csv"), append = FALSE)
 ```
@@ -1076,7 +1109,7 @@ readr::write_csv(x = rtarped, file = here::here("mydata", "rtarped.csv"), append
 
 ******
 
-### - For the response variables indicating knotweed regrowths at fabric strip overlaps (i.e. *reg_stripsoverlap*)
+# - Exploration of the sub-dataset related to the response variable indicating knotweed regrowths at fabric strip overlaps (i.e. *reg_stripsoverlap*)
 \
 The first thing to do here is to prepare the sub-dataset that will be used to model the responses of the *reg_stripsoverlap* variable. To do so, the following steps have been performed:
 
