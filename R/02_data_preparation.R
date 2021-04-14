@@ -539,7 +539,7 @@ uni.histograms <- function(dataset, MAR=c(3,2,0.5,1.5), CEX.LAB = 1.2, FONT.LAB 
 #'
 #' @description The `cond.boxplots` function draws, within a single panel, conditional boxplots (i.e.
 #' a plot of a continuous Y variable against one or several categorical X(s) variable(s) (factor),
-#' or \strong{discretized} numeric variable(s)) in order to explore bivariate relationships or
+#' or \strong{discretized} numeric variable(s)) in order to explore bivariate relationships and
 #' assess \strong{heteroscedasticity}. \cr
 #' If some of the X variables are quantitative (numeric), they will consequently be transformed into
 #' factors and discretized into a given number of classes, set approximately by the `N` parameter. This

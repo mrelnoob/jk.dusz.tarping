@@ -140,7 +140,7 @@ devtools::check() # Ok!
 
 # To finally install the package:
 devtools::install()
-usethis::use_git(message = ":boom: New function: cond.boxplots()!")
+usethis::use_git(message = ":metal: Updated function: cond.boxplots()!")
 system("git push")
 
 
@@ -240,7 +240,8 @@ usethis::use_build_ignore("_drake.R")
 usethis::use_build_ignore("make.R")
 usethis::use_git_ignore(".drake")
 usethis::use_build_ignore("output/")
-usethis::use_build_ignore("text/") # And not plots/ ?????
+usethis::use_build_ignore("text/")
+usethis::use_build_ignore("plots/")
 
 
 
