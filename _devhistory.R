@@ -18,11 +18,10 @@
 # usethis::edit_file("_devhistory.R")
 # Here, I do not need to run it because the present script file (the one you are reading) ALREADY IS my
 # development history file!
-# From now, all the command lines will be written in this file.
+# From now on, all command lines will be written in this file.
 # IMPORTANT NOTE: in this case, I started a package project from scratch. If I want to start from a
 # GitHub repository, the workflow is different but some steps will be required so I encourage my future
-# self to carefully review the steps of this workflow anyway. In the end, I would be best if I transformed
-# this R development history file into a Rmd document!!!
+# self to carefully review the steps of this workflow anyway.
 
 
 
@@ -73,7 +72,7 @@ usethis::use_r("00_import_raw_data")
 # contain R scripts for functions and NOTHING ELSE!!! Yet, RStudio may sometimes put other things in it,
 # so it is a good idea to go and see once in a while.
 
-# To use pipes everywhere in the package without explicitly loading the "magrittr" package:
+# To use pipes (i.e. %>%) everywhere in the package without explicitly loading the "magrittr" package:
 usethis::use_pipe() # Automatically creates a pipe function (and associated R file in the R folder),
 # while updating the DESCRIPTION file to tell R that it should import the "magrittr" package.
 
@@ -82,16 +81,16 @@ usethis::use_pipe() # Automatically creates a pipe function (and associated R fi
 dir.create("mydata")
 usethis::use_build_ignore("mydata") # Because it is not expected in a regular package root folder (if
 # I don't ignore it, it will cause warnings in my package checks and all kind of craps. I just spent
-# five hours to get read of them, so trust me).
+# five hours to get rid of them, so trust me).
 usethis::use_git(message = ":zap: Created a mydata folder and imported data in it")
 
 
 
 ### Now I can write my function in the associated R file while keeping in mind that:
 #  --> I need to create a roxygen skeleton to write the documentation.
-#  --> I should NOT SOURCE my functions (i.e. I should save my function's file but do not run the
+#  --> I should NOT SOURCE my functions (i.e. I should save my function's file but I should not run the
 #    code in it and create "manually" the function you just wrote) to avoid conflicts, see below!
-# IMPORTANT NOTE: if a function uses functions from other packages, you need to tell it to R by updating
+# IMPORTANT NOTE: if a function uses functions from other packages, you need to tell R about it by updating
 # the NAMESPACE file. It will be done automatically by devtools when we produce our documentation if we
 # have previously listed the dependencies (packages) in the Roxygen2 header of the functions thanks to the
 # tags (#' @import package OR #' @importFrom package function)! So we do this and add in our function's
@@ -102,6 +101,14 @@ usethis::use_package("here")
 usethis::use_package("stringr")
 # REMINDER: The NAMESPACE controls what happens when our package is loaded but not when it's installed.
 # This is the role of DESCRIPTION!
+
+############################################################################################################
+################# IMPORTANT PART: to load, check and install the functions of my package ###################
+############################################################################################################
+
+### The following lines (until the part about connecting to Github) are run iteratively every time a new
+# function is created within the package or every time a function is modified. This is the central part
+# that loads, inspects (i.e. run the R CMD check), test, and install my functions and my whole package!
 
 # To load our functions, we will thus use:
 devtools::load_all() # Now, all functions in the R folder are available!
@@ -127,15 +134,14 @@ usethis::use_git(message = ":bulb: Update documentation")
 
 ### When everything is ready, it's time to check the integrity of our package:
 devtools::check() # Ok!
-# IMPORTANT NOTE: I had a lot of PROBLEMS in my first attempts to create this function because the dataset
-# contained comments in French and English, with special characters and punctuation (;,:[] etc.) and R
-# thought that my punctuation was field separators! Do not put comments in .csv or .txt files!
+# IMPORTANT NOTE: I had a lot of PROBLEMS in my first attempts to create the loading function because the
+# dataset contained comments in French and English, with special characters and punctuation (;,:[] etc.)
+# and R thought that my punctuation was field separators! NEVER put comments in .csv or .txt files!!!
 
 # To finally install the package:
 devtools::install()
 usethis::use_git(message = ":boom: New function: cond.boxplots()!")
 system("git push")
-
 
 
 
@@ -263,11 +269,12 @@ usethis::use_package("gridExtra")
 
 ### Up to this point, I have created the "cleaning" functions for the first part of my data processing.
 # So my 01_data_cleaning.R file is populated with some functions and the package works. So NOW, I need
-# to start addressing my data preparation step and start keeping tracks of my data wrangling and data
-# future analyses in a .Rmd report.
-# Therefore, I create such .Rmd manually because file.create(... = "output/text/test.Rmd") does not
+# to start addressing my data preparation step and start keeping tracks of my data wrangling and future data
+# analyses in a .Rmd report:
+file.create(... = "output/text/jk.d.tarp.data_preparation_report.Rmd")
+# Therefore, I create such .Rmd manually because  does not
 # insert the skeleton within the file (YAML etc.) and I'm running late...
-usethis::use_git(message = ":arrow_up: Saved progresses!")
+usethis::use_git(message = ":boom: Improved _devhistory.R file")
 system("git push")
 
 
