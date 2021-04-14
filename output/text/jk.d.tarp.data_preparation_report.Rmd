@@ -428,13 +428,8 @@ graphics::coplot(efficiency ~ followups | pb_fixation, data = erad,
                  panel=function(x,y,...) { points(x,y, col = wesanderson::wes_palette(n=4, name="Royal2"), pch = 19); abline(line(y~x)) }, 
                  number = 2, overlap = 0.05, rows = 1)
 ```
-```{r erad coplot 4, fig.align='center', fig.cap="**Figure 2.8d.** Coplot of the *efficiency score* displaying a two-way interaction between *followups* and *pb_durability*. There is a 5% overlap between each group, explaining why there are more than *n* = 85 points. Colours are meaningless and are just here for aesthetical reasons", message=FALSE, comment=NA, warning=FALSE}
-graphics::coplot(efficiency ~ followups | pb_durability, data = erad, 
-                 panel=function(x,y,...) { points(x,y, col = wesanderson::wes_palette(n=4, name="Royal2"), pch = 19); abline(line(y~x)) }, 
-                 number = 2, overlap = 0.05, rows = 1)
-```
 
-Quite logically, these two coplots seem to confirm that follow-up operations increase tarping efficiency especially when there are some problems regarding fabrics fixation or durability. The pattern is particularly clear for fixation problems (Figure 2.8c).
+Quite logically, this coplot seems to confirm that follow-up operations increase tarping efficiency especially when there are some problems regarding fabrics fixation.
 
 ******
 
