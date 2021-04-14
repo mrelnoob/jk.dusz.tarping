@@ -1,6 +1,6 @@
 Package: jk.dusz.tarping
 Title: Prepare and Analyse the Tarping Survey Data
-Version: 0.1.0
+Version: 0.2.0
 Authors@R: 
     person(given = "Francois-Marie",
            family = "Martin",
