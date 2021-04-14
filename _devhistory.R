@@ -177,7 +177,7 @@ system("git push --set-upstream origin master") # Or without system() but in the
 # ____________________________________________________
 ##### How to add a README file to our repository #####
 
-usethis::use_readme_rmd() # Creates a README.Rmd and add it automatically to .Rbuildignore (and opens it).
+usethis::use_readme_rmd() # Creates a README.Rmd and adds it automatically to .Rbuildignore (and opens it).
 # After manually editing the file, we need to compile it into a .md document (otherwise, GitHub and
 # the CRAN won't be able to read it and display it on their websites):
 rmarkdown::render("README.Rmd")
@@ -200,16 +200,16 @@ system("git push")
 ####################################
 ####################################
 
-# Up to this point, I've created a working package called `jk.dusz.tarping` whose sole function is to
-# load the unique CSV file that is stored in the mydata folder. It is not very useful nor compulsory
-# to use have a proper Research Compendium nor to use Drake. But I wanted to have a very clean and well
-# commented "development history" file to help me build future more useful packages. I'll delete it
+# Up to this point, I've created a working package called `jk.dusz.tarping` that, as of today (14/04/21),
+# contains the functions used to produce my data preparation report. It is not very useful nor compulsory
+# to have a proper _devhistory.R file nor to use Drake. But I wanted to have a very clean and well
+# commented "development history" file to help me build more useful packages in the future. I'll delete it
 # if I finally take the time to change this file into a proper tutorial (in RMarkdown).
 
 # Now, I will try to carry on my data analysis process while and place it into a Drake workflow to ensure
-# the reproducibility, consistency and robustness of my process.I am not sure if I will integrate the
+# the reproducibility, consistency and robustness of my process. I am not sure if I will integrate the
 # following part into my package (because it's fairly time consuming) but I will try.
-# It should not be a problem not to transform everything as a package. As long as I don't use the commends
+# It should not be a problem not to transform everything as a package. As long as I don't use the commands
 # meant for package building (such as devtools::check() or document()), there should be no reasons for
 # errors (I guess)...
 
@@ -225,7 +225,7 @@ usethis::use_r(name = "03_modelling.R")
 usethis::use_r(name = "plan.R") # Do not forget to create the "plan" of your Drake pipeline
 
 # Then I have to create the make.R file (kind of master script) and a "_drake.R" file (but I'm not
-# sure why yet):
+# sure why yet, possibly to contain the logs):
 file.create("make.R")
 file.create("_drake.R")
 
@@ -251,7 +251,7 @@ usethis::use_build_ignore("text/") # And not plots/ ?????
 
 ### To analyse my data, I will use various packages (dependencies), so I need to fill-in the DESCRIPTION
 # file about them in order to load them afterwards with devtools (in case I don't carry on with the
-# package creation:
+# package creation):
 usethis::use_package("drake")
 usethis::use_package("dplyr")
 usethis::use_package("ggplot2")
@@ -271,9 +271,9 @@ usethis::use_package("gridExtra")
 # So my 01_data_cleaning.R file is populated with some functions and the package works. So NOW, I need
 # to start addressing my data preparation step and start keeping tracks of my data wrangling and future data
 # analyses in a .Rmd report:
-file.create(... = "output/text/jk.d.tarp.data_preparation_report.Rmd")
-# Therefore, I create such .Rmd manually because  does not
-# insert the skeleton within the file (YAML etc.) and I'm running late...
+file.create(... = "output/text/jk.d.tarp.data_preparation_report.Rmd") # Using this command, the .Rmd file
+# will be created but will lack the YAML header skeleton that should thus be manually placed at the top of
+# the document.
 usethis::use_git(message = ":boom: Improved _devhistory.R file")
 system("git push")
 
