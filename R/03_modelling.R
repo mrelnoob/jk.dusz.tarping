@@ -17,8 +17,9 @@ eff <- readr::read_csv(here::here("mydata", "erad.csv"), col_names = TRUE, col_t
                            pb_durability = readr::col_factor(c("0", "1"))))
 
 
-## Dans gamlss, je dois utiliser re() pour fitter un random effect, car random() convient lorsque Y est normal,
-# (enfin je crois).
+## Dans gamlss, je dois utiliser re() pour fitter un random effect (s'utilise globalement comme lme() - voir
+# ressources en ligne, dont l'aide dans mes favoris),
+# car random() convient lorsque Y est normal, (enfin je crois).
 ## Mes modèles mixtes doivent être ajustés avec du ML et pas du REML (sinon, ils ne sont pas comparables) !
 
 
