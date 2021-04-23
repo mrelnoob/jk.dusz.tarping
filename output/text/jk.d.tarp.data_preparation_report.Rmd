@@ -437,7 +437,7 @@ Quite logically, this coplot seems to confirm that follow-up operations increase
 ### Finally, I export the dataset to be used for modelling in my "mydata" folder:
 readr::write_csv(x = erad, file = here::here("mydata", "erad.csv"), append = FALSE)
 # A problem with this method is that once exported, R will lose track of the variable types (class). Therefore, if we open (read) this .csv file with R, it will specify columns as best it can, that is as double for numeric columns and as character for columns containing letters. For instance, it will import the first column of `erad` (i.e. "manager_id") as a numeric (double) variable when it should be a factor.
-# A not so ideal solution is to use the `col_types` argument of the readr::read_csv() function to manually specify variable types during import. Yet, we will not be able to specify that "plantation" is an ordered factor and we will have to do it manually afterward. 
+# A not so ideal solution is to use the `col_types` argument of the readr::read_csv() function to manually specify variable types during import (see the readr vignette for more info).
 ```
 \
 \
