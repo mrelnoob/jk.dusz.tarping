@@ -1,3 +1,26 @@
+################################
+##### MODELLING efficiency #####
+################################
+
+### IMPORTANT NOTE: to avoid creating notes for unquoted variables, I must add the following code at
+# the beginning of every source file (e.g. R/myscript.R) that uses unquoted variables, so in front of
+# all my scripts doing any kind of analyses (otherwise, I should always assign each variable, e.g.
+# mydata$myvariable, which is quite time consuming and wearisome).
+if(getRversion() >= "2.15.1")  utils::globalVariables(c(
+  "manager_id", "xp_id", "country", "efficiency", "eff_eradication", "high_eff",
+  "latitude", "elevation", "goals", "slope", "coarse_env", "obstacles", "flood",
+  "geomem", "maxveg", "uprootexcav", "stand_surface", "fully_tarped", "distance", "tarping_duration",
+  "stripsoverlap_ok", "tarpfix_pierced", "tarpfix_multimethod", "sedicover_height",
+  "trench_depth", "plantation", "followups",
+  "pb_fixation", "pb_durability"))
+
+
+
+##### Data preparation for modelling 'efficiency' #####
+# --------------------------------------------------- #
+
+# List of used packages (for publication or package building): here, readr,
+
 eff <- readr::read_csv(here::here("mydata", "erad.csv"), col_names = TRUE, col_types =
                          readr::cols(
                            manager_id = readr::col_factor(),
@@ -18,11 +41,24 @@ eff <- readr::read_csv(here::here("mydata", "erad.csv"), col_names = TRUE, col_t
 
 
 ## Dans gamlss, je dois utiliser re() pour fitter un random effect (s'utilise globalement comme lme() - voir
-# ressources en ligne, dont l'aide dans mes favoris),
-# car random() convient lorsque Y est normal, (enfin je crois).
+# ressources en ligne, dont l'aide dans mes favoris), car random() convient lorsque Y est normal,
+# (enfin je crois).
 ## Mes modèles mixtes doivent être ajustés avec du ML et pas du REML (sinon, ils ne sont pas comparables) !
+# Mais s'il me reste qu'un "best model", je peux le refitter en REML car ses estimations de SE seront plus
+# précises.
+
+# Donc je CENTRE mes variables impliquées dans des interactions. Mais si à la fin, je vire les modèles à
+# interaction, alors pas besoin, non ? ASK CV§§§§§§§§§
 
 
+
+
+
+
+
+
+
+# Code de Philippe 2021
 Model <- (1:17)
 
 Candidate <- c('Manag + Year',
