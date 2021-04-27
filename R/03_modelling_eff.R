@@ -46,23 +46,19 @@ readr::read_csv(here::here("mydata", "erad.csv"), col_names = TRUE, col_types =
 summary(eff)
 
 
-##### Test model #####
-# --------------------
+##### Test model with gamlss #####
+# --------------------------------
 #Cand.mod <- list()
-
 #Cand.mod[[1]] <- gamlss::gamlss(efficiency~distance, data = eff, family = BEOI())
-#mod1 <- gamlss::gamlss(efficiency~distance, data = eff, family = gamlss.dist::BEOI())
-library(gamlss)
-mod1 <- gamlss::gamlss(formula = efficiency~distance + re(random = ~1|manager_id, method = "ML"),
-                       nu.formula = ~distance + re(random = ~1|manager_id, method = "ML"),
-                       data = eff, family = gamlss.dist::BEOI())
-#mod2 <- gamlss::gamlss(efficiency~distance + gamlss::random(x = manager_id),
-#                      data = eff, family = gamlss.dist::BEOI())
-# Checking the residuals:
-plot(mod1)
-#plot(mod2)
-plot(fitted(mod1)~eff$efficiency)
 
+library(gamlss)
+mod1 <- gamlss(formula = efficiency~distance+re(random = ~1|manager_id),
+                       nu.formula = ~distance+re(random = ~1|manager_id),
+                       data = eff, family = BEOI())
+
+# Checking the residuals:
+plot(mod1) # Obs. n°67 is probably problematic?
+plot(fitted(mod1)~eff$efficiency)
 # Checking the goodness-of-fit and overdispersion:
 dat.resid <- sum(resid(mod1, type = "weighted", what = "mu")^2)
 1 - pchisq(dat.resid, mod1$df.resid) # Conclusions: Pearson residuals do indicate a lack of fit (p values
@@ -72,7 +68,40 @@ dat.resid/df.residual(mod1) # Conclusions: the data are definitely not overdispe
 summary(mod1)
 binomial()$linkinv(coef(mod1))  # logit inverse: to get interpretable parameter estimates
 # Further trend exploration:
-gamlss::Rsq(mod1) # R^2 seems very good!
+gamlss::Rsq(mod1) # R^2 seems too good to be true!
+
+
+
+##### Test model with glmmTMB #####
+# ---------------------------------
+
+eff %>% dplyr::mutate(efficiency = ifelse(efficiency == 1, 0.999, efficiency)) -> eff2
+mod2 <- glmmTMB::glmmTMB(formula = efficiency~distance + (1|manager_id), data = eff2,
+                         family = glmmTMB::beta_family(link = "logit"))
+
+# Checking the residuals:
+ggplot2::ggplot(data = NULL) + ggplot2::geom_point(ggplot2::aes(y = residuals(mod2,
+                                                   type = "pearson"), x = fitted(mod2)))
+qq.line = function(x) {
+  # following four lines from base R's qqline()
+  y <- quantile(x[!is.na(x)], c(0.25, 0.75))
+  x <- qnorm(c(0.25, 0.75))
+  slope <- diff(y)/diff(x)
+  int <- y[1L] - slope * x[1L]
+  return(c(int = int, slope = slope))
+}
+QQline = qq.line(resid(mod2, type = "pearson"))
+ggplot2::ggplot(data = NULL, ggplot2::aes(sample = resid(mod2, type = "pearson"))) +
+  ggplot2::stat_qq() + ggplot2::geom_abline(intercept = QQline[1], slope = QQline[2])
+# Checking the goodness-of-fit and overdispersion:
+dat.resid <- sum(resid(mod2, type = "pearson")^2)
+1 - pchisq(dat.resid, df.residual(mod2)) # Ok
+dat.resid/df.residual(mod2) # Ok
+# Further trend exploration:
+1 - exp((2/nrow(eff2)) * (logLik(update(mod2, ~1))[1] - logLik(mod2)[1]))
+
+
+
 
 
 ## Dans gamlss, je dois utiliser re() pour fitter un random effect (s'utilise globalement comme lme() - voir
@@ -84,6 +113,15 @@ gamlss::Rsq(mod1) # R^2 seems very good!
 
 # Donc je CENTRE mes variables impliquées dans des interactions. Mais si à la fin, je vire les modèles à
 # interaction, alors pas besoin, non ? ASK CV§§§§§§§§§
+
+
+
+
+
+
+
+
+
 
 
 
