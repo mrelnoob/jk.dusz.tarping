@@ -19,6 +19,7 @@
 
 
 
+# --------------------------------------------------- #
 ##### Data preparation for modelling 'efficiency' #####
 # --------------------------------------------------- #
 
@@ -47,7 +48,7 @@ readr::read_csv(here::here("mydata", "erad.csv"), col_names = TRUE, col_types =
                            pb_durability = readr::col_factor(c("0", "1")))) %>%
   dplyr::mutate(efficiency = efficiency/10) %>% # For 'efficiency' to be look like a percentage that could
   # be modelled using a Beta Regression Model.
-  dplyr::mutate(efficiency.2 = ifelse(efficiency == 1, 0.999, efficiency)) -> eff
+  dplyr::mutate(efficiency = ifelse(efficiency == 1, 0.999, efficiency)) -> eff
 summary(eff)
 
 
@@ -95,17 +96,16 @@ pseudo.R2glmm <- function(model){
 
 
 
-##### Models to explain 'efficiency' #####
-# -------------------------------------- #
+# ---------------------------------------- #
+##### Building of the candidate models #####
+# ---------------------------------------- #
 
-#Cand.mod <- list()
-#Cand.mod[[1]] <- gamlss::gamlss(efficiency~distance, data = eff, family = BEOI())
-
-
-
+Cand.mod <- list()
+Cand.mod[[1]] <- gamlss::gamlss(efficiency~distance, data = eff, family = BEOI())
 
 
-##### Test model with gamlss #####
+
+##### Test model with GAMLSS #####
 # --------------------------------
 
 # library(gamlss)
@@ -129,211 +129,777 @@ pseudo.R2glmm <- function(model){
 
 
 
-##### Test model with glmmTMB #####
-# ---------------------------------
+##### Model 1 (null model) #####
+# ------------------------------
 
-mod2 <- glmmTMB::glmmTMB(formula = efficiency.2~distance + (1|manager_id), data = eff,
-                         family = glmmTMB::beta_family(link = "logit"))
+Cand.mod[[1]] <- glmmTMB::glmmTMB(formula = efficiency~(1|manager_id), data = eff,
+                         family = glmmTMB::beta_family(link = "logit"), REML = FALSE)
 
 ### Model evaluation:
-ggplot2::ggplot(data = NULL) + ggplot2::geom_point(ggplot2::aes(y = residuals(mod2,
-                                                   type = "pearson"), x = fitted(mod2)))
-QQline <- qq.line(resid(mod2, type = "pearson"))
-ggplot2::ggplot(data = NULL, ggplot2::aes(sample = resid(mod2, type = "pearson"))) +
+ggplot2::ggplot(data = NULL) + ggplot2::geom_point(ggplot2::aes(y = residuals(Cand.mod[[1]],
+                                                                              type = "pearson"), x = fitted(Cand.mod[[1]])))
+QQline <- qq.line(resid(Cand.mod[[1]], type = "pearson"))
+ggplot2::ggplot(data = NULL, ggplot2::aes(sample = resid(Cand.mod[[1]], type = "pearson"))) +
   ggplot2::stat_qq() + ggplot2::geom_abline(intercept = QQline[1], slope = QQline[2])
 # To simulate residuals (see https://www.flutterbys.com.au/stats/tut/tut10.5a.html#h2_15):
-dat.sim <- simulate(mod2, n = 250)
+dat.sim <- simulate(Cand.mod[[1]], n = 250)
 par(mfrow = c(5, 4), mar = c(3, 3, 1, 1))
 resid <- NULL
 for (i in 1:nrow(dat.sim)) {
   e = ecdf(data.matrix(dat.sim[i, ] + runif(250, -0.5, 0.5)))
   plot(e, main = i, las = 1)
-  resid[i] <- e(eff$efficiency.2[i] + runif(250, -0.5, 0.5))
+  resid[i] <- e(eff$efficiency[i] + runif(250, -0.5, 0.5))
 }
-par(mfrow = c(1, 1))
-plot(resid ~ fitted(mod2))
-
+par(.pardefault) # To restore defaults graphical parameters
+plot(resid ~ fitted(Cand.mod[[1]]))
 
 ### Checking the goodness-of-fit and overdispersion:
-dat.resid <- sum(resid(mod2, type = "pearson")^2)
-1 - pchisq(dat.resid, df.residual(mod2)) # Ok
-dat.resid/df.residual(mod2) # Ok
+dat.resid <- sum(resid(Cand.mod[[1]], type = "pearson")^2)
+1 - pchisq(dat.resid, df.residual(Cand.mod[[1]])) # Ok
+dat.resid/df.residual(Cand.mod[[1]]) # Ok
 # To plot the observed vs. fitted values:
-par(.pardefault) # To restore defaults graphical parameters
-plot(x = fitted(mod2), y = eff$efficiency.2, xlab = "Fitted values", ylab = "Observed values")
-
+plot(x = fitted(Cand.mod[[1]]), y = eff$efficiency, xlab = "Fitted values", ylab = "Observed values")
 
 ### Exploring the model parameters and test hypotheses:
-summary(mod2)
-family(mod2)$linkinv(glmmTMB::fixef(mod2)$cond) # To get interpretable coefficients.
-broom.mixed::tidy(mod2)
-broom.mixed::glance(mod2)
-
+summary(Cand.mod[[1]])
+family(Cand.mod[[1]])$linkinv(glmmTMB::fixef(Cand.mod[[1]])$cond) # To get interpretable coefficients.
+broom.mixed::tidy(Cand.mod[[1]])
+broom.mixed::glance(Cand.mod[[1]])
 
 ### Computing a quasiR^2:
-1 - exp((2/nrow(eff)) * (logLik(update(mod2, ~1))[1] - logLik(mod2)[1])) # Methods from flutterbys.com
-
-
-pseudo.R2glmm(model = mod2)
-
-## Dans gamlss, je dois utiliser re() pour fitter un random effect (s'utilise globalement comme lme() - voir
-# ressources en ligne, dont l'aide dans mes favoris), car random() convient lorsque Y est normal,
-# (enfin je crois).
-## Mes modèles mixtes doivent être ajustés avec du ML et pas du REML (sinon, ils ne sont pas comparables) !
-# Mais s'il me reste qu'un "best model", je peux le refitter en REML car ses estimations de SE seront plus
-# précises.
-
-# Donc je CENTRE mes variables impliquées dans des interactions. Mais si à la fin, je vire les modèles à
-# interaction, alors pas besoin, non ? ASK CV§§§§§§§§§
+1 - exp((2/nrow(eff)) * (logLik(update(Cand.mod[[1]], ~1))[1] - logLik(Cand.mod[[1]])[1])) # Methods from flutterbys.com
+pseudo.R2glmm(model = Cand.mod[[1]])
 
 
 
+##### Model 2 #####
+# -----------------
+
+Cand.mod[[2]] <- glmmTMB::glmmTMB(formula = efficiency~distance + (1|manager_id), data = eff,
+                         family = glmmTMB::beta_family(link = "logit"), REML = FALSE)
+
+### Model evaluation:
+ggplot2::ggplot(data = NULL) + ggplot2::geom_point(ggplot2::aes(y = residuals(Cand.mod[[2]],
+                                                   type = "pearson"), x = fitted(Cand.mod[[2]])))
+QQline <- qq.line(resid(Cand.mod[[2]], type = "pearson"))
+ggplot2::ggplot(data = NULL, ggplot2::aes(sample = resid(Cand.mod[[2]], type = "pearson"))) +
+  ggplot2::stat_qq() + ggplot2::geom_abline(intercept = QQline[1], slope = QQline[2])
+# To simulate residuals (see https://www.flutterbys.com.au/stats/tut/tut10.5a.html#h2_15):
+dat.sim <- simulate(Cand.mod[[2]], n = 250)
+par(mfrow = c(5, 4), mar = c(3, 3, 1, 1))
+resid <- NULL
+for (i in 1:nrow(dat.sim)) {
+  e = ecdf(data.matrix(dat.sim[i, ] + runif(250, -0.5, 0.5)))
+  plot(e, main = i, las = 1)
+  resid[i] <- e(eff$efficiency[i] + runif(250, -0.5, 0.5))
+}
+par(.pardefault) # To restore defaults graphical parameters
+plot(resid ~ fitted(Cand.mod[[2]]))
+
+### Checking the goodness-of-fit and overdispersion:
+dat.resid <- sum(resid(Cand.mod[[2]], type = "pearson")^2)
+1 - pchisq(dat.resid, df.residual(Cand.mod[[2]])) # Ok
+dat.resid/df.residual(Cand.mod[[2]]) # Ok
+# To plot the observed vs. fitted values:
+par(.pardefault) # To restore defaults graphical parameters
+plot(x = fitted(Cand.mod[[2]]), y = eff$efficiency, xlab = "Fitted values", ylab = "Observed values")
+
+### Exploring the model parameters and test hypotheses:
+summary(Cand.mod[[2]])
+family(Cand.mod[[2]])$linkinv(glmmTMB::fixef(Cand.mod[[2]])$cond) # To get interpretable coefficients.
+broom.mixed::tidy(Cand.mod[[2]])
+broom.mixed::glance(Cand.mod[[2]])
+
+### Computing a quasiR^2:
+1 - exp((2/nrow(eff)) * (logLik(update(Cand.mod[[2]], ~1))[1] - logLik(Cand.mod[[2]])[1])) # Methods from flutterbys.com
+pseudo.R2glmm(model = Cand.mod[[2]])
+
+
+
+##### Model 3 #####
+# -----------------
+
+Cand.mod[[3]] <- glmmTMB::glmmTMB(formula = efficiency~followups + (1|manager_id), data = eff,
+                                  family = glmmTMB::beta_family(link = "logit"), REML = FALSE)
+
+### Model evaluation:
+ggplot2::ggplot(data = NULL) + ggplot2::geom_point(ggplot2::aes(y = residuals(Cand.mod[[3]],
+                                                                              type = "pearson"), x = fitted(Cand.mod[[3]])))
+QQline <- qq.line(resid(Cand.mod[[3]], type = "pearson"))
+ggplot2::ggplot(data = NULL, ggplot2::aes(sample = resid(Cand.mod[[3]], type = "pearson"))) +
+  ggplot2::stat_qq() + ggplot2::geom_abline(intercept = QQline[1], slope = QQline[2])
+# To simulate residuals (see https://www.flutterbys.com.au/stats/tut/tut10.5a.html#h2_15):
+dat.sim <- simulate(Cand.mod[[3]], n = 250)
+par(mfrow = c(5, 4), mar = c(3, 3, 1, 1))
+resid <- NULL
+for (i in 1:nrow(dat.sim)) {
+  e = ecdf(data.matrix(dat.sim[i, ] + runif(250, -0.5, 0.5)))
+  plot(e, main = i, las = 1)
+  resid[i] <- e(eff$efficiency[i] + runif(250, -0.5, 0.5))
+}
+par(.pardefault) # To restore defaults graphical parameters
+plot(resid ~ fitted(Cand.mod[[3]]))
+
+### Checking the goodness-of-fit and overdispersion:
+dat.resid <- sum(resid(Cand.mod[[3]], type = "pearson")^2)
+1 - pchisq(dat.resid, df.residual(Cand.mod[[3]])) # Ok
+dat.resid/df.residual(Cand.mod[[3]]) # Ok
+# To plot the observed vs. fitted values:
+par(.pardefault) # To restore defaults graphical parameters
+plot(x = fitted(Cand.mod[[3]]), y = eff$efficiency, xlab = "Fitted values", ylab = "Observed values")
+
+### Exploring the model parameters and test hypotheses:
+summary(Cand.mod[[3]])
+family(Cand.mod[[3]])$linkinv(glmmTMB::fixef(Cand.mod[[3]])$cond) # To get interpretable coefficients.
+broom.mixed::tidy(Cand.mod[[3]])
+broom.mixed::glance(Cand.mod[[3]])
+
+### Computing a quasiR^2:
+1 - exp((2/nrow(eff)) * (logLik(update(Cand.mod[[3]], ~1))[1] - logLik(Cand.mod[[3]])[1])) # Methods from flutterbys.com
+pseudo.R2glmm(model = Cand.mod[[3]])
+
+
+
+##### Model 4 #####
+# -----------------
+
+Cand.mod[[4]] <- glmmTMB::glmmTMB(formula = efficiency~fully_tarped + (1|manager_id), data = eff,
+                                  family = glmmTMB::beta_family(link = "logit"), REML = FALSE)
+
+### Model evaluation:
+ggplot2::ggplot(data = NULL) + ggplot2::geom_point(ggplot2::aes(y = residuals(Cand.mod[[4]],
+                                                                              type = "pearson"), x = fitted(Cand.mod[[4]])))
+QQline <- qq.line(resid(Cand.mod[[4]], type = "pearson"))
+ggplot2::ggplot(data = NULL, ggplot2::aes(sample = resid(Cand.mod[[4]], type = "pearson"))) +
+  ggplot2::stat_qq() + ggplot2::geom_abline(intercept = QQline[1], slope = QQline[2])
+# To simulate residuals (see https://www.flutterbys.com.au/stats/tut/tut10.5a.html#h2_15):
+dat.sim <- simulate(Cand.mod[[4]], n = 250)
+par(mfrow = c(5, 4), mar = c(3, 3, 1, 1))
+resid <- NULL
+for (i in 1:nrow(dat.sim)) {
+  e = ecdf(data.matrix(dat.sim[i, ] + runif(250, -0.5, 0.5)))
+  plot(e, main = i, las = 1)
+  resid[i] <- e(eff$efficiency[i] + runif(250, -0.5, 0.5))
+}
+par(.pardefault) # To restore defaults graphical parameters
+plot(resid ~ fitted(Cand.mod[[4]]))
+
+### Checking the goodness-of-fit and overdispersion:
+dat.resid <- sum(resid(Cand.mod[[4]], type = "pearson")^2)
+1 - pchisq(dat.resid, df.residual(Cand.mod[[4]])) # Ok
+dat.resid/df.residual(Cand.mod[[4]]) # Ok
+# To plot the observed vs. fitted values:
+plot(x = fitted(Cand.mod[[4]]), y = eff$efficiency, xlab = "Fitted values", ylab = "Observed values")
+
+### Exploring the model parameters and test hypotheses:
+summary(Cand.mod[[4]])
+family(Cand.mod[[4]])$linkinv(glmmTMB::fixef(Cand.mod[[4]])$cond) # To get interpretable coefficients.
+broom.mixed::tidy(Cand.mod[[4]])
+broom.mixed::glance(Cand.mod[[4]])
+
+### Computing a quasiR^2:
+1 - exp((2/nrow(eff)) * (logLik(update(Cand.mod[[4]], ~1))[1] - logLik(Cand.mod[[4]])[1])) # Methods from flutterbys.com
+pseudo.R2glmm(model = Cand.mod[[4]])
+
+
+
+##### Model 5 #####
+# -----------------
+
+Cand.mod[[5]] <- glmmTMB::glmmTMB(formula = efficiency~geomem + (1|manager_id), data = eff,
+                                  family = glmmTMB::beta_family(link = "logit"), REML = FALSE)
+
+### Model evaluation:
+ggplot2::ggplot(data = NULL) + ggplot2::geom_point(ggplot2::aes(y = residuals(Cand.mod[[5]],
+                                                                              type = "pearson"), x = fitted(Cand.mod[[5]])))
+QQline <- qq.line(resid(Cand.mod[[5]], type = "pearson"))
+ggplot2::ggplot(data = NULL, ggplot2::aes(sample = resid(Cand.mod[[5]], type = "pearson"))) +
+  ggplot2::stat_qq() + ggplot2::geom_abline(intercept = QQline[1], slope = QQline[2])
+# To simulate residuals (see https://www.flutterbys.com.au/stats/tut/tut10.5a.html#h2_15):
+dat.sim <- simulate(Cand.mod[[5]], n = 250)
+par(mfrow = c(5, 4), mar = c(3, 3, 1, 1))
+resid <- NULL
+for (i in 1:nrow(dat.sim)) {
+  e = ecdf(data.matrix(dat.sim[i, ] + runif(250, -0.5, 0.5)))
+  plot(e, main = i, las = 1)
+  resid[i] <- e(eff$efficiency[i] + runif(250, -0.5, 0.5))
+}
+par(.pardefault) # To restore defaults graphical parameters
+plot(resid ~ fitted(Cand.mod[[5]]))
+
+### Checking the goodness-of-fit and overdispersion:
+dat.resid <- sum(resid(Cand.mod[[5]], type = "pearson")^2)
+1 - pchisq(dat.resid, df.residual(Cand.mod[[5]])) # Ok
+dat.resid/df.residual(Cand.mod[[5]]) # Ok
+# To plot the observed vs. fitted values:
+plot(x = fitted(Cand.mod[[5]]), y = eff$efficiency, xlab = "Fitted values", ylab = "Observed values")
+
+### Exploring the model parameters and test hypotheses:
+summary(Cand.mod[[5]])
+family(Cand.mod[[5]])$linkinv(glmmTMB::fixef(Cand.mod[[5]])$cond) # To get interpretable coefficients.
+broom.mixed::tidy(Cand.mod[[5]])
+broom.mixed::glance(Cand.mod[[5]])
+
+### Computing a quasiR^2:
+1 - exp((2/nrow(eff)) * (logLik(update(Cand.mod[[5]], ~1))[1] - logLik(Cand.mod[[5]])[1])) # Methods from flutterbys.com
+pseudo.R2glmm(model = Cand.mod[[5]])
+
+
+
+##### Model 6 #####
+# -----------------
+
+Cand.mod[[6]] <- glmmTMB::glmmTMB(formula = efficiency~obstacles + (1|manager_id), data = eff,
+                                  family = glmmTMB::beta_family(link = "logit"), REML = FALSE)
+
+### Model evaluation:
+ggplot2::ggplot(data = NULL) + ggplot2::geom_point(ggplot2::aes(y = residuals(Cand.mod[[6]],
+                                                                              type = "pearson"), x = fitted(Cand.mod[[6]])))
+QQline <- qq.line(resid(Cand.mod[[6]], type = "pearson"))
+ggplot2::ggplot(data = NULL, ggplot2::aes(sample = resid(Cand.mod[[6]], type = "pearson"))) +
+  ggplot2::stat_qq() + ggplot2::geom_abline(intercept = QQline[1], slope = QQline[2])
+# To simulate residuals (see https://www.flutterbys.com.au/stats/tut/tut10.5a.html#h2_15):
+dat.sim <- simulate(Cand.mod[[6]], n = 250)
+par(mfrow = c(5, 4), mar = c(3, 3, 1, 1))
+resid <- NULL
+for (i in 1:nrow(dat.sim)) {
+  e = ecdf(data.matrix(dat.sim[i, ] + runif(250, -0.5, 0.5)))
+  plot(e, main = i, las = 1)
+  resid[i] <- e(eff$efficiency[i] + runif(250, -0.5, 0.5))
+}
+par(.pardefault) # To restore defaults graphical parameters
+plot(resid ~ fitted(Cand.mod[[6]]))
+
+### Checking the goodness-of-fit and overdispersion:
+dat.resid <- sum(resid(Cand.mod[[6]], type = "pearson")^2)
+1 - pchisq(dat.resid, df.residual(Cand.mod[[6]])) # Ok
+dat.resid/df.residual(Cand.mod[[6]]) # Ok
+# To plot the observed vs. fitted values:
+plot(x = fitted(Cand.mod[[6]]), y = eff$efficiency, xlab = "Fitted values", ylab = "Observed values")
+
+### Exploring the model parameters and test hypotheses:
+summary(Cand.mod[[6]])
+family(Cand.mod[[6]])$linkinv(glmmTMB::fixef(Cand.mod[[6]])$cond) # To get interpretable coefficients.
+broom.mixed::tidy(Cand.mod[[6]])
+broom.mixed::glance(Cand.mod[[6]])
+
+### Computing a quasiR^2:
+1 - exp((2/nrow(eff)) * (logLik(update(Cand.mod[[6]], ~1))[1] - logLik(Cand.mod[[6]])[1])) # Methods from flutterbys.com
+pseudo.R2glmm(model = Cand.mod[[6]])
+
+
+
+##### Model 7 #####
+# -----------------
+
+Cand.mod[[7]] <- glmmTMB::glmmTMB(formula = efficiency~plantation + (1|manager_id), data = eff,
+                                  family = glmmTMB::beta_family(link = "logit"), REML = FALSE)
+
+### Model evaluation:
+ggplot2::ggplot(data = NULL) + ggplot2::geom_point(ggplot2::aes(y = residuals(Cand.mod[[7]],
+                                                                              type = "pearson"), x = fitted(Cand.mod[[7]])))
+QQline <- qq.line(resid(Cand.mod[[7]], type = "pearson"))
+ggplot2::ggplot(data = NULL, ggplot2::aes(sample = resid(Cand.mod[[7]], type = "pearson"))) +
+  ggplot2::stat_qq() + ggplot2::geom_abline(intercept = QQline[1], slope = QQline[2])
+# To simulate residuals (see https://www.flutterbys.com.au/stats/tut/tut10.5a.html#h2_15):
+dat.sim <- simulate(Cand.mod[[7]], n = 250)
+par(mfrow = c(5, 4), mar = c(3, 3, 1, 1))
+resid <- NULL
+for (i in 1:nrow(dat.sim)) {
+  e = ecdf(data.matrix(dat.sim[i, ] + runif(250, -0.5, 0.5)))
+  plot(e, main = i, las = 1)
+  resid[i] <- e(eff$efficiency[i] + runif(250, -0.5, 0.5))
+}
+par(.pardefault) # To restore defaults graphical parameters
+plot(resid ~ fitted(Cand.mod[[7]]))
+
+### Checking the goodness-of-fit and overdispersion:
+dat.resid <- sum(resid(Cand.mod[[7]], type = "pearson")^2)
+1 - pchisq(dat.resid, df.residual(Cand.mod[[7]])) # Ok
+dat.resid/df.residual(Cand.mod[[7]]) # Ok
+# To plot the observed vs. fitted values:
+plot(x = fitted(Cand.mod[[7]]), y = eff$efficiency, xlab = "Fitted values", ylab = "Observed values")
+
+### Exploring the model parameters and test hypotheses:
+summary(Cand.mod[[7]])
+family(Cand.mod[[7]])$linkinv(glmmTMB::fixef(Cand.mod[[7]])$cond) # To get interpretable coefficients.
+broom.mixed::tidy(Cand.mod[[7]])
+broom.mixed::glance(Cand.mod[[7]])
+
+### Computing a quasiR^2:
+1 - exp((2/nrow(eff)) * (logLik(update(Cand.mod[[7]], ~1))[1] - logLik(Cand.mod[[7]])[1])) # Methods from flutterbys.com
+pseudo.R2glmm(model = Cand.mod[[7]])
+
+
+
+##### Model 8 #####
+# -----------------
+
+Cand.mod[[8]] <- glmmTMB::glmmTMB(formula = efficiency~pb_fixation + (1|manager_id), data = eff,
+                                  family = glmmTMB::beta_family(link = "logit"), REML = FALSE)
+
+### Model evaluation:
+ggplot2::ggplot(data = NULL) + ggplot2::geom_point(ggplot2::aes(y = residuals(Cand.mod[[8]],
+                                                                              type = "pearson"), x = fitted(Cand.mod[[8]])))
+QQline <- qq.line(resid(Cand.mod[[8]], type = "pearson"))
+ggplot2::ggplot(data = NULL, ggplot2::aes(sample = resid(Cand.mod[[8]], type = "pearson"))) +
+  ggplot2::stat_qq() + ggplot2::geom_abline(intercept = QQline[1], slope = QQline[2])
+# To simulate residuals (see https://www.flutterbys.com.au/stats/tut/tut10.5a.html#h2_15):
+dat.sim <- simulate(Cand.mod[[8]], n = 250)
+par(mfrow = c(5, 4), mar = c(3, 3, 1, 1))
+resid <- NULL
+for (i in 1:nrow(dat.sim)) {
+  e = ecdf(data.matrix(dat.sim[i, ] + runif(250, -0.5, 0.5)))
+  plot(e, main = i, las = 1)
+  resid[i] <- e(eff$efficiency[i] + runif(250, -0.5, 0.5))
+}
+par(.pardefault) # To restore defaults graphical parameters
+plot(resid ~ fitted(Cand.mod[[8]]))
+
+### Checking the goodness-of-fit and overdispersion:
+dat.resid <- sum(resid(Cand.mod[[8]], type = "pearson")^2)
+1 - pchisq(dat.resid, df.residual(Cand.mod[[8]])) # Ok
+dat.resid/df.residual(Cand.mod[[8]]) # Ok
+# To plot the observed vs. fitted values:
+plot(x = fitted(Cand.mod[[8]]), y = eff$efficiency, xlab = "Fitted values", ylab = "Observed values")
+
+### Exploring the model parameters and test hypotheses:
+summary(Cand.mod[[8]])
+family(Cand.mod[[8]])$linkinv(glmmTMB::fixef(Cand.mod[[8]])$cond) # To get interpretable coefficients.
+broom.mixed::tidy(Cand.mod[[8]])
+broom.mixed::glance(Cand.mod[[8]])
+
+### Computing a quasiR^2:
+1 - exp((2/nrow(eff)) * (logLik(update(Cand.mod[[8]], ~1))[1] - logLik(Cand.mod[[8]])[1])) # Methods from flutterbys.com
+pseudo.R2glmm(model = Cand.mod[[8]])
+
+
+
+##### Model 9 #####
+# -----------------
+
+Cand.mod[[9]] <- glmmTMB::glmmTMB(formula = efficiency~sedicover_height + (1|manager_id), data = eff,
+                                  family = glmmTMB::beta_family(link = "logit"), REML = FALSE)
+
+### Model evaluation:
+ggplot2::ggplot(data = NULL) + ggplot2::geom_point(ggplot2::aes(y = residuals(Cand.mod[[9]],
+                                                                              type = "pearson"), x = fitted(Cand.mod[[9]])))
+QQline <- qq.line(resid(Cand.mod[[9]], type = "pearson"))
+ggplot2::ggplot(data = NULL, ggplot2::aes(sample = resid(Cand.mod[[9]], type = "pearson"))) +
+  ggplot2::stat_qq() + ggplot2::geom_abline(intercept = QQline[1], slope = QQline[2])
+# To simulate residuals (see https://www.flutterbys.com.au/stats/tut/tut10.5a.html#h2_15):
+dat.sim <- simulate(Cand.mod[[9]], n = 250)
+par(mfrow = c(5, 4), mar = c(3, 3, 1, 1))
+resid <- NULL
+for (i in 1:nrow(dat.sim)) {
+  e = ecdf(data.matrix(dat.sim[i, ] + runif(250, -0.5, 0.5)))
+  plot(e, main = i, las = 1)
+  resid[i] <- e(eff$efficiency[i] + runif(250, -0.5, 0.5))
+}
+par(.pardefault) # To restore defaults graphical parameters
+plot(resid ~ fitted(Cand.mod[[9]]))
+
+### Checking the goodness-of-fit and overdispersion:
+dat.resid <- sum(resid(Cand.mod[[9]], type = "pearson")^2)
+1 - pchisq(dat.resid, df.residual(Cand.mod[[9]])) # Ok
+dat.resid/df.residual(Cand.mod[[9]]) # Ok
+# To plot the observed vs. fitted values:
+plot(x = fitted(Cand.mod[[9]]), y = eff$efficiency, xlab = "Fitted values", ylab = "Observed values")
+
+### Exploring the model parameters and test hypotheses:
+summary(Cand.mod[[9]])
+family(Cand.mod[[9]])$linkinv(glmmTMB::fixef(Cand.mod[[9]])$cond) # To get interpretable coefficients.
+broom.mixed::tidy(Cand.mod[[9]])
+broom.mixed::glance(Cand.mod[[9]])
+
+### Computing a quasiR^2:
+1 - exp((2/nrow(eff)) * (logLik(update(Cand.mod[[9]], ~1))[1] - logLik(Cand.mod[[9]])[1])) # Methods from flutterbys.com
+pseudo.R2glmm(model = Cand.mod[[9]])
+
+
+
+##### Model 10 #####
+# -----------------
+
+Cand.mod[[10]] <- glmmTMB::glmmTMB(formula = efficiency~slope + (1|manager_id), data = eff,
+                                  family = glmmTMB::beta_family(link = "logit"), REML = FALSE)
+
+### Model evaluation:
+ggplot2::ggplot(data = NULL) + ggplot2::geom_point(ggplot2::aes(y = residuals(Cand.mod[[10]],
+                                                                              type = "pearson"), x = fitted(Cand.mod[[10]])))
+QQline <- qq.line(resid(Cand.mod[[10]], type = "pearson"))
+ggplot2::ggplot(data = NULL, ggplot2::aes(sample = resid(Cand.mod[[10]], type = "pearson"))) +
+  ggplot2::stat_qq() + ggplot2::geom_abline(intercept = QQline[1], slope = QQline[2])
+# To simulate residuals (see https://www.flutterbys.com.au/stats/tut/tut10.5a.html#h2_15):
+dat.sim <- simulate(Cand.mod[[10]], n = 250)
+par(mfrow = c(5, 4), mar = c(3, 3, 1, 1))
+resid <- NULL
+for (i in 1:nrow(dat.sim)) {
+  e = ecdf(data.matrix(dat.sim[i, ] + runif(250, -0.5, 0.5)))
+  plot(e, main = i, las = 1)
+  resid[i] <- e(eff$efficiency[i] + runif(250, -0.5, 0.5))
+}
+par(.pardefault) # To restore defaults graphical parameters
+plot(resid ~ fitted(Cand.mod[[10]]))
+
+### Checking the goodness-of-fit and overdispersion:
+dat.resid <- sum(resid(Cand.mod[[10]], type = "pearson")^2)
+1 - pchisq(dat.resid, df.residual(Cand.mod[[10]])) # Ok
+dat.resid/df.residual(Cand.mod[[10]]) # Ok
+# To plot the observed vs. fitted values:
+plot(x = fitted(Cand.mod[[10]]), y = eff$efficiency, xlab = "Fitted values", ylab = "Observed values")
+
+### Exploring the model parameters and test hypotheses:
+summary(Cand.mod[[10]])
+family(Cand.mod[[10]])$linkinv(glmmTMB::fixef(Cand.mod[[10]])$cond) # To get interpretable coefficients.
+broom.mixed::tidy(Cand.mod[[10]])
+broom.mixed::glance(Cand.mod[[10]])
+
+### Computing a quasiR^2:
+1 - exp((2/nrow(eff)) * (logLik(update(Cand.mod[[10]], ~1))[1] - logLik(Cand.mod[[10]])[1])) # Methods from flutterbys.com
+pseudo.R2glmm(model = Cand.mod[[10]])
+
+
+
+##### Model 11 #####
+# -----------------
+
+Cand.mod[[11]] <- glmmTMB::glmmTMB(formula = efficiency~log(stand_surface) + (1|manager_id), data = eff,
+                                  family = glmmTMB::beta_family(link = "logit"), REML = FALSE)
+
+### Model evaluation:
+ggplot2::ggplot(data = NULL) + ggplot2::geom_point(ggplot2::aes(y = residuals(Cand.mod[[11]],
+                                                                              type = "pearson"), x = fitted(Cand.mod[[11]])))
+QQline <- qq.line(resid(Cand.mod[[11]], type = "pearson"))
+ggplot2::ggplot(data = NULL, ggplot2::aes(sample = resid(Cand.mod[[11]], type = "pearson"))) +
+  ggplot2::stat_qq() + ggplot2::geom_abline(intercept = QQline[1], slope = QQline[2])
+# To simulate residuals (see https://www.flutterbys.com.au/stats/tut/tut10.5a.html#h2_15):
+dat.sim <- simulate(Cand.mod[[11]], n = 250)
+par(mfrow = c(5, 4), mar = c(3, 3, 1, 1))
+resid <- NULL
+for (i in 1:nrow(dat.sim)) {
+  e = ecdf(data.matrix(dat.sim[i, ] + runif(250, -0.5, 0.5)))
+  plot(e, main = i, las = 1)
+  resid[i] <- e(eff$efficiency[i] + runif(250, -0.5, 0.5))
+}
+par(.pardefault) # To restore defaults graphical parameters
+plot(resid ~ fitted(Cand.mod[[11]]))
+
+### Checking the goodness-of-fit and overdispersion:
+dat.resid <- sum(resid(Cand.mod[[11]], type = "pearson")^2)
+1 - pchisq(dat.resid, df.residual(Cand.mod[[11]])) # Ok
+dat.resid/df.residual(Cand.mod[[11]]) # Ok
+# To plot the observed vs. fitted values:
+plot(x = fitted(Cand.mod[[11]]), y = eff$efficiency, xlab = "Fitted values", ylab = "Observed values")
+
+### Exploring the model parameters and test hypotheses:
+summary(Cand.mod[[11]])
+family(Cand.mod[[11]])$linkinv(glmmTMB::fixef(Cand.mod[[11]])$cond) # To get interpretable coefficients.
+broom.mixed::tidy(Cand.mod[[11]])
+broom.mixed::glance(Cand.mod[[11]])
+
+### Computing a quasiR^2:
+1 - exp((2/nrow(eff)) * (logLik(update(Cand.mod[[11]], ~1))[1] - logLik(Cand.mod[[11]])[1])) # Methods from flutterbys.com
+pseudo.R2glmm(model = Cand.mod[[11]])
 
 
 
 
+##### Model 12 #####
+# -----------------
+
+Cand.mod[[12]] <- glmmTMB::glmmTMB(formula = efficiency~tarping_duration + (1|manager_id), data = eff,
+                                   family = glmmTMB::beta_family(link = "logit"), REML = FALSE)
+
+### Model evaluation:
+ggplot2::ggplot(data = NULL) + ggplot2::geom_point(ggplot2::aes(y = residuals(Cand.mod[[12]],
+                                                                              type = "pearson"), x = fitted(Cand.mod[[12]])))
+QQline <- qq.line(resid(Cand.mod[[12]], type = "pearson"))
+ggplot2::ggplot(data = NULL, ggplot2::aes(sample = resid(Cand.mod[[12]], type = "pearson"))) +
+  ggplot2::stat_qq() + ggplot2::geom_abline(intercept = QQline[1], slope = QQline[2])
+# To simulate residuals (see https://www.flutterbys.com.au/stats/tut/tut10.5a.html#h2_15):
+dat.sim <- simulate(Cand.mod[[12]], n = 250)
+par(mfrow = c(5, 4), mar = c(3, 3, 1, 1))
+resid <- NULL
+for (i in 1:nrow(dat.sim)) {
+  e = ecdf(data.matrix(dat.sim[i, ] + runif(250, -0.5, 0.5)))
+  plot(e, main = i, las = 1)
+  resid[i] <- e(eff$efficiency[i] + runif(250, -0.5, 0.5))
+}
+par(.pardefault) # To restore defaults graphical parameters
+plot(resid ~ fitted(Cand.mod[[12]]))
+
+### Checking the goodness-of-fit and overdispersion:
+dat.resid <- sum(resid(Cand.mod[[12]], type = "pearson")^2)
+1 - pchisq(dat.resid, df.residual(Cand.mod[[12]])) # Ok
+dat.resid/df.residual(Cand.mod[[12]]) # Ok
+# To plot the observed vs. fitted values:
+plot(x = fitted(Cand.mod[[12]]), y = eff$efficiency, xlab = "Fitted values", ylab = "Observed values")
+
+### Exploring the model parameters and test hypotheses:
+summary(Cand.mod[[12]])
+family(Cand.mod[[12]])$linkinv(glmmTMB::fixef(Cand.mod[[12]])$cond) # To get interpretable coefficients.
+broom.mixed::tidy(Cand.mod[[12]])
+broom.mixed::glance(Cand.mod[[12]])
+
+### Computing a quasiR^2:
+1 - exp((2/nrow(eff)) * (logLik(update(Cand.mod[[12]], ~1))[1] - logLik(Cand.mod[[12]])[1])) # Methods from flutterbys.com
+pseudo.R2glmm(model = Cand.mod[[12]])
 
 
 
 
+##### Model 13 #####
+# -----------------
 
+Cand.mod[[13]] <- glmmTMB::glmmTMB(formula = efficiency~uprootexcav + (1|manager_id), data = eff,
+                                   family = glmmTMB::beta_family(link = "logit"), REML = FALSE)
 
+### Model evaluation:
+ggplot2::ggplot(data = NULL) + ggplot2::geom_point(ggplot2::aes(y = residuals(Cand.mod[[13]],
+                                                                              type = "pearson"), x = fitted(Cand.mod[[13]])))
+QQline <- qq.line(resid(Cand.mod[[13]], type = "pearson"))
+ggplot2::ggplot(data = NULL, ggplot2::aes(sample = resid(Cand.mod[[13]], type = "pearson"))) +
+  ggplot2::stat_qq() + ggplot2::geom_abline(intercept = QQline[1], slope = QQline[2])
+# To simulate residuals (see https://www.flutterbys.com.au/stats/tut/tut10.5a.html#h2_15):
+dat.sim <- simulate(Cand.mod[[13]], n = 250)
+par(mfrow = c(5, 4), mar = c(3, 3, 1, 1))
+resid <- NULL
+for (i in 1:nrow(dat.sim)) {
+  e = ecdf(data.matrix(dat.sim[i, ] + runif(250, -0.5, 0.5)))
+  plot(e, main = i, las = 1)
+  resid[i] <- e(eff$efficiency[i] + runif(250, -0.5, 0.5))
+}
+par(.pardefault) # To restore defaults graphical parameters
+plot(resid ~ fitted(Cand.mod[[13]]))
 
-##### Code de Philippe 2021 #####
-Model <- (1:17)
+### Checking the goodness-of-fit and overdispersion:
+dat.resid <- sum(resid(Cand.mod[[13]], type = "pearson")^2)
+1 - pchisq(dat.resid, df.residual(Cand.mod[[13]])) # Ok
+dat.resid/df.residual(Cand.mod[[13]]) # Ok
+# To plot the observed vs. fitted values:
+plot(x = fitted(Cand.mod[[13]]), y = eff$efficiency, xlab = "Fitted values", ylab = "Observed values")
 
-Candidate <- c('Manag + Year',
-               'Manag + Year + Elevation', 'Manag + Year + Distance', 'Manag + Year + Prop_Sedim',
-               'Manag + Year + Depth_Sedim', "Manag + Year + Dura_Inund", "Manag + Year + Inte_Inund",
-               "Manag + Year + Mean_Temp", "Manag + Year + Sum_Prec",
-               'Manag + Year * Elevation', 'Manag + Year * Distance', 'Manag + Year * Prop_Sedim',
-               'Manag + Year * Depth_Sedim', "Manag + Year * Dura_Inund", "Manag + Year * Inte_Inund",
-               "Manag + Year * Mean_Temp", "Manag + Year * Sum_Prec")
+### Exploring the model parameters and test hypotheses:
+summary(Cand.mod[[13]])
+family(Cand.mod[[13]])$linkinv(glmmTMB::fixef(Cand.mod[[13]])$cond) # To get interpretable coefficients.
+broom.mixed::tidy(Cand.mod[[13]])
+broom.mixed::glance(Cand.mod[[13]])
 
-Cand.model <- data.frame(Model, Candidate)
-
-AICc <- MuMIn::model.sel(object=Cand.mod) # Rank models (but where does Cand.mod come from?)
-AICc.model <- as.data.frame(AICc)
-AICc.model$csweigth <- cumsum(AICc.model$weight)
-AICc.model$Model <- row.names(AICc.model)
-AICc.model <- merge(AICc.model, Cand.model, by="Model")
-AICc.model <- merge(AICc.model, R.ajust, by="Model")
-AICc.model <- AICc.model[order(AICc.model$delta),]
-AICc.model$Variables <- "FD_sla"
-AICc.model$Rank <- 1:nrow(AICc.model)
-AICc.model <- AICc.model[,c("Rank", "Model", "Variables", "Candidate", "df", "AICc", "delta", "weight", "R2")]
-AICc.model$AICc <- format(round(AICc.model$AICc, digits=1))
-AICc.model$delta <- format(round(AICc.model$delta, digits=3))
-AICc.model$weight <- format(round(AICc.model$weight, digits=3))
-AICc.model$R2 <- format(round(AICc.model$R2, digits=3))
-colnames(AICc.model)[colnames(AICc.model) == 'Candidate'] <- 'Candidate model'
-colnames(AICc.model)[colnames(AICc.model) == 'df'] <- 'k'
-colnames(AICc.model)[colnames(AICc.model) == 'delta'] <- 'delta AICc'
-colnames(AICc.model)[colnames(AICc.model) == 'weight'] <- 'W'
-write.table(AICc.model,"output/Model/Models_FD_sla.csv", sep=";", row.names=F, col.names=T)
-
-
-Parameters <- c('Manag', 'Year', 'Elevation', 'Distance', 'Prop_Sedim', 'Depth_Sedim', 'Dura_Inund',
-                'Inte_Inund', 'Mean_Temp', 'Sum_Prec',
-                'Year * Elevation', 'Year * Distance', 'Year * Prop_Sedim', 'Year * Depth_Sedim',
-                'Year * Dura_Inund', 'Year * Inte_Inund', 'Year * Mean_Temp', 'Year * Sum_Prec')
-Var <- c("managplowing", "annee19", "topographie.2", "distance_eau.2", "sub_limons.2", "h_alluvions.2",
-         "Dura_inund.2", "Inte_inund.2", "Mean_Temp.2", "Sum_Prec.2",
-         "annee19:topographie.2", "annee19:distance_eau.2", "annee19:sub_limons.2", "annee19:h_alluvions.2",
-         "annee19ura_inund.2", "annee19:Inte_inund.2", "annee19:Mean_Temp.2", "annee19:Sum_Prec.2")
-Var.Imp <- c("manag", "annee", "topographie.2", "distance_eau.2", "sub_limons.2", "h_alluvions.2",
-             "Dura_inund.2", "Inte_inund.2", "Mean_Temp.2", "Sum_Prec.2",
-             "annee:topographie.2", "annee:distance_eau.2", "annee:sub_limons.2", "annee:h_alluvions.2",
-             "anneeura_inund.2", "annee:Inte_inund.2", "annee:Mean_Temp.2", "annee:Sum_Prec.2")
-
-Para.model <- data.frame(Parameters, Var, Var.Imp)
-top.models <- MuMIn::get.models(AICc, cumsum(weight)<=1) # Pour prendre l'ensemble des modèles a priori
-# (sinon 0.95)
-# top.models <- get.models(AICc, delta<=7)
-Parameter <- MuMIn::model.avg(top.models, revised.var=T, adjusted=T, fit=T) # Model averaging
-Parameter.model <- as.data.frame(cbind(coefTable(Parameter), confint(Parameter)))
-Parameter.model <- Parameter.model[rownames(Parameter.model) != "X.Intercept.", ]
-Parameter.model$Var <- row.names(Parameter.model)
-Parameter.model <- merge(Parameter.model, Para.model, by="Var", all=TRUE)
-Imp <- as.data.frame(format(round(importance(Parameter), digits=2)))
-colnames(Imp) <- "Imp."
-Imp$Var.Imp <- row.names(Imp)
-Parameter.model <- merge(Parameter.model, Imp, by="Var.Imp", all=TRUE)
-Parameter.model$'Estimate (±SE)' <- paste0(format(round(Parameter.model$Estimate, digits=3), trim=T),
-                                           " (±", format(round(Parameter.model$'Std. Error', digits=3),
-                                                         trim=T), ")")
-Parameter.model$'(95% CI)' <- paste0("(", format(round(Parameter.model$'2.5 %', digits=3), trim=T),
-                                     "; ", format(round(Parameter.model$'97.5 %', digits=3), trim=T), ")")
-Parameter.model$Variables <- "FD_sla"
-Parameter.model$'N model' <- length(top.models)
-Parameter.model <- Parameter.model[,c("Variables", "Parameters", "Imp.", "Estimate (±SE)", "(95% CI)",
-                                      'N model')]
-Parameter.model <- Parameter.model[!is.na(Parameter.model$Parameters), ]
-write.table(Parameter.model,"output/Model/Parameters_FD_sla.csv", sep=";", row.names=F, col.names=T)
+### Computing a Pseudo-R2:
+pseudo.R2glmm(model = Cand.mod[[13]])
 
 
 
 
+##### Model 14 #####
+# -----------------
+
+Cand.mod[[14]] <- glmmTMB::glmmTMB(formula = efficiency~distance + followups + (1|manager_id), data = eff,
+                                   family = glmmTMB::beta_family(link = "logit"), REML = FALSE)
+
+### Model evaluation:
+ggplot2::ggplot(data = NULL) + ggplot2::geom_point(ggplot2::aes(y = residuals(Cand.mod[[14]],
+                                                                              type = "pearson"), x = fitted(Cand.mod[[14]])))
+QQline <- qq.line(resid(Cand.mod[[14]], type = "pearson"))
+ggplot2::ggplot(data = NULL, ggplot2::aes(sample = resid(Cand.mod[[14]], type = "pearson"))) +
+  ggplot2::stat_qq() + ggplot2::geom_abline(intercept = QQline[1], slope = QQline[2])
+# To simulate residuals (see https://www.flutterbys.com.au/stats/tut/tut10.5a.html#h2_15):
+dat.sim <- simulate(Cand.mod[[14]], n = 250)
+par(mfrow = c(5, 4), mar = c(3, 3, 1, 1))
+resid <- NULL
+for (i in 1:nrow(dat.sim)) {
+  e = ecdf(data.matrix(dat.sim[i, ] + runif(250, -0.5, 0.5)))
+  plot(e, main = i, las = 1)
+  resid[i] <- e(eff$efficiency[i] + runif(250, -0.5, 0.5))
+}
+par(.pardefault) # To restore defaults graphical parameters
+plot(resid ~ fitted(Cand.mod[[14]]))
+
+### Checking the goodness-of-fit and overdispersion:
+dat.resid <- sum(resid(Cand.mod[[14]], type = "pearson")^2)
+1 - pchisq(dat.resid, df.residual(Cand.mod[[14]])) # Ok
+dat.resid/df.residual(Cand.mod[[14]]) # Ok
+# To plot the observed vs. fitted values:
+plot(x = fitted(Cand.mod[[14]]), y = eff$efficiency, xlab = "Fitted values", ylab = "Observed values")
+
+### Exploring the model parameters and test hypotheses:
+summary(Cand.mod[[14]])
+family(Cand.mod[[14]])$linkinv(glmmTMB::fixef(Cand.mod[[14]])$cond) # To get interpretable coefficients.
+broom.mixed::tidy(Cand.mod[[14]])
+broom.mixed::glance(Cand.mod[[14]])
+
+### Computing a Pseudo-R2:
+pseudo.R2glmm(model = Cand.mod[[14]])
 
 
 
 
-######## Code from https://sites.google.com/site/rforfishandwildlifegrads/home/mumin_usage_examples:
-# download the file directly from the website
-dater<-read.csv("https://sites.google.com/site/rforfishandwildlifegrads/home/mumin_usage_examples/Example%20data.csv?attredirects=0&d=1")
-head(dater)
-summary(dater)
+##### Model 15 #####
+# -----------------
 
-require(MuMIn)
-#First, fit 4 candidate linear models to explain variation in density
-mod1<-lm(density~distance+elev, data = dater)
-mod2<-lm(density~slope+pct.cover, data = dater)
-mod3<-lm(density~slope+distance, data = dater)
-mod4<-lm(density~slope+distance+elev, data = dater)
-# use the mod.sel function to conduct model selection
-# and put output into object out.put
-out.put<-model.sel(mod1,mod2,mod3,mod4)
-out.put
+Cand.mod[[15]] <- glmmTMB::glmmTMB(formula = efficiency~distance + fully_tarped + (1|manager_id), data = eff,
+                                   family = glmmTMB::beta_family(link = "logit"), REML = FALSE)
 
-# create a confidence set of models using the subset function
-# select models with delta AICc less than 5
-# IMPORTANT: Weights have been renormalized!! (weights add to 1)
-subset(out.put, delta <5)
-# select models 95% cumulative weight criteria
-# IMPORTANT: Weights have been renormalized!!
-subset(out.put, cumsum(out.put$weight) <= .95)
+### Model evaluation:
+ggplot2::ggplot(data = NULL) + ggplot2::geom_point(ggplot2::aes(y = residuals(Cand.mod[[15]],
+                                                                              type = "pearson"), x = fitted(Cand.mod[[15]])))
+QQline <- qq.line(resid(Cand.mod[[15]], type = "pearson"))
+ggplot2::ggplot(data = NULL, ggplot2::aes(sample = resid(Cand.mod[[15]], type = "pearson"))) +
+  ggplot2::stat_qq() + ggplot2::geom_abline(intercept = QQline[1], slope = QQline[2])
+# To simulate residuals (see https://www.flutterbys.com.au/stats/tut/tut10.5a.html#h2_15):
+dat.sim <- simulate(Cand.mod[[15]], n = 250)
+par(mfrow = c(5, 4), mar = c(3, 3, 1, 1))
+resid <- NULL
+for (i in 1:nrow(dat.sim)) {
+  e = ecdf(data.matrix(dat.sim[i, ] + runif(250, -0.5, 0.5)))
+  plot(e, main = i, las = 1)
+  resid[i] <- e(eff$efficiency[i] + runif(250, -0.5, 0.5))
+}
+par(.pardefault) # To restore defaults graphical parameters
+plot(resid ~ fitted(Cand.mod[[15]]))
 
-# coerce the object out.put into a data frame
-# elements 6-10 in out.put have what we want
-sel.table<-as.data.frame(out.put)[6:11]
-# a little clean-up, lets round things a bit
-sel.table[,3:4]<- round(sel.table[,3:4],2)
-sel.table[,5:6]<- round(sel.table[,5:6],3)
-sel.table
-# that’s better
+### Checking the goodness-of-fit and overdispersion:
+dat.resid <- sum(resid(Cand.mod[[15]], type = "pearson")^2)
+1 - pchisq(dat.resid, df.residual(Cand.mod[[15]])) # Ok
+dat.resid/df.residual(Cand.mod[[15]]) # Ok
+# To plot the observed vs. fitted values:
+plot(x = fitted(Cand.mod[[15]]), y = eff$efficiency, xlab = "Fitted values", ylab = "Observed values")
 
-# how about a little renaming columns to fit proper conventions
-# number of parameters (df) should be K
-names(sel.table)[1] = "K"
-## lets be sure to put the model names in a column
-sel.table$Model<-rownames(sel.table)
-# replace Model name with formulas little tricky so be careful
-for(i in 1:nrow(sel.table)) sel.table$Model[i]<- as.character(formula(paste(sel.table$Model[i])))[3]
-# let's see what is in there
-sel.table
+### Exploring the model parameters and test hypotheses:
+summary(Cand.mod[[15]])
+family(Cand.mod[[15]])$linkinv(glmmTMB::fixef(Cand.mod[[15]])$cond) # To get interpretable coefficients.
+broom.mixed::tidy(Cand.mod[[15]])
+broom.mixed::glance(Cand.mod[[15]])
 
-# Importance weights for individual predictor variables
-# calculated using the importance function
-importance(out.put)
-# The number of candidate models that a parameter occurs can have a big effect of the importance weight.
-# For example, the intercept is included in all models, so the importance weight is 1 (hence it is never
-# shown). In the above output, pct.cover is in only one model so interpret weights with caution.
+### Computing a Pseudo-R2:
+pseudo.R2glmm(model = Cand.mod[[15]])
 
-# There are two methods for model-averaging defined by Burnham and Anderson as , where parameter estimates
-# are averaged over all models in which predictor xj occurs and  where parameter estimates are averaged over
-# all models not just those in which predictor xj occurs. MuMIn function model.avg conducts both types of
-# model averaging and reports the first type of model averaging as “subset” and the second type as “full.
-# Model average using all candidate models, always use revised.var = TRUE
-MA.ests<-model.avg(out.put, revised.var = TRUE)
-MA.ests
-# Le reste du code ne marche pas (le package MuMin a changé depuis), donc je m'arrête-là.
+
+
+##### Model 16 #####
+# -----------------
+
+Cand.mod[[16]] <- glmmTMB::glmmTMB(formula = efficiency~distance + obstacles + (1|manager_id), data = eff,
+                                   family = glmmTMB::beta_family(link = "logit"), REML = FALSE)
+
+### Model evaluation:
+ggplot2::ggplot(data = NULL) + ggplot2::geom_point(ggplot2::aes(y = residuals(Cand.mod[[16]],
+                                                                              type = "pearson"), x = fitted(Cand.mod[[16]])))
+QQline <- qq.line(resid(Cand.mod[[16]], type = "pearson"))
+ggplot2::ggplot(data = NULL, ggplot2::aes(sample = resid(Cand.mod[[16]], type = "pearson"))) +
+  ggplot2::stat_qq() + ggplot2::geom_abline(intercept = QQline[1], slope = QQline[2])
+# To simulate residuals (see https://www.flutterbys.com.au/stats/tut/tut10.5a.html#h2_15):
+dat.sim <- simulate(Cand.mod[[16]], n = 250)
+par(mfrow = c(5, 4), mar = c(3, 3, 1, 1))
+resid <- NULL
+for (i in 1:nrow(dat.sim)) {
+  e = ecdf(data.matrix(dat.sim[i, ] + runif(250, -0.5, 0.5)))
+  plot(e, main = i, las = 1)
+  resid[i] <- e(eff$efficiency[i] + runif(250, -0.5, 0.5))
+}
+par(.pardefault) # To restore defaults graphical parameters
+plot(resid ~ fitted(Cand.mod[[16]]))
+
+### Checking the goodness-of-fit and overdispersion:
+dat.resid <- sum(resid(Cand.mod[[16]], type = "pearson")^2)
+1 - pchisq(dat.resid, df.residual(Cand.mod[[16]])) # Ok
+dat.resid/df.residual(Cand.mod[[16]]) # Ok
+# To plot the observed vs. fitted values:
+plot(x = fitted(Cand.mod[[16]]), y = eff$efficiency, xlab = "Fitted values", ylab = "Observed values")
+
+### Exploring the model parameters and test hypotheses:
+summary(Cand.mod[[16]])
+family(Cand.mod[[16]])$linkinv(glmmTMB::fixef(Cand.mod[[16]])$cond) # To get interpretable coefficients.
+broom.mixed::tidy(Cand.mod[[16]])
+broom.mixed::glance(Cand.mod[[16]])
+
+### Computing a Pseudo-R2:
+pseudo.R2glmm(model = Cand.mod[[16]])
+
+
+
+##### Model 17 #####
+# -----------------
+
+Cand.mod[[17]] <- glmmTMB::glmmTMB(formula = efficiency~distance + log(stand_surface) + (1|manager_id), data = eff,
+                                   family = glmmTMB::beta_family(link = "logit"), REML = FALSE)
+
+### Model evaluation:
+ggplot2::ggplot(data = NULL) + ggplot2::geom_point(ggplot2::aes(y = residuals(Cand.mod[[17]],
+                                                                              type = "pearson"), x = fitted(Cand.mod[[17]])))
+QQline <- qq.line(resid(Cand.mod[[17]], type = "pearson"))
+ggplot2::ggplot(data = NULL, ggplot2::aes(sample = resid(Cand.mod[[17]], type = "pearson"))) +
+  ggplot2::stat_qq() + ggplot2::geom_abline(intercept = QQline[1], slope = QQline[2])
+# To simulate residuals (see https://www.flutterbys.com.au/stats/tut/tut10.5a.html#h2_15):
+dat.sim <- simulate(Cand.mod[[17]], n = 250)
+par(mfrow = c(5, 4), mar = c(3, 3, 1, 1))
+resid <- NULL
+for (i in 1:nrow(dat.sim)) {
+  e = ecdf(data.matrix(dat.sim[i, ] + runif(250, -0.5, 0.5)))
+  plot(e, main = i, las = 1)
+  resid[i] <- e(eff$efficiency[i] + runif(250, -0.5, 0.5))
+}
+par(.pardefault) # To restore defaults graphical parameters
+plot(resid ~ fitted(Cand.mod[[17]]))
+
+### Checking the goodness-of-fit and overdispersion:
+dat.resid <- sum(resid(Cand.mod[[17]], type = "pearson")^2)
+1 - pchisq(dat.resid, df.residual(Cand.mod[[17]])) # Ok
+dat.resid/df.residual(Cand.mod[[17]]) # Ok
+# To plot the observed vs. fitted values:
+plot(x = fitted(Cand.mod[[17]]), y = eff$efficiency, xlab = "Fitted values", ylab = "Observed values")
+
+### Exploring the model parameters and test hypotheses:
+summary(Cand.mod[[17]])
+family(Cand.mod[[17]])$linkinv(glmmTMB::fixef(Cand.mod[[17]])$cond) # To get interpretable coefficients.
+broom.mixed::tidy(Cand.mod[[17]])
+broom.mixed::glance(Cand.mod[[17]])
+
+### Computing a Pseudo-R2:
+pseudo.R2glmm(model = Cand.mod[[17]])
+
+
+
+##### Model 18 #####
+# -----------------
+
+Cand.mod[[18]] <- glmmTMB::glmmTMB(formula = efficiency~distance * log(stand_surface) + (1|manager_id), data = eff,
+                                   family = glmmTMB::beta_family(link = "logit"), REML = FALSE)
+
+### Model evaluation:
+ggplot2::ggplot(data = NULL) + ggplot2::geom_point(ggplot2::aes(y = residuals(Cand.mod[[18]],
+                                                                              type = "pearson"), x = fitted(Cand.mod[[18]])))
+QQline <- qq.line(resid(Cand.mod[[18]], type = "pearson"))
+ggplot2::ggplot(data = NULL, ggplot2::aes(sample = resid(Cand.mod[[18]], type = "pearson"))) +
+  ggplot2::stat_qq() + ggplot2::geom_abline(intercept = QQline[1], slope = QQline[2])
+# To simulate residuals (see https://www.flutterbys.com.au/stats/tut/tut10.5a.html#h2_15):
+dat.sim <- simulate(Cand.mod[[18]], n = 250)
+par(mfrow = c(5, 4), mar = c(3, 3, 1, 1))
+resid <- NULL
+for (i in 1:nrow(dat.sim)) {
+  e = ecdf(data.matrix(dat.sim[i, ] + runif(250, -0.5, 0.5)))
+  plot(e, main = i, las = 1)
+  resid[i] <- e(eff$efficiency[i] + runif(250, -0.5, 0.5))
+}
+par(.pardefault) # To restore defaults graphical parameters
+plot(resid ~ fitted(Cand.mod[[18]]))
+
+### Checking the goodness-of-fit and overdispersion:
+dat.resid <- sum(resid(Cand.mod[[18]], type = "pearson")^2)
+1 - pchisq(dat.resid, df.residual(Cand.mod[[18]])) # Ok
+dat.resid/df.residual(Cand.mod[[18]]) # Ok
+# To plot the observed vs. fitted values:
+plot(x = fitted(Cand.mod[[18]]), y = eff$efficiency, xlab = "Fitted values", ylab = "Observed values")
+
+### Exploring the model parameters and test hypotheses:
+summary(Cand.mod[[18]])
+family(Cand.mod[[18]])$linkinv(glmmTMB::fixef(Cand.mod[[18]])$cond) # To get interpretable coefficients.
+broom.mixed::tidy(Cand.mod[[18]])
+broom.mixed::glance(Cand.mod[[18]])
+
+### Computing a Pseudo-R2:
+pseudo.R2glmm(model = Cand.mod[[18]])
+
+
+
