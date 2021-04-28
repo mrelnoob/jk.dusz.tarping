@@ -17,11 +17,15 @@
 
 
 
+
+
 ##### Data preparation for modelling 'efficiency' #####
 # --------------------------------------------------- #
 
-# List of used packages (for publication or package building): here, readr, gamlss, gamlss.dist, MuMIn,
-# emmeans,
+# List of used packages (for publication or package building): here, readr, (gamlss, gamlss.dist), MuMIn,
+# emmeans, glmmTMB, ggplot2, broom.mixed
+
+.pardefault <- par() # To save the default graphical parameters (in case I want to restore them).
 
 library(jk.dusz.tarping)
 readr::read_csv(here::here("mydata", "erad.csv"), col_names = TRUE, col_types =
@@ -41,15 +45,68 @@ readr::read_csv(here::here("mydata", "erad.csv"), col_names = TRUE, col_types =
                            plantation = readr::col_factor(c("0", "1")),
                            pb_fixation = readr::col_factor(c("0", "1")),
                            pb_durability = readr::col_factor(c("0", "1")))) %>%
-  dplyr::mutate(efficiency = efficiency/10) -> eff # For 'efficiency' to be look like a percentage that could
-# be modelled using a Beta Regression Model.
+  dplyr::mutate(efficiency = efficiency/10) %>% # For 'efficiency' to be look like a percentage that could
+  # be modelled using a Beta Regression Model.
+  dplyr::mutate(efficiency.2 = ifelse(efficiency == 1, 0.999, efficiency)) -> eff
 summary(eff)
+
+
+
+### Custom functions for modelling:
+# To help creating QQplots for beta regression models:
+
+qq.line = function(x) {
+  # following four lines from base R's qqline()
+  y <- quantile(x[!is.na(x)], c(0.25, 0.75))
+  x <- qnorm(c(0.25, 0.75))
+  slope <- diff(y)/diff(x)
+  int <- y[1L] - slope * x[1L]
+  return(c(int = int, slope = slope))
+}
+
+# Since the MuMIn::r.squaredGLMM() function does not work for beta models with logit links, here is a way
+# to compute (marginal and conditional) Pseudo-R2 based on: Johnson, P.C.D. (2014) Extension of Nakagawa &
+# Schielzeth’s R_GLMM² to random slopes models. Methods in Ecology and Evolution 5: 44-946:
+
+pseudo.R2glmm <- function(model){
+  X <- model.matrix(model)
+  n <- nrow(X)
+  Beta <- glmmTMB::fixef(model)$cond
+  Sf <- var(X %*% Beta)
+  Sigma.list <- glmmTMB::VarCorr(model)
+  Sl <-
+    sum(
+      sapply(Sigma.list$cond,
+             function(Sigma)
+             {
+               Z <-X[,rownames(Sigma)]
+               sum(diag(Z %*% Sigma %*% t(Z)))/n
+             }))
+  Se <- attr(Sigma.list$cond, "sc")^2
+  Sd <- 0
+  total.var <- Sf + Sl + Se + Sd
+  Marginal_R2 <- Sf / total.var # Marginal R_GLMM² represents the variance explained by the fixed effects
+  Conditional_R2 <- (Sf + Sl) / total.var # Conditional R_GLMM² represents the variance explained by the entire model
+  R2 <- data.frame(Marginal_R2, Conditional_R2)
+  print(R2)
+}
+
+
+
+
+
+##### Models to explain 'efficiency' #####
+# -------------------------------------- #
+
+#Cand.mod <- list()
+#Cand.mod[[1]] <- gamlss::gamlss(efficiency~distance, data = eff, family = BEOI())
+
+
+
 
 
 ##### Test model with gamlss #####
 # --------------------------------
-#Cand.mod <- list()
-#Cand.mod[[1]] <- gamlss::gamlss(efficiency~distance, data = eff, family = BEOI())
 
 # library(gamlss)
 # mod1 <- gamlss(formula = efficiency~distance+re(random = ~1|manager_id),
@@ -75,34 +132,49 @@ summary(eff)
 ##### Test model with glmmTMB #####
 # ---------------------------------
 
-eff %>% dplyr::mutate(efficiency = ifelse(efficiency == 1, 0.999, efficiency)) -> eff2
-mod2 <- glmmTMB::glmmTMB(formula = efficiency~distance + (1|manager_id), data = eff2,
+mod2 <- glmmTMB::glmmTMB(formula = efficiency.2~distance + (1|manager_id), data = eff,
                          family = glmmTMB::beta_family(link = "logit"))
 
-# Checking the residuals:
+### Model evaluation:
 ggplot2::ggplot(data = NULL) + ggplot2::geom_point(ggplot2::aes(y = residuals(mod2,
                                                    type = "pearson"), x = fitted(mod2)))
-qq.line = function(x) {
-  # following four lines from base R's qqline()
-  y <- quantile(x[!is.na(x)], c(0.25, 0.75))
-  x <- qnorm(c(0.25, 0.75))
-  slope <- diff(y)/diff(x)
-  int <- y[1L] - slope * x[1L]
-  return(c(int = int, slope = slope))
-}
-QQline = qq.line(resid(mod2, type = "pearson"))
+QQline <- qq.line(resid(mod2, type = "pearson"))
 ggplot2::ggplot(data = NULL, ggplot2::aes(sample = resid(mod2, type = "pearson"))) +
   ggplot2::stat_qq() + ggplot2::geom_abline(intercept = QQline[1], slope = QQline[2])
-# Checking the goodness-of-fit and overdispersion:
+# To simulate residuals (see https://www.flutterbys.com.au/stats/tut/tut10.5a.html#h2_15):
+dat.sim <- simulate(mod2, n = 250)
+par(mfrow = c(5, 4), mar = c(3, 3, 1, 1))
+resid <- NULL
+for (i in 1:nrow(dat.sim)) {
+  e = ecdf(data.matrix(dat.sim[i, ] + runif(250, -0.5, 0.5)))
+  plot(e, main = i, las = 1)
+  resid[i] <- e(eff$efficiency.2[i] + runif(250, -0.5, 0.5))
+}
+par(mfrow = c(1, 1))
+plot(resid ~ fitted(mod2))
+
+
+### Checking the goodness-of-fit and overdispersion:
 dat.resid <- sum(resid(mod2, type = "pearson")^2)
 1 - pchisq(dat.resid, df.residual(mod2)) # Ok
 dat.resid/df.residual(mod2) # Ok
-# Further trend exploration:
-1 - exp((2/nrow(eff2)) * (logLik(update(mod2, ~1))[1] - logLik(mod2)[1]))
+# To plot the observed vs. fitted values:
+par(.pardefault) # To restore defaults graphical parameters
+plot(x = fitted(mod2), y = eff$efficiency.2, xlab = "Fitted values", ylab = "Observed values")
 
 
+### Exploring the model parameters and test hypotheses:
+summary(mod2)
+family(mod2)$linkinv(glmmTMB::fixef(mod2)$cond) # To get interpretable coefficients.
+broom.mixed::tidy(mod2)
+broom.mixed::glance(mod2)
 
 
+### Computing a quasiR^2:
+1 - exp((2/nrow(eff)) * (logLik(update(mod2, ~1))[1] - logLik(mod2)[1])) # Methods from flutterbys.com
+
+
+pseudo.R2glmm(model = mod2)
 
 ## Dans gamlss, je dois utiliser re() pour fitter un random effect (s'utilise globalement comme lme() - voir
 # ressources en ligne, dont l'aide dans mes favoris), car random() convient lorsque Y est normal,
@@ -127,7 +199,7 @@ dat.resid/df.residual(mod2) # Ok
 
 
 
-####### Code de Philippe 2021
+##### Code de Philippe 2021 #####
 Model <- (1:17)
 
 Candidate <- c('Manag + Year',
