@@ -128,6 +128,13 @@ Cand.mod <- list()
 
 ##### Model 1 (null model) #####
 # ------------------------------
+§§§§§§§ TESTER SI ça change quand stand_surface/10!!!!!
+
+  §§§§§§§§
+++++ centering pour interactions!!!
+  ++ tester R2 de nagelkerke
+++ tester avec repairs/add_control§§§
+
 
 Cand.mod[[1]] <- glmmTMB::glmmTMB(formula = efficiency~(1|manager_id), data = eff,
                          family = glmmTMB::beta_family(link = "logit"), REML = FALSE)
