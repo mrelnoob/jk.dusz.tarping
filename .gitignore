@@ -4,3 +4,5 @@
 .DS_Store
 README.html
 .drake
+.Rdata
+.httr-oauth

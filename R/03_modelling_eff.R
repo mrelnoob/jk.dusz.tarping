@@ -44,6 +44,8 @@ readr::read_csv(here::here("mydata", "erad.csv"), col_names = TRUE, col_types =
                            tarpfix_multimethod = readr::col_factor(c("0", "1")),
                            tarpfix_pierced = readr::col_factor(c("0", "1")),
                            plantation = readr::col_factor(c("0", "1")),
+                           repairs = readr::col_factor(c("0", "1")),
+                           add_control = readr::col_factor(c("0", "1")),
                            pb_fixation = readr::col_factor(c("0", "1")),
                            pb_durability = readr::col_factor(c("0", "1")))) %>%
   dplyr::mutate(efficiency = efficiency/10) %>% # For 'efficiency' to be look like a percentage that could
@@ -54,7 +56,7 @@ summary(eff)
 
 
 ### Custom functions for modelling:
-# To help creating QQplots for beta regression models:
+# To help creating QQ-plots for beta regression models:
 
 qq.line = function(x) {
   # following four lines from base R's qqline()
