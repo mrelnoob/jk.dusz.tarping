@@ -102,39 +102,22 @@ pseudo.R2glmm <- function(model){
 
 Cand.mod <- list()
 
-##### Test model with GAMLSS #####
-# --------------------------------
 
-# library(gamlss)
-# mod1 <- gamlss(formula = efficiency~distance+re(random = ~1|manager_id),
-#                        nu.formula = ~distance+re(random = ~1|manager_id),
-#                        data = eff, family = BEINF())
-#
-# # Checking the residuals:
-# plot(mod1) # Obs. n°67 is probably problematic?
-# plot(fitted(mod1)~eff$efficiency)
-# # Checking the goodness-of-fit and overdispersion:
-# dat.resid <- sum(resid(mod1, type = "weighted", what = "mu")^2)
-# 1 - pchisq(dat.resid, mod1$df.resid) # Conclusions: Pearson residuals do indicate a lack of fit (p values
-# # far lower than 0.05)
-# dat.resid/df.residual(mod1) # Conclusions: the data are definitely not overdispersed.
-# # Exploring parameters and hypotheses:
-# summary(mod1)
-# binomial()$linkinv(coef(mod1))  # logit inverse: to get interpretable parameter estimates
-# # Further trend exploration:
-# gamlss::Rsq(mod1) # R^2 seems too good to be true!
-
-
-
-##### Model 1 (null model) #####
-# ------------------------------
 §§§§§§§ TESTER SI ça change quand stand_surface/10!!!!!
 
   §§§§§§§§
 ++++ centering pour interactions!!!
   ++ tester R2 de nagelkerke
-++ tester avec repairs/add_control§§§
+++ VIF
+++ autres checks de performance::!!!!!!
+  ++ tester avec repairs/add_control§§§
+++ Huber-White SE!!!!!!!
+---- de stand_surface, followups et ++++ de repairs/add_control et d'obstacles!'
 
+
+
+##### Model 1 (null model) #####
+# ------------------------------
 
 Cand.mod[[1]] <- glmmTMB::glmmTMB(formula = efficiency~(1|manager_id), data = eff,
                          family = glmmTMB::beta_family(link = "logit"), REML = FALSE)
