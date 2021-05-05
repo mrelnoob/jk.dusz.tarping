@@ -1547,11 +1547,15 @@ par(mfrow = c(5, 4), mar = c(3, 3, 1, 1))
 resid <- NULL
 for (i in 1:nrow(dat.sim)) {
   e = ecdf(data.matrix(dat.sim[i, ] + runif(250, -0.5, 0.5)))
-  plot(e, main = i, las = 1)
   resid[i] <- e(eff$efficiency[i] + runif(250, -0.5, 0.5))
 }
 par(.pardefault) # To restore defaults graphical parameters
 plot(resid ~ fitted(Cand.mod[[31]]))
+
+### Model evaluation (with the 'performance' package)
+performance::check_autocorrelation(Cand.mod[[31]])
+performance::check_collinearity(Cand.mod[[31]])
+performance::r2_nakagawa(Cand.mod[[31]])
 
 ### Checking the goodness-of-fit and overdispersion:
 dat.resid <- sum(resid(Cand.mod[[31]], type = "pearson")^2)
@@ -1567,6 +1571,7 @@ broom.mixed::tidy(Cand.mod[[31]])
 broom.mixed::glance(Cand.mod[[31]])
 
 ### Computing a Pseudo-R2:
+1 - exp((2/nrow(eff)) * (logLik(update(Cand.mod[[31]], ~1))[1] - logLik(Cand.mod[[31]])[1])) # Methods from flutterbys.com
 pseudo.R2glmm(model = Cand.mod[[31]])
 
 
@@ -1589,11 +1594,15 @@ par(mfrow = c(5, 4), mar = c(3, 3, 1, 1))
 resid <- NULL
 for (i in 1:nrow(dat.sim)) {
   e = ecdf(data.matrix(dat.sim[i, ] + runif(250, -0.5, 0.5)))
-  plot(e, main = i, las = 1)
   resid[i] <- e(eff$efficiency[i] + runif(250, -0.5, 0.5))
 }
 par(.pardefault) # To restore defaults graphical parameters
 plot(resid ~ fitted(Cand.mod[[32]]))
+
+### Model evaluation (with the 'performance' package)
+performance::check_autocorrelation(Cand.mod[[32]])
+performance::check_collinearity(Cand.mod[[32]])
+performance::r2_nakagawa(Cand.mod[[32]])
 
 ### Checking the goodness-of-fit and overdispersion:
 dat.resid <- sum(resid(Cand.mod[[32]], type = "pearson")^2)
@@ -1609,6 +1618,7 @@ broom.mixed::tidy(Cand.mod[[32]])
 broom.mixed::glance(Cand.mod[[32]])
 
 ### Computing a Pseudo-R2:
+1 - exp((2/nrow(eff)) * (logLik(update(Cand.mod[[32]], ~1))[1] - logLik(Cand.mod[[32]])[1])) # Methods from flutterbys.com
 pseudo.R2glmm(model = Cand.mod[[32]])
 
 
@@ -1631,11 +1641,15 @@ par(mfrow = c(5, 4), mar = c(3, 3, 1, 1))
 resid <- NULL
 for (i in 1:nrow(dat.sim)) {
   e = ecdf(data.matrix(dat.sim[i, ] + runif(250, -0.5, 0.5)))
-  plot(e, main = i, las = 1)
   resid[i] <- e(eff$efficiency[i] + runif(250, -0.5, 0.5))
 }
 par(.pardefault) # To restore defaults graphical parameters
 plot(resid ~ fitted(Cand.mod[[33]]))
+
+### Model evaluation (with the 'performance' package)
+performance::check_autocorrelation(Cand.mod[[33]])
+performance::check_collinearity(Cand.mod[[33]])
+performance::r2_nakagawa(Cand.mod[[33]])
 
 ### Checking the goodness-of-fit and overdispersion:
 dat.resid <- sum(resid(Cand.mod[[33]], type = "pearson")^2)
@@ -1651,6 +1665,7 @@ broom.mixed::tidy(Cand.mod[[33]])
 broom.mixed::glance(Cand.mod[[33]])
 
 ### Computing a Pseudo-R2:
+1 - exp((2/nrow(eff)) * (logLik(update(Cand.mod[[33]], ~1))[1] - logLik(Cand.mod[[33]])[1])) # Methods from flutterbys.com
 pseudo.R2glmm(model = Cand.mod[[33]])
 
 
@@ -1673,11 +1688,15 @@ par(mfrow = c(5, 4), mar = c(3, 3, 1, 1))
 resid <- NULL
 for (i in 1:nrow(dat.sim)) {
   e = ecdf(data.matrix(dat.sim[i, ] + runif(250, -0.5, 0.5)))
-  plot(e, main = i, las = 1)
   resid[i] <- e(eff$efficiency[i] + runif(250, -0.5, 0.5))
 }
 par(.pardefault) # To restore defaults graphical parameters
 plot(resid ~ fitted(Cand.mod[[34]]))
+
+### Model evaluation (with the 'performance' package)
+performance::check_autocorrelation(Cand.mod[[34]])
+performance::check_collinearity(Cand.mod[[34]])
+performance::r2_nakagawa(Cand.mod[[34]])
 
 ### Checking the goodness-of-fit and overdispersion:
 dat.resid <- sum(resid(Cand.mod[[34]], type = "pearson")^2)
@@ -1693,6 +1712,7 @@ broom.mixed::tidy(Cand.mod[[34]])
 broom.mixed::glance(Cand.mod[[34]])
 
 ### Computing a Pseudo-R2:
+1 - exp((2/nrow(eff)) * (logLik(update(Cand.mod[[34]], ~1))[1] - logLik(Cand.mod[[34]])[1])) # Methods from flutterbys.com
 pseudo.R2glmm(model = Cand.mod[[34]])
 
 
@@ -1715,11 +1735,15 @@ par(mfrow = c(5, 4), mar = c(3, 3, 1, 1))
 resid <- NULL
 for (i in 1:nrow(dat.sim)) {
   e = ecdf(data.matrix(dat.sim[i, ] + runif(250, -0.5, 0.5)))
-  plot(e, main = i, las = 1)
   resid[i] <- e(eff$efficiency[i] + runif(250, -0.5, 0.5))
 }
 par(.pardefault) # To restore defaults graphical parameters
 plot(resid ~ fitted(Cand.mod[[35]]))
+
+### Model evaluation (with the 'performance' package)
+performance::check_autocorrelation(Cand.mod[[35]])
+performance::check_collinearity(Cand.mod[[35]])
+performance::r2_nakagawa(Cand.mod[[35]])
 
 ### Checking the goodness-of-fit and overdispersion:
 dat.resid <- sum(resid(Cand.mod[[35]], type = "pearson")^2)
@@ -1735,6 +1759,7 @@ broom.mixed::tidy(Cand.mod[[35]])
 broom.mixed::glance(Cand.mod[[35]])
 
 ### Computing a Pseudo-R2:
+1 - exp((2/nrow(eff)) * (logLik(update(Cand.mod[[35]], ~1))[1] - logLik(Cand.mod[[35]])[1])) # Methods from flutterbys.com
 pseudo.R2glmm(model = Cand.mod[[35]])
 
 
@@ -1757,11 +1782,15 @@ par(mfrow = c(5, 4), mar = c(3, 3, 1, 1))
 resid <- NULL
 for (i in 1:nrow(dat.sim)) {
   e = ecdf(data.matrix(dat.sim[i, ] + runif(250, -0.5, 0.5)))
-  plot(e, main = i, las = 1)
   resid[i] <- e(eff$efficiency[i] + runif(250, -0.5, 0.5))
 }
 par(.pardefault) # To restore defaults graphical parameters
 plot(resid ~ fitted(Cand.mod[[36]]))
+
+### Model evaluation (with the 'performance' package)
+performance::check_autocorrelation(Cand.mod[[36]])
+performance::check_collinearity(Cand.mod[[36]])
+performance::r2_nakagawa(Cand.mod[[36]])
 
 ### Checking the goodness-of-fit and overdispersion:
 dat.resid <- sum(resid(Cand.mod[[36]], type = "pearson")^2)
@@ -1777,6 +1806,7 @@ broom.mixed::tidy(Cand.mod[[36]])
 broom.mixed::glance(Cand.mod[[36]])
 
 ### Computing a Pseudo-R2:
+1 - exp((2/nrow(eff)) * (logLik(update(Cand.mod[[36]], ~1))[1] - logLik(Cand.mod[[36]])[1])) # Methods from flutterbys.com
 pseudo.R2glmm(model = Cand.mod[[36]])
 
 
@@ -1799,11 +1829,15 @@ par(mfrow = c(5, 4), mar = c(3, 3, 1, 1))
 resid <- NULL
 for (i in 1:nrow(dat.sim)) {
   e = ecdf(data.matrix(dat.sim[i, ] + runif(250, -0.5, 0.5)))
-  plot(e, main = i, las = 1)
   resid[i] <- e(eff$efficiency[i] + runif(250, -0.5, 0.5))
 }
 par(.pardefault) # To restore defaults graphical parameters
 plot(resid ~ fitted(Cand.mod[[37]]))
+
+### Model evaluation (with the 'performance' package)
+performance::check_autocorrelation(Cand.mod[[37]])
+performance::check_collinearity(Cand.mod[[37]])
+performance::r2_nakagawa(Cand.mod[[37]])
 
 ### Checking the goodness-of-fit and overdispersion:
 dat.resid <- sum(resid(Cand.mod[[37]], type = "pearson")^2)
@@ -1819,6 +1853,7 @@ broom.mixed::tidy(Cand.mod[[37]])
 broom.mixed::glance(Cand.mod[[37]])
 
 ### Computing a Pseudo-R2:
+1 - exp((2/nrow(eff)) * (logLik(update(Cand.mod[[37]], ~1))[1] - logLik(Cand.mod[[37]])[1])) # Methods from flutterbys.com
 pseudo.R2glmm(model = Cand.mod[[37]])
 
 
@@ -1841,11 +1876,15 @@ par(mfrow = c(5, 4), mar = c(3, 3, 1, 1))
 resid <- NULL
 for (i in 1:nrow(dat.sim)) {
   e = ecdf(data.matrix(dat.sim[i, ] + runif(250, -0.5, 0.5)))
-  plot(e, main = i, las = 1)
   resid[i] <- e(eff$efficiency[i] + runif(250, -0.5, 0.5))
 }
 par(.pardefault) # To restore defaults graphical parameters
 plot(resid ~ fitted(Cand.mod[[38]]))
+
+### Model evaluation (with the 'performance' package)
+performance::check_autocorrelation(Cand.mod[[38]])
+performance::check_collinearity(Cand.mod[[38]])
+performance::r2_nakagawa(Cand.mod[[38]])
 
 ### Checking the goodness-of-fit and overdispersion:
 dat.resid <- sum(resid(Cand.mod[[38]], type = "pearson")^2)
@@ -1861,6 +1900,7 @@ broom.mixed::tidy(Cand.mod[[38]])
 broom.mixed::glance(Cand.mod[[38]])
 
 ### Computing a Pseudo-R2:
+1 - exp((2/nrow(eff)) * (logLik(update(Cand.mod[[38]], ~1))[1] - logLik(Cand.mod[[38]])[1])) # Methods from flutterbys.com
 pseudo.R2glmm(model = Cand.mod[[38]])
 
 
@@ -1883,11 +1923,15 @@ par(mfrow = c(5, 4), mar = c(3, 3, 1, 1))
 resid <- NULL
 for (i in 1:nrow(dat.sim)) {
   e = ecdf(data.matrix(dat.sim[i, ] + runif(250, -0.5, 0.5)))
-  plot(e, main = i, las = 1)
   resid[i] <- e(eff$efficiency[i] + runif(250, -0.5, 0.5))
 }
 par(.pardefault) # To restore defaults graphical parameters
 plot(resid ~ fitted(Cand.mod[[39]]))
+
+### Model evaluation (with the 'performance' package)
+performance::check_autocorrelation(Cand.mod[[39]])
+performance::check_collinearity(Cand.mod[[39]])
+performance::r2_nakagawa(Cand.mod[[39]])
 
 ### Checking the goodness-of-fit and overdispersion:
 dat.resid <- sum(resid(Cand.mod[[39]], type = "pearson")^2)
@@ -1903,6 +1947,7 @@ broom.mixed::tidy(Cand.mod[[39]])
 broom.mixed::glance(Cand.mod[[39]])
 
 ### Computing a Pseudo-R2:
+1 - exp((2/nrow(eff)) * (logLik(update(Cand.mod[[39]], ~1))[1] - logLik(Cand.mod[[39]])[1])) # Methods from flutterbys.com
 pseudo.R2glmm(model = Cand.mod[[39]])
 
 
@@ -1925,11 +1970,15 @@ par(mfrow = c(5, 4), mar = c(3, 3, 1, 1))
 resid <- NULL
 for (i in 1:nrow(dat.sim)) {
   e = ecdf(data.matrix(dat.sim[i, ] + runif(250, -0.5, 0.5)))
-  plot(e, main = i, las = 1)
   resid[i] <- e(eff$efficiency[i] + runif(250, -0.5, 0.5))
 }
 par(.pardefault) # To restore defaults graphical parameters
 plot(resid ~ fitted(Cand.mod[[40]]))
+
+### Model evaluation (with the 'performance' package)
+performance::check_autocorrelation(Cand.mod[[40]])
+performance::check_collinearity(Cand.mod[[40]])
+performance::r2_nakagawa(Cand.mod[[40]])
 
 ### Checking the goodness-of-fit and overdispersion:
 dat.resid <- sum(resid(Cand.mod[[40]], type = "pearson")^2)
@@ -1945,6 +1994,7 @@ broom.mixed::tidy(Cand.mod[[40]])
 broom.mixed::glance(Cand.mod[[40]])
 
 ### Computing a Pseudo-R2:
+1 - exp((2/nrow(eff)) * (logLik(update(Cand.mod[[40]], ~1))[1] - logLik(Cand.mod[[40]])[1])) # Methods from flutterbys.com
 pseudo.R2glmm(model = Cand.mod[[40]])
 
 
@@ -1967,11 +2017,15 @@ par(mfrow = c(5, 4), mar = c(3, 3, 1, 1))
 resid <- NULL
 for (i in 1:nrow(dat.sim)) {
   e = ecdf(data.matrix(dat.sim[i, ] + runif(250, -0.5, 0.5)))
-  plot(e, main = i, las = 1)
   resid[i] <- e(eff$efficiency[i] + runif(250, -0.5, 0.5))
 }
 par(.pardefault) # To restore defaults graphical parameters
 plot(resid ~ fitted(Cand.mod[[41]]))
+
+### Model evaluation (with the 'performance' package)
+performance::check_autocorrelation(Cand.mod[[41]])
+performance::check_collinearity(Cand.mod[[41]])
+performance::r2_nakagawa(Cand.mod[[41]])
 
 ### Checking the goodness-of-fit and overdispersion:
 dat.resid <- sum(resid(Cand.mod[[41]], type = "pearson")^2)
@@ -1987,6 +2041,7 @@ broom.mixed::tidy(Cand.mod[[41]])
 broom.mixed::glance(Cand.mod[[41]])
 
 ### Computing a Pseudo-R2:
+1 - exp((2/nrow(eff)) * (logLik(update(Cand.mod[[41]], ~1))[1] - logLik(Cand.mod[[41]])[1])) # Methods from flutterbys.com
 pseudo.R2glmm(model = Cand.mod[[41]])
 
 
@@ -2009,11 +2064,15 @@ par(mfrow = c(5, 4), mar = c(3, 3, 1, 1))
 resid <- NULL
 for (i in 1:nrow(dat.sim)) {
   e = ecdf(data.matrix(dat.sim[i, ] + runif(250, -0.5, 0.5)))
-  plot(e, main = i, las = 1)
   resid[i] <- e(eff$efficiency[i] + runif(250, -0.5, 0.5))
 }
 par(.pardefault) # To restore defaults graphical parameters
 plot(resid ~ fitted(Cand.mod[[42]]))
+
+### Model evaluation (with the 'performance' package)
+performance::check_autocorrelation(Cand.mod[[42]])
+performance::check_collinearity(Cand.mod[[42]])
+performance::r2_nakagawa(Cand.mod[[42]])
 
 ### Checking the goodness-of-fit and overdispersion:
 dat.resid <- sum(resid(Cand.mod[[42]], type = "pearson")^2)
@@ -2029,6 +2088,7 @@ broom.mixed::tidy(Cand.mod[[42]])
 broom.mixed::glance(Cand.mod[[42]])
 
 ### Computing a Pseudo-R2:
+1 - exp((2/nrow(eff)) * (logLik(update(Cand.mod[[42]], ~1))[1] - logLik(Cand.mod[[42]])[1])) # Methods from flutterbys.com
 pseudo.R2glmm(model = Cand.mod[[42]])
 
 
@@ -2051,11 +2111,15 @@ par(mfrow = c(5, 4), mar = c(3, 3, 1, 1))
 resid <- NULL
 for (i in 1:nrow(dat.sim)) {
   e = ecdf(data.matrix(dat.sim[i, ] + runif(250, -0.5, 0.5)))
-  plot(e, main = i, las = 1)
   resid[i] <- e(eff$efficiency[i] + runif(250, -0.5, 0.5))
 }
 par(.pardefault) # To restore defaults graphical parameters
 plot(resid ~ fitted(Cand.mod[[43]]))
+
+### Model evaluation (with the 'performance' package)
+performance::check_autocorrelation(Cand.mod[[43]])
+performance::check_collinearity(Cand.mod[[43]])
+performance::r2_nakagawa(Cand.mod[[43]])
 
 ### Checking the goodness-of-fit and overdispersion:
 dat.resid <- sum(resid(Cand.mod[[43]], type = "pearson")^2)
@@ -2071,6 +2135,7 @@ broom.mixed::tidy(Cand.mod[[43]])
 broom.mixed::glance(Cand.mod[[43]])
 
 ### Computing a Pseudo-R2:
+1 - exp((2/nrow(eff)) * (logLik(update(Cand.mod[[43]], ~1))[1] - logLik(Cand.mod[[43]])[1])) # Methods from flutterbys.com
 pseudo.R2glmm(model = Cand.mod[[43]])
 
 
@@ -2093,11 +2158,15 @@ par(mfrow = c(5, 4), mar = c(3, 3, 1, 1))
 resid <- NULL
 for (i in 1:nrow(dat.sim)) {
   e = ecdf(data.matrix(dat.sim[i, ] + runif(250, -0.5, 0.5)))
-  plot(e, main = i, las = 1)
   resid[i] <- e(eff$efficiency[i] + runif(250, -0.5, 0.5))
 }
 par(.pardefault) # To restore defaults graphical parameters
 plot(resid ~ fitted(Cand.mod[[44]]))
+
+### Model evaluation (with the 'performance' package)
+performance::check_autocorrelation(Cand.mod[[44]])
+performance::check_collinearity(Cand.mod[[44]])
+performance::r2_nakagawa(Cand.mod[[44]])
 
 ### Checking the goodness-of-fit and overdispersion:
 dat.resid <- sum(resid(Cand.mod[[44]], type = "pearson")^2)
@@ -2113,6 +2182,7 @@ broom.mixed::tidy(Cand.mod[[44]])
 broom.mixed::glance(Cand.mod[[44]])
 
 ### Computing a Pseudo-R2:
+1 - exp((2/nrow(eff)) * (logLik(update(Cand.mod[[44]], ~1))[1] - logLik(Cand.mod[[44]])[1])) # Methods from flutterbys.com
 pseudo.R2glmm(model = Cand.mod[[44]])
 
 
@@ -2135,11 +2205,15 @@ par(mfrow = c(5, 4), mar = c(3, 3, 1, 1))
 resid <- NULL
 for (i in 1:nrow(dat.sim)) {
   e = ecdf(data.matrix(dat.sim[i, ] + runif(250, -0.5, 0.5)))
-  plot(e, main = i, las = 1)
   resid[i] <- e(eff$efficiency[i] + runif(250, -0.5, 0.5))
 }
 par(.pardefault) # To restore defaults graphical parameters
 plot(resid ~ fitted(Cand.mod[[45]]))
+
+### Model evaluation (with the 'performance' package)
+performance::check_autocorrelation(Cand.mod[[45]])
+performance::check_collinearity(Cand.mod[[45]])
+performance::r2_nakagawa(Cand.mod[[45]])
 
 ### Checking the goodness-of-fit and overdispersion:
 dat.resid <- sum(resid(Cand.mod[[45]], type = "pearson")^2)
@@ -2155,6 +2229,7 @@ broom.mixed::tidy(Cand.mod[[45]])
 broom.mixed::glance(Cand.mod[[45]])
 
 ### Computing a Pseudo-R2:
+1 - exp((2/nrow(eff)) * (logLik(update(Cand.mod[[45]], ~1))[1] - logLik(Cand.mod[[45]])[1])) # Methods from flutterbys.com
 pseudo.R2glmm(model = Cand.mod[[45]])
 
 
@@ -2177,11 +2252,15 @@ par(mfrow = c(5, 4), mar = c(3, 3, 1, 1))
 resid <- NULL
 for (i in 1:nrow(dat.sim)) {
   e = ecdf(data.matrix(dat.sim[i, ] + runif(250, -0.5, 0.5)))
-  plot(e, main = i, las = 1)
   resid[i] <- e(eff$efficiency[i] + runif(250, -0.5, 0.5))
 }
 par(.pardefault) # To restore defaults graphical parameters
 plot(resid ~ fitted(Cand.mod[[46]]))
+
+### Model evaluation (with the 'performance' package)
+performance::check_autocorrelation(Cand.mod[[46]])
+performance::check_collinearity(Cand.mod[[46]])
+performance::r2_nakagawa(Cand.mod[[46]])
 
 ### Checking the goodness-of-fit and overdispersion:
 dat.resid <- sum(resid(Cand.mod[[46]], type = "pearson")^2)
@@ -2197,6 +2276,7 @@ broom.mixed::tidy(Cand.mod[[46]])
 broom.mixed::glance(Cand.mod[[46]])
 
 ### Computing a Pseudo-R2:
+1 - exp((2/nrow(eff)) * (logLik(update(Cand.mod[[46]], ~1))[1] - logLik(Cand.mod[[46]])[1])) # Methods from flutterbys.com
 pseudo.R2glmm(model = Cand.mod[[46]])
 
 
@@ -2219,11 +2299,15 @@ par(mfrow = c(5, 4), mar = c(3, 3, 1, 1))
 resid <- NULL
 for (i in 1:nrow(dat.sim)) {
   e = ecdf(data.matrix(dat.sim[i, ] + runif(250, -0.5, 0.5)))
-  plot(e, main = i, las = 1)
   resid[i] <- e(eff$efficiency[i] + runif(250, -0.5, 0.5))
 }
 par(.pardefault) # To restore defaults graphical parameters
 plot(resid ~ fitted(Cand.mod[[47]]))
+
+### Model evaluation (with the 'performance' package)
+performance::check_autocorrelation(Cand.mod[[47]])
+performance::check_collinearity(Cand.mod[[47]])
+performance::r2_nakagawa(Cand.mod[[47]])
 
 ### Checking the goodness-of-fit and overdispersion:
 dat.resid <- sum(resid(Cand.mod[[47]], type = "pearson")^2)
@@ -2239,6 +2323,7 @@ broom.mixed::tidy(Cand.mod[[47]])
 broom.mixed::glance(Cand.mod[[47]])
 
 ### Computing a Pseudo-R2:
+1 - exp((2/nrow(eff)) * (logLik(update(Cand.mod[[47]], ~1))[1] - logLik(Cand.mod[[47]])[1])) # Methods from flutterbys.com
 pseudo.R2glmm(model = Cand.mod[[47]])
 
 
@@ -2261,11 +2346,15 @@ par(mfrow = c(5, 4), mar = c(3, 3, 1, 1))
 resid <- NULL
 for (i in 1:nrow(dat.sim)) {
   e = ecdf(data.matrix(dat.sim[i, ] + runif(250, -0.5, 0.5)))
-  plot(e, main = i, las = 1)
   resid[i] <- e(eff$efficiency[i] + runif(250, -0.5, 0.5))
 }
 par(.pardefault) # To restore defaults graphical parameters
 plot(resid ~ fitted(Cand.mod[[48]]))
+
+### Model evaluation (with the 'performance' package)
+performance::check_autocorrelation(Cand.mod[[48]])
+performance::check_collinearity(Cand.mod[[48]])
+performance::r2_nakagawa(Cand.mod[[48]])
 
 ### Checking the goodness-of-fit and overdispersion:
 dat.resid <- sum(resid(Cand.mod[[48]], type = "pearson")^2)
@@ -2281,6 +2370,7 @@ broom.mixed::tidy(Cand.mod[[48]])
 broom.mixed::glance(Cand.mod[[48]])
 
 ### Computing a Pseudo-R2:
+1 - exp((2/nrow(eff)) * (logLik(update(Cand.mod[[48]], ~1))[1] - logLik(Cand.mod[[48]])[1])) # Methods from flutterbys.com
 pseudo.R2glmm(model = Cand.mod[[48]])
 
 
@@ -2303,11 +2393,15 @@ par(mfrow = c(5, 4), mar = c(3, 3, 1, 1))
 resid <- NULL
 for (i in 1:nrow(dat.sim)) {
   e = ecdf(data.matrix(dat.sim[i, ] + runif(250, -0.5, 0.5)))
-  plot(e, main = i, las = 1)
   resid[i] <- e(eff$efficiency[i] + runif(250, -0.5, 0.5))
 }
 par(.pardefault) # To restore defaults graphical parameters
 plot(resid ~ fitted(Cand.mod[[49]]))
+
+### Model evaluation (with the 'performance' package)
+performance::check_autocorrelation(Cand.mod[[49]])
+performance::check_collinearity(Cand.mod[[49]])
+performance::r2_nakagawa(Cand.mod[[49]])
 
 ### Checking the goodness-of-fit and overdispersion:
 dat.resid <- sum(resid(Cand.mod[[49]], type = "pearson")^2)
@@ -2323,6 +2417,7 @@ broom.mixed::tidy(Cand.mod[[49]])
 broom.mixed::glance(Cand.mod[[49]])
 
 ### Computing a Pseudo-R2:
+1 - exp((2/nrow(eff)) * (logLik(update(Cand.mod[[49]], ~1))[1] - logLik(Cand.mod[[49]])[1])) # Methods from flutterbys.com
 pseudo.R2glmm(model = Cand.mod[[49]])
 
 
@@ -2345,11 +2440,15 @@ par(mfrow = c(5, 4), mar = c(3, 3, 1, 1))
 resid <- NULL
 for (i in 1:nrow(dat.sim)) {
   e = ecdf(data.matrix(dat.sim[i, ] + runif(250, -0.5, 0.5)))
-  plot(e, main = i, las = 1)
   resid[i] <- e(eff$efficiency[i] + runif(250, -0.5, 0.5))
 }
 par(.pardefault) # To restore defaults graphical parameters
 plot(resid ~ fitted(Cand.mod[[50]]))
+
+### Model evaluation (with the 'performance' package)
+performance::check_autocorrelation(Cand.mod[[50]])
+performance::check_collinearity(Cand.mod[[50]])
+performance::r2_nakagawa(Cand.mod[[50]])
 
 ### Checking the goodness-of-fit and overdispersion:
 dat.resid <- sum(resid(Cand.mod[[50]], type = "pearson")^2)
@@ -2365,6 +2464,7 @@ broom.mixed::tidy(Cand.mod[[50]])
 broom.mixed::glance(Cand.mod[[50]])
 
 ### Computing a Pseudo-R2:
+1 - exp((2/nrow(eff)) * (logLik(update(Cand.mod[[50]], ~1))[1] - logLik(Cand.mod[[50]])[1])) # Methods from flutterbys.com
 pseudo.R2glmm(model = Cand.mod[[50]])
 
 
@@ -2387,11 +2487,15 @@ par(mfrow = c(5, 4), mar = c(3, 3, 1, 1))
 resid <- NULL
 for (i in 1:nrow(dat.sim)) {
   e = ecdf(data.matrix(dat.sim[i, ] + runif(250, -0.5, 0.5)))
-  plot(e, main = i, las = 1)
   resid[i] <- e(eff$efficiency[i] + runif(250, -0.5, 0.5))
 }
 par(.pardefault) # To restore defaults graphical parameters
 plot(resid ~ fitted(Cand.mod[[51]]))
+
+### Model evaluation (with the 'performance' package)
+performance::check_autocorrelation(Cand.mod[[51]])
+performance::check_collinearity(Cand.mod[[51]])
+performance::r2_nakagawa(Cand.mod[[51]])
 
 ### Checking the goodness-of-fit and overdispersion:
 dat.resid <- sum(resid(Cand.mod[[51]], type = "pearson")^2)
@@ -2407,6 +2511,7 @@ broom.mixed::tidy(Cand.mod[[51]])
 broom.mixed::glance(Cand.mod[[51]])
 
 ### Computing a Pseudo-R2:
+1 - exp((2/nrow(eff)) * (logLik(update(Cand.mod[[51]], ~1))[1] - logLik(Cand.mod[[51]])[1])) # Methods from flutterbys.com
 pseudo.R2glmm(model = Cand.mod[[51]])
 
 
@@ -2429,11 +2534,15 @@ par(mfrow = c(5, 4), mar = c(3, 3, 1, 1))
 resid <- NULL
 for (i in 1:nrow(dat.sim)) {
   e = ecdf(data.matrix(dat.sim[i, ] + runif(250, -0.5, 0.5)))
-  plot(e, main = i, las = 1)
   resid[i] <- e(eff$efficiency[i] + runif(250, -0.5, 0.5))
 }
 par(.pardefault) # To restore defaults graphical parameters
 plot(resid ~ fitted(Cand.mod[[52]]))
+
+### Model evaluation (with the 'performance' package)
+performance::check_autocorrelation(Cand.mod[[52]])
+performance::check_collinearity(Cand.mod[[52]])
+performance::r2_nakagawa(Cand.mod[[52]])
 
 ### Checking the goodness-of-fit and overdispersion:
 dat.resid <- sum(resid(Cand.mod[[52]], type = "pearson")^2)
@@ -2449,6 +2558,7 @@ broom.mixed::tidy(Cand.mod[[52]])
 broom.mixed::glance(Cand.mod[[52]])
 
 ### Computing a Pseudo-R2:
+1 - exp((2/nrow(eff)) * (logLik(update(Cand.mod[[52]], ~1))[1] - logLik(Cand.mod[[52]])[1])) # Methods from flutterbys.com
 pseudo.R2glmm(model = Cand.mod[[52]])
 
 
@@ -2471,11 +2581,15 @@ par(mfrow = c(5, 4), mar = c(3, 3, 1, 1))
 resid <- NULL
 for (i in 1:nrow(dat.sim)) {
   e = ecdf(data.matrix(dat.sim[i, ] + runif(250, -0.5, 0.5)))
-  plot(e, main = i, las = 1)
   resid[i] <- e(eff$efficiency[i] + runif(250, -0.5, 0.5))
 }
 par(.pardefault) # To restore defaults graphical parameters
 plot(resid ~ fitted(Cand.mod[[53]]))
+
+### Model evaluation (with the 'performance' package)
+performance::check_autocorrelation(Cand.mod[[53]])
+performance::check_collinearity(Cand.mod[[53]])
+performance::r2_nakagawa(Cand.mod[[53]])
 
 ### Checking the goodness-of-fit and overdispersion:
 dat.resid <- sum(resid(Cand.mod[[53]], type = "pearson")^2)
@@ -2491,6 +2605,7 @@ broom.mixed::tidy(Cand.mod[[53]])
 broom.mixed::glance(Cand.mod[[53]])
 
 ### Computing a Pseudo-R2:
+1 - exp((2/nrow(eff)) * (logLik(update(Cand.mod[[53]], ~1))[1] - logLik(Cand.mod[[53]])[1])) # Methods from flutterbys.com
 pseudo.R2glmm(model = Cand.mod[[53]])
 
 
@@ -2513,11 +2628,15 @@ par(mfrow = c(5, 4), mar = c(3, 3, 1, 1))
 resid <- NULL
 for (i in 1:nrow(dat.sim)) {
   e = ecdf(data.matrix(dat.sim[i, ] + runif(250, -0.5, 0.5)))
-  plot(e, main = i, las = 1)
   resid[i] <- e(eff$efficiency[i] + runif(250, -0.5, 0.5))
 }
 par(.pardefault) # To restore defaults graphical parameters
 plot(resid ~ fitted(Cand.mod[[54]]))
+
+### Model evaluation (with the 'performance' package)
+performance::check_autocorrelation(Cand.mod[[54]])
+performance::check_collinearity(Cand.mod[[54]])
+performance::r2_nakagawa(Cand.mod[[54]])
 
 ### Checking the goodness-of-fit and overdispersion:
 dat.resid <- sum(resid(Cand.mod[[54]], type = "pearson")^2)
@@ -2533,6 +2652,7 @@ broom.mixed::tidy(Cand.mod[[54]])
 broom.mixed::glance(Cand.mod[[54]])
 
 ### Computing a Pseudo-R2:
+1 - exp((2/nrow(eff)) * (logLik(update(Cand.mod[[54]], ~1))[1] - logLik(Cand.mod[[54]])[1])) # Methods from flutterbys.com
 pseudo.R2glmm(model = Cand.mod[[54]])
 
 
@@ -2555,11 +2675,15 @@ par(mfrow = c(5, 4), mar = c(3, 3, 1, 1))
 resid <- NULL
 for (i in 1:nrow(dat.sim)) {
   e = ecdf(data.matrix(dat.sim[i, ] + runif(250, -0.5, 0.5)))
-  plot(e, main = i, las = 1)
   resid[i] <- e(eff$efficiency[i] + runif(250, -0.5, 0.5))
 }
 par(.pardefault) # To restore defaults graphical parameters
 plot(resid ~ fitted(Cand.mod[[55]]))
+
+### Model evaluation (with the 'performance' package)
+performance::check_autocorrelation(Cand.mod[[55]])
+performance::check_collinearity(Cand.mod[[55]])
+performance::r2_nakagawa(Cand.mod[[55]])
 
 ### Checking the goodness-of-fit and overdispersion:
 dat.resid <- sum(resid(Cand.mod[[55]], type = "pearson")^2)
@@ -2575,6 +2699,7 @@ broom.mixed::tidy(Cand.mod[[55]])
 broom.mixed::glance(Cand.mod[[55]])
 
 ### Computing a Pseudo-R2:
+1 - exp((2/nrow(eff)) * (logLik(update(Cand.mod[[55]], ~1))[1] - logLik(Cand.mod[[55]])[1])) # Methods from flutterbys.com
 pseudo.R2glmm(model = Cand.mod[[55]])
 
 
@@ -2597,11 +2722,15 @@ par(mfrow = c(5, 4), mar = c(3, 3, 1, 1))
 resid <- NULL
 for (i in 1:nrow(dat.sim)) {
   e = ecdf(data.matrix(dat.sim[i, ] + runif(250, -0.5, 0.5)))
-  plot(e, main = i, las = 1)
   resid[i] <- e(eff$efficiency[i] + runif(250, -0.5, 0.5))
 }
 par(.pardefault) # To restore defaults graphical parameters
 plot(resid ~ fitted(Cand.mod[[56]]))
+
+### Model evaluation (with the 'performance' package)
+performance::check_autocorrelation(Cand.mod[[56]])
+performance::check_collinearity(Cand.mod[[56]])
+performance::r2_nakagawa(Cand.mod[[56]])
 
 ### Checking the goodness-of-fit and overdispersion:
 dat.resid <- sum(resid(Cand.mod[[56]], type = "pearson")^2)
@@ -2617,6 +2746,7 @@ broom.mixed::tidy(Cand.mod[[56]])
 broom.mixed::glance(Cand.mod[[56]])
 
 ### Computing a Pseudo-R2:
+1 - exp((2/nrow(eff)) * (logLik(update(Cand.mod[[56]], ~1))[1] - logLik(Cand.mod[[56]])[1])) # Methods from flutterbys.com
 pseudo.R2glmm(model = Cand.mod[[56]])
 
 
@@ -2639,11 +2769,15 @@ par(mfrow = c(5, 4), mar = c(3, 3, 1, 1))
 resid <- NULL
 for (i in 1:nrow(dat.sim)) {
   e = ecdf(data.matrix(dat.sim[i, ] + runif(250, -0.5, 0.5)))
-  plot(e, main = i, las = 1)
   resid[i] <- e(eff$efficiency[i] + runif(250, -0.5, 0.5))
 }
 par(.pardefault) # To restore defaults graphical parameters
 plot(resid ~ fitted(Cand.mod[[57]]))
+
+### Model evaluation (with the 'performance' package)
+performance::check_autocorrelation(Cand.mod[[57]])
+performance::check_collinearity(Cand.mod[[57]])
+performance::r2_nakagawa(Cand.mod[[57]])
 
 ### Checking the goodness-of-fit and overdispersion:
 dat.resid <- sum(resid(Cand.mod[[57]], type = "pearson")^2)
@@ -2659,6 +2793,7 @@ broom.mixed::tidy(Cand.mod[[57]])
 broom.mixed::glance(Cand.mod[[57]])
 
 ### Computing a Pseudo-R2:
+1 - exp((2/nrow(eff)) * (logLik(update(Cand.mod[[57]], ~1))[1] - logLik(Cand.mod[[57]])[1])) # Methods from flutterbys.com
 pseudo.R2glmm(model = Cand.mod[[57]])
 
 
@@ -2681,11 +2816,15 @@ par(mfrow = c(5, 4), mar = c(3, 3, 1, 1))
 resid <- NULL
 for (i in 1:nrow(dat.sim)) {
   e = ecdf(data.matrix(dat.sim[i, ] + runif(250, -0.5, 0.5)))
-  plot(e, main = i, las = 1)
   resid[i] <- e(eff$efficiency[i] + runif(250, -0.5, 0.5))
 }
 par(.pardefault) # To restore defaults graphical parameters
 plot(resid ~ fitted(Cand.mod[[58]]))
+
+### Model evaluation (with the 'performance' package)
+performance::check_autocorrelation(Cand.mod[[58]])
+performance::check_collinearity(Cand.mod[[58]])
+performance::r2_nakagawa(Cand.mod[[58]])
 
 ### Checking the goodness-of-fit and overdispersion:
 dat.resid <- sum(resid(Cand.mod[[58]], type = "pearson")^2)
@@ -2701,6 +2840,7 @@ broom.mixed::tidy(Cand.mod[[58]])
 broom.mixed::glance(Cand.mod[[58]])
 
 ### Computing a Pseudo-R2:
+1 - exp((2/nrow(eff)) * (logLik(update(Cand.mod[[58]], ~1))[1] - logLik(Cand.mod[[58]])[1])) # Methods from flutterbys.com
 pseudo.R2glmm(model = Cand.mod[[58]])
 
 
@@ -2723,11 +2863,15 @@ par(mfrow = c(5, 4), mar = c(3, 3, 1, 1))
 resid <- NULL
 for (i in 1:nrow(dat.sim)) {
   e = ecdf(data.matrix(dat.sim[i, ] + runif(250, -0.5, 0.5)))
-  plot(e, main = i, las = 1)
   resid[i] <- e(eff$efficiency[i] + runif(250, -0.5, 0.5))
 }
 par(.pardefault) # To restore defaults graphical parameters
 plot(resid ~ fitted(Cand.mod[[59]]))
+
+### Model evaluation (with the 'performance' package)
+performance::check_autocorrelation(Cand.mod[[59]])
+performance::check_collinearity(Cand.mod[[59]])
+performance::r2_nakagawa(Cand.mod[[59]])
 
 ### Checking the goodness-of-fit and overdispersion:
 dat.resid <- sum(resid(Cand.mod[[59]], type = "pearson")^2)
@@ -2743,6 +2887,7 @@ broom.mixed::tidy(Cand.mod[[59]])
 broom.mixed::glance(Cand.mod[[59]])
 
 ### Computing a Pseudo-R2:
+1 - exp((2/nrow(eff)) * (logLik(update(Cand.mod[[59]], ~1))[1] - logLik(Cand.mod[[59]])[1])) # Methods from flutterbys.com
 pseudo.R2glmm(model = Cand.mod[[59]])
 
 
@@ -2765,11 +2910,15 @@ par(mfrow = c(5, 4), mar = c(3, 3, 1, 1))
 resid <- NULL
 for (i in 1:nrow(dat.sim)) {
   e = ecdf(data.matrix(dat.sim[i, ] + runif(250, -0.5, 0.5)))
-  plot(e, main = i, las = 1)
   resid[i] <- e(eff$efficiency[i] + runif(250, -0.5, 0.5))
 }
 par(.pardefault) # To restore defaults graphical parameters
 plot(resid ~ fitted(Cand.mod[[60]]))
+
+### Model evaluation (with the 'performance' package)
+performance::check_autocorrelation(Cand.mod[[60]])
+performance::check_collinearity(Cand.mod[[60]])
+performance::r2_nakagawa(Cand.mod[[60]])
 
 ### Checking the goodness-of-fit and overdispersion:
 dat.resid <- sum(resid(Cand.mod[[60]], type = "pearson")^2)
@@ -2785,6 +2934,7 @@ broom.mixed::tidy(Cand.mod[[60]])
 broom.mixed::glance(Cand.mod[[60]])
 
 ### Computing a Pseudo-R2:
+1 - exp((2/nrow(eff)) * (logLik(update(Cand.mod[[60]], ~1))[1] - logLik(Cand.mod[[60]])[1])) # Methods from flutterbys.com
 pseudo.R2glmm(model = Cand.mod[[60]])
 
 
@@ -2807,11 +2957,15 @@ par(mfrow = c(5, 4), mar = c(3, 3, 1, 1))
 resid <- NULL
 for (i in 1:nrow(dat.sim)) {
   e = ecdf(data.matrix(dat.sim[i, ] + runif(250, -0.5, 0.5)))
-  plot(e, main = i, las = 1)
   resid[i] <- e(eff$efficiency[i] + runif(250, -0.5, 0.5))
 }
 par(.pardefault) # To restore defaults graphical parameters
 plot(resid ~ fitted(Cand.mod[[61]]))
+
+### Model evaluation (with the 'performance' package)
+performance::check_autocorrelation(Cand.mod[[61]])
+performance::check_collinearity(Cand.mod[[61]])
+performance::r2_nakagawa(Cand.mod[[61]])
 
 ### Checking the goodness-of-fit and overdispersion:
 dat.resid <- sum(resid(Cand.mod[[61]], type = "pearson")^2)
@@ -2827,6 +2981,7 @@ broom.mixed::tidy(Cand.mod[[61]])
 broom.mixed::glance(Cand.mod[[61]])
 
 ### Computing a Pseudo-R2:
+1 - exp((2/nrow(eff)) * (logLik(update(Cand.mod[[61]], ~1))[1] - logLik(Cand.mod[[61]])[1])) # Methods from flutterbys.com
 pseudo.R2glmm(model = Cand.mod[[61]])
 
 
@@ -2849,11 +3004,15 @@ par(mfrow = c(5, 4), mar = c(3, 3, 1, 1))
 resid <- NULL
 for (i in 1:nrow(dat.sim)) {
   e = ecdf(data.matrix(dat.sim[i, ] + runif(250, -0.5, 0.5)))
-  plot(e, main = i, las = 1)
   resid[i] <- e(eff$efficiency[i] + runif(250, -0.5, 0.5))
 }
 par(.pardefault) # To restore defaults graphical parameters
 plot(resid ~ fitted(Cand.mod[[62]]))
+
+### Model evaluation (with the 'performance' package)
+performance::check_autocorrelation(Cand.mod[[62]])
+performance::check_collinearity(Cand.mod[[62]])
+performance::r2_nakagawa(Cand.mod[[62]])
 
 ### Checking the goodness-of-fit and overdispersion:
 dat.resid <- sum(resid(Cand.mod[[62]], type = "pearson")^2)
@@ -2869,6 +3028,7 @@ broom.mixed::tidy(Cand.mod[[62]])
 broom.mixed::glance(Cand.mod[[62]])
 
 ### Computing a Pseudo-R2:
+1 - exp((2/nrow(eff)) * (logLik(update(Cand.mod[[62]], ~1))[1] - logLik(Cand.mod[[62]])[1])) # Methods from flutterbys.com
 pseudo.R2glmm(model = Cand.mod[[62]])
 
 
@@ -2891,11 +3051,15 @@ par(mfrow = c(5, 4), mar = c(3, 3, 1, 1))
 resid <- NULL
 for (i in 1:nrow(dat.sim)) {
   e = ecdf(data.matrix(dat.sim[i, ] + runif(250, -0.5, 0.5)))
-  plot(e, main = i, las = 1)
   resid[i] <- e(eff$efficiency[i] + runif(250, -0.5, 0.5))
 }
 par(.pardefault) # To restore defaults graphical parameters
 plot(resid ~ fitted(Cand.mod[[63]]))
+
+### Model evaluation (with the 'performance' package)
+performance::check_autocorrelation(Cand.mod[[63]])
+performance::check_collinearity(Cand.mod[[63]])
+performance::r2_nakagawa(Cand.mod[[63]])
 
 ### Checking the goodness-of-fit and overdispersion:
 dat.resid <- sum(resid(Cand.mod[[63]], type = "pearson")^2)
@@ -2911,6 +3075,7 @@ broom.mixed::tidy(Cand.mod[[63]])
 broom.mixed::glance(Cand.mod[[63]])
 
 ### Computing a Pseudo-R2:
+1 - exp((2/nrow(eff)) * (logLik(update(Cand.mod[[63]], ~1))[1] - logLik(Cand.mod[[63]])[1])) # Methods from flutterbys.com
 pseudo.R2glmm(model = Cand.mod[[63]])
 
 
@@ -2933,11 +3098,15 @@ par(mfrow = c(5, 4), mar = c(3, 3, 1, 1))
 resid <- NULL
 for (i in 1:nrow(dat.sim)) {
   e = ecdf(data.matrix(dat.sim[i, ] + runif(250, -0.5, 0.5)))
-  plot(e, main = i, las = 1)
   resid[i] <- e(eff$efficiency[i] + runif(250, -0.5, 0.5))
 }
 par(.pardefault) # To restore defaults graphical parameters
 plot(resid ~ fitted(Cand.mod[[64]]))
+
+### Model evaluation (with the 'performance' package)
+performance::check_autocorrelation(Cand.mod[[64]])
+performance::check_collinearity(Cand.mod[[64]])
+performance::r2_nakagawa(Cand.mod[[64]])
 
 ### Checking the goodness-of-fit and overdispersion:
 dat.resid <- sum(resid(Cand.mod[[64]], type = "pearson")^2)
@@ -2953,6 +3122,7 @@ broom.mixed::tidy(Cand.mod[[64]])
 broom.mixed::glance(Cand.mod[[64]])
 
 ### Computing a Pseudo-R2:
+1 - exp((2/nrow(eff)) * (logLik(update(Cand.mod[[64]], ~1))[1] - logLik(Cand.mod[[64]])[1])) # Methods from flutterbys.com
 pseudo.R2glmm(model = Cand.mod[[64]])
 
 
@@ -2980,6 +3150,11 @@ for (i in 1:nrow(dat.sim)) {
 par(.pardefault) # To restore defaults graphical parameters
 plot(resid ~ fitted(Cand.mod[[65]]))
 
+### Model evaluation (with the 'performance' package)
+performance::check_autocorrelation(Cand.mod[[65]])
+performance::check_collinearity(Cand.mod[[65]])
+performance::r2_nakagawa(Cand.mod[[65]])
+
 ### Checking the goodness-of-fit and overdispersion:
 dat.resid <- sum(resid(Cand.mod[[65]], type = "pearson")^2)
 1 - pchisq(dat.resid, df.residual(Cand.mod[[65]])) # Ok
@@ -2994,6 +3169,7 @@ broom.mixed::tidy(Cand.mod[[65]])
 broom.mixed::glance(Cand.mod[[65]])
 
 ### Computing a Pseudo-R2:
+1 - exp((2/nrow(eff)) * (logLik(update(Cand.mod[[65]], ~1))[1] - logLik(Cand.mod[[65]])[1])) # Methods from flutterbys.com
 pseudo.R2glmm(model = Cand.mod[[65]])
 
 
@@ -3021,6 +3197,11 @@ for (i in 1:nrow(dat.sim)) {
 par(.pardefault) # To restore defaults graphical parameters
 plot(resid ~ fitted(Cand.mod[[66]]))
 
+### Model evaluation (with the 'performance' package)
+performance::check_autocorrelation(Cand.mod[[66]])
+performance::check_collinearity(Cand.mod[[66]])
+performance::r2_nakagawa(Cand.mod[[66]])
+
 ### Checking the goodness-of-fit and overdispersion:
 dat.resid <- sum(resid(Cand.mod[[66]], type = "pearson")^2)
 1 - pchisq(dat.resid, df.residual(Cand.mod[[66]])) # Ok
@@ -3035,6 +3216,7 @@ broom.mixed::tidy(Cand.mod[[66]])
 broom.mixed::glance(Cand.mod[[66]])
 
 ### Computing a Pseudo-R2:
+1 - exp((2/nrow(eff)) * (logLik(update(Cand.mod[[66]], ~1))[1] - logLik(Cand.mod[[66]])[1])) # Methods from flutterbys.com
 pseudo.R2glmm(model = Cand.mod[[66]])
 
 
@@ -3062,6 +3244,11 @@ for (i in 1:nrow(dat.sim)) {
 par(.pardefault) # To restore defaults graphical parameters
 plot(resid ~ fitted(Cand.mod[[67]]))
 
+### Model evaluation (with the 'performance' package)
+performance::check_autocorrelation(Cand.mod[[67]])
+performance::check_collinearity(Cand.mod[[67]])
+performance::r2_nakagawa(Cand.mod[[67]])
+
 ### Checking the goodness-of-fit and overdispersion:
 dat.resid <- sum(resid(Cand.mod[[67]], type = "pearson")^2)
 1 - pchisq(dat.resid, df.residual(Cand.mod[[67]])) # Ok
@@ -3076,130 +3263,7 @@ broom.mixed::tidy(Cand.mod[[67]])
 broom.mixed::glance(Cand.mod[[67]])
 
 ### Computing a Pseudo-R2:
+1 - exp((2/nrow(eff)) * (logLik(update(Cand.mod[[67]], ~1))[1] - logLik(Cand.mod[[67]])[1])) # Methods from flutterbys.com
 pseudo.R2glmm(model = Cand.mod[[67]])
-
-
-
-##### Model 68 #####
-# -----------------
-
-Cand.mod[[68]] <- glmmTMB::glmmTMB(formula = efficiency~fully_tarped + obstacles + distance + followups + (1|manager_id), data = eff,
-                                   family = glmmTMB::beta_family(link = "logit"), REML = FALSE)
-
-### Model evaluation (Fluttersbys method):
-ggplot2::ggplot(data = NULL) + ggplot2::geom_point(ggplot2::aes(y = residuals(Cand.mod[[68]],
-                                                                              type = "pearson"), x = fitted(Cand.mod[[68]])))
-QQline <- qq.line(resid(Cand.mod[[68]], type = "pearson"))
-ggplot2::ggplot(data = NULL, ggplot2::aes(sample = resid(Cand.mod[[68]], type = "pearson"))) +
-  ggplot2::stat_qq() + ggplot2::geom_abline(intercept = QQline[1], slope = QQline[2])
-# To simulate residuals (see https://www.flutterbys.com.au/stats/tut/tut10.5a.html#h2_29):
-dat.sim <- simulate(Cand.mod[[68]], n = 250)
-par(mfrow = c(5, 4), mar = c(3, 3, 1, 1))
-resid <- NULL
-for (i in 1:nrow(dat.sim)) {
-  e = ecdf(data.matrix(dat.sim[i, ] + runif(250, -0.5, 0.5)))
-  resid[i] <- e(eff$efficiency[i] + runif(250, -0.5, 0.5))
-}
-par(.pardefault) # To restore defaults graphical parameters
-plot(resid ~ fitted(Cand.mod[[68]]))
-
-### Checking the goodness-of-fit and overdispersion:
-dat.resid <- sum(resid(Cand.mod[[68]], type = "pearson")^2)
-1 - pchisq(dat.resid, df.residual(Cand.mod[[68]])) # Ok
-dat.resid/df.residual(Cand.mod[[68]]) # Ok
-# To plot the observed vs. fitted values:
-plot(x = fitted(Cand.mod[[68]]), y = eff$efficiency, xlab = "Fitted values", ylab = "Observed values")
-
-### Exploring the model parameters and test hypotheses:
-summary(Cand.mod[[68]])
-family(Cand.mod[[68]])$linkinv(glmmTMB::fixef(Cand.mod[[68]])$cond) # To get interpretable coefficients.
-broom.mixed::tidy(Cand.mod[[68]])
-broom.mixed::glance(Cand.mod[[68]])
-
-### Computing a Pseudo-R2:
-pseudo.R2glmm(model = Cand.mod[[68]])
-
-
-
-##### Model 69 #####
-# -----------------
-
-Cand.mod[[69]] <- glmmTMB::glmmTMB(formula = efficiency~fully_tarped + obstacles + distance + log(stand_surface) + (1|manager_id), data = eff,
-                                   family = glmmTMB::beta_family(link = "logit"), REML = FALSE)
-
-### Model evaluation (Fluttersbys method):
-ggplot2::ggplot(data = NULL) + ggplot2::geom_point(ggplot2::aes(y = residuals(Cand.mod[[69]],
-                                                                              type = "pearson"), x = fitted(Cand.mod[[69]])))
-QQline <- qq.line(resid(Cand.mod[[69]], type = "pearson"))
-ggplot2::ggplot(data = NULL, ggplot2::aes(sample = resid(Cand.mod[[69]], type = "pearson"))) +
-  ggplot2::stat_qq() + ggplot2::geom_abline(intercept = QQline[1], slope = QQline[2])
-# To simulate residuals (see https://www.flutterbys.com.au/stats/tut/tut10.5a.html#h2_29):
-dat.sim <- simulate(Cand.mod[[69]], n = 250)
-par(mfrow = c(5, 4), mar = c(3, 3, 1, 1))
-resid <- NULL
-for (i in 1:nrow(dat.sim)) {
-  e = ecdf(data.matrix(dat.sim[i, ] + runif(250, -0.5, 0.5)))
-  resid[i] <- e(eff$efficiency[i] + runif(250, -0.5, 0.5))
-}
-par(.pardefault) # To restore defaults graphical parameters
-plot(resid ~ fitted(Cand.mod[[69]]))
-
-### Checking the goodness-of-fit and overdispersion:
-dat.resid <- sum(resid(Cand.mod[[69]], type = "pearson")^2)
-1 - pchisq(dat.resid, df.residual(Cand.mod[[69]])) # Ok
-dat.resid/df.residual(Cand.mod[[69]]) # Ok
-# To plot the observed vs. fitted values:
-plot(x = fitted(Cand.mod[[69]]), y = eff$efficiency, xlab = "Fitted values", ylab = "Observed values")
-
-### Exploring the model parameters and test hypotheses:
-summary(Cand.mod[[69]])
-family(Cand.mod[[69]])$linkinv(glmmTMB::fixef(Cand.mod[[69]])$cond) # To get interpretable coefficients.
-broom.mixed::tidy(Cand.mod[[69]])
-broom.mixed::glance(Cand.mod[[69]])
-
-### Computing a Pseudo-R2:
-pseudo.R2glmm(model = Cand.mod[[69]])
-
-
-
-##### Model 70 #####
-# -----------------
-
-Cand.mod[[70]] <- glmmTMB::glmmTMB(formula = efficiency~fully_tarped + obstacles + distance * uprootexcav + (1|manager_id), data = eff,
-                                   family = glmmTMB::beta_family(link = "logit"), REML = FALSE)
-
-### Model evaluation (Fluttersbys method):
-ggplot2::ggplot(data = NULL) + ggplot2::geom_point(ggplot2::aes(y = residuals(Cand.mod[[70]],
-                                                                              type = "pearson"), x = fitted(Cand.mod[[70]])))
-QQline <- qq.line(resid(Cand.mod[[70]], type = "pearson"))
-ggplot2::ggplot(data = NULL, ggplot2::aes(sample = resid(Cand.mod[[70]], type = "pearson"))) +
-  ggplot2::stat_qq() + ggplot2::geom_abline(intercept = QQline[1], slope = QQline[2])
-# To simulate residuals (see https://www.flutterbys.com.au/stats/tut/tut10.5a.html#h2_29):
-dat.sim <- simulate(Cand.mod[[70]], n = 250)
-par(mfrow = c(5, 4), mar = c(3, 3, 1, 1))
-resid <- NULL
-for (i in 1:nrow(dat.sim)) {
-  e = ecdf(data.matrix(dat.sim[i, ] + runif(250, -0.5, 0.5)))
-  resid[i] <- e(eff$efficiency[i] + runif(250, -0.5, 0.5))
-}
-par(.pardefault) # To restore defaults graphical parameters
-plot(resid ~ fitted(Cand.mod[[70]]))
-
-### Checking the goodness-of-fit and overdispersion:
-dat.resid <- sum(resid(Cand.mod[[70]], type = "pearson")^2)
-1 - pchisq(dat.resid, df.residual(Cand.mod[[70]])) # Ok
-dat.resid/df.residual(Cand.mod[[70]]) # Ok
-# To plot the observed vs. fitted values:
-plot(x = fitted(Cand.mod[[70]]), y = eff$efficiency, xlab = "Fitted values", ylab = "Observed values")
-
-### Exploring the model parameters and test hypotheses:
-summary(Cand.mod[[70]])
-family(Cand.mod[[70]])$linkinv(glmmTMB::fixef(Cand.mod[[70]])$cond) # To get interpretable coefficients.
-broom.mixed::tidy(Cand.mod[[70]])
-broom.mixed::glance(Cand.mod[[70]])
-
-### Computing a Pseudo-R2:
-pseudo.R2glmm(model = Cand.mod[[70]])
-
 
 
