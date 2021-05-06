@@ -1,0 +1,13 @@
+Response;Parameters;Imp.;Estimate (±SE);(95% CI);N model
+efficiency;followups;0.04;0.014 (±0.109);"(-0.199; 0.227)";67
+efficiency;fully_tarped;0.99;1.082 (±0.291);"(0.513; 1.652)";67
+efficiency;geomem;0.00;0.107 (±0.274);"(-0.429; 0.644)";67
+efficiency;distance;0.60;0.703 (±0.312);"(0.093; 1.314)";67
+efficiency;sedicover_height;0.00;0.008 (±0.098);"(-0.183; 0.200)";67
+efficiency;stand_surface;0.00;-0.072 (±0.083);"(-0.234; 0.091)";67
+efficiency;tarping_duration;0.00;0.191 (±0.283);"(-0.363; 0.746)";67
+efficiency;obstacles;0.98;-0.146 (±0.041);"(-0.227; -0.065)";67
+efficiency;pb_fixation;0.07;-0.301 (±0.279);"(-0.847; 0.244)";67
+efficiency;plantation;0.00;-0.069 (±0.334);"(-0.723; 0.584)";67
+efficiency;slope;0.10;-0.046 (±0.035);"(-0.114; 0.023)";67
+efficiency;uprootexcav;0.06;-0.215 (±0.238);"(-0.682; 0.252)";67

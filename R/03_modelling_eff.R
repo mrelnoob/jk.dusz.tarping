@@ -24,7 +24,7 @@
 # --------------------------------------------------- #
 
 # List of used packages (for publication or package building): here, readr, (gamlss, gamlss.dist), MuMIn,
-# glmmTMB, ggplot2, (broom.mixed),
+# glmmTMB, ggplot2, (broom.mixed), stats
 
 .pardefault <- par() # To save the default graphical parameters (in case I want to restore them).
 
@@ -127,7 +127,7 @@ R.ajust <- rbind(R.ajust, data.frame(Model=1, R2=R2[1]))
 ##### Model 2 #####
 # -----------------
 
-Cand.mod[[2]] <- glmmTMB::glmmTMB(formula = efficiency~distance + (1|manager_id), data = eff,
+Cand.mod[[2]] <- glmmTMB::glmmTMB(formula = efficiency~log(distance+1) + (1|manager_id), data = eff,
                          family = glmmTMB::beta_family(link = "logit"), REML = FALSE)
 
 ### Model evaluation (Fluttersbys method):
@@ -415,7 +415,7 @@ R.ajust <- rbind(R.ajust, data.frame(Model=8, R2=R2[1]))
 ##### Model 9 #####
 # -----------------
 
-Cand.mod[[9]] <- glmmTMB::glmmTMB(formula = efficiency~sedicover_height + (1|manager_id), data = eff,
+Cand.mod[[9]] <- glmmTMB::glmmTMB(formula = efficiency~log(sedicover_height+1) + (1|manager_id), data = eff,
                                   family = glmmTMB::beta_family(link = "logit"), REML = FALSE)
 
 ### Model evaluation (Fluttersbys method):
@@ -538,7 +538,7 @@ R.ajust <- rbind(R.ajust, data.frame(Model=11, R2=R2[1]))
 ##### Model 12 #####
 # -----------------
 
-Cand.mod[[12]] <- glmmTMB::glmmTMB(formula = efficiency~tarping_duration + (1|manager_id), data = eff,
+Cand.mod[[12]] <- glmmTMB::glmmTMB(formula = efficiency~log(tarping_duration) + (1|manager_id), data = eff,
                                    family = glmmTMB::beta_family(link = "logit"), REML = FALSE)
 
 ### Model evaluation (Fluttersbys method):
@@ -620,7 +620,7 @@ R.ajust <- rbind(R.ajust, data.frame(Model=13, R2=R2[1]))
 ##### Model 14 #####
 # -----------------
 
-Cand.mod[[14]] <- glmmTMB::glmmTMB(formula = efficiency~distance + followups + (1|manager_id), data = eff,
+Cand.mod[[14]] <- glmmTMB::glmmTMB(formula = efficiency~log(distance+1) + followups + (1|manager_id), data = eff,
                                    family = glmmTMB::beta_family(link = "logit"), REML = FALSE)
 
 ### Model evaluation (Fluttersbys method):
@@ -662,7 +662,7 @@ R.ajust <- rbind(R.ajust, data.frame(Model=14, R2=R2[1]))
 ##### Model 15 #####
 # -----------------
 
-Cand.mod[[15]] <- glmmTMB::glmmTMB(formula = efficiency~distance + fully_tarped + (1|manager_id), data = eff,
+Cand.mod[[15]] <- glmmTMB::glmmTMB(formula = efficiency~log(distance+1) + fully_tarped + (1|manager_id), data = eff,
                                    family = glmmTMB::beta_family(link = "logit"), REML = FALSE)
 
 ### Model evaluation (Fluttersbys method):
@@ -703,7 +703,7 @@ R.ajust <- rbind(R.ajust, data.frame(Model=15, R2=R2[1]))
 ##### Model 16 #####
 # -----------------
 
-Cand.mod[[16]] <- glmmTMB::glmmTMB(formula = efficiency~distance + obstacles + (1|manager_id), data = eff,
+Cand.mod[[16]] <- glmmTMB::glmmTMB(formula = efficiency~log(distance+1) + obstacles + (1|manager_id), data = eff,
                                    family = glmmTMB::beta_family(link = "logit"), REML = FALSE)
 
 ### Model evaluation (Fluttersbys method):
@@ -744,7 +744,7 @@ R.ajust <- rbind(R.ajust, data.frame(Model=16, R2=R2[1]))
 ##### Model 17 #####
 # -----------------
 
-Cand.mod[[17]] <- glmmTMB::glmmTMB(formula = efficiency~distance + log(stand_surface) + (1|manager_id), data = eff,
+Cand.mod[[17]] <- glmmTMB::glmmTMB(formula = efficiency~log(distance+1) + log(stand_surface) + (1|manager_id), data = eff,
                                    family = glmmTMB::beta_family(link = "logit"), REML = FALSE)
 
 ### Model evaluation (Fluttersbys method):
@@ -785,7 +785,7 @@ R.ajust <- rbind(R.ajust, data.frame(Model=17, R2=R2[1]))
 ##### Model 18 #####
 # -----------------
 
-Cand.mod[[18]] <- glmmTMB::glmmTMB(formula = efficiency~distance + sedicover_height + (1|manager_id), data = eff,
+Cand.mod[[18]] <- glmmTMB::glmmTMB(formula = efficiency~log(distance+1) + log(sedicover_height+1) + (1|manager_id), data = eff,
                                    family = glmmTMB::beta_family(link = "logit"), REML = FALSE)
 
 ### Model evaluation (Fluttersbys method):
@@ -826,7 +826,7 @@ R.ajust <- rbind(R.ajust, data.frame(Model=18, R2=R2[1]))
 ##### Model 19 #####
 # -----------------
 
-Cand.mod[[19]] <- glmmTMB::glmmTMB(formula = efficiency~distance + uprootexcav + (1|manager_id), data = eff,
+Cand.mod[[19]] <- glmmTMB::glmmTMB(formula = efficiency~log(distance+1) + uprootexcav + (1|manager_id), data = eff,
                                    family = glmmTMB::beta_family(link = "logit"), REML = FALSE)
 
 ### Model evaluation (Fluttersbys method):
@@ -1031,7 +1031,7 @@ R.ajust <- rbind(R.ajust, data.frame(Model=23, R2=R2[1]))
 ##### Model 24 #####
 # -----------------
 
-Cand.mod[[24]] <- glmmTMB::glmmTMB(formula = efficiency~followups + tarping_duration + (1|manager_id), data = eff,
+Cand.mod[[24]] <- glmmTMB::glmmTMB(formula = efficiency~followups + log(tarping_duration) + (1|manager_id), data = eff,
                                    family = glmmTMB::beta_family(link = "logit"), REML = FALSE)
 
 ### Model evaluation (Fluttersbys method):
@@ -1154,7 +1154,7 @@ R.ajust <- rbind(R.ajust, data.frame(Model=26, R2=R2[1]))
 ##### Model 27 #####
 # -----------------
 
-Cand.mod[[27]] <- glmmTMB::glmmTMB(formula = efficiency~fully_tarped + sedicover_height + (1|manager_id), data = eff,
+Cand.mod[[27]] <- glmmTMB::glmmTMB(formula = efficiency~fully_tarped + log(sedicover_height+1) + (1|manager_id), data = eff,
                                    family = glmmTMB::beta_family(link = "logit"), REML = FALSE)
 
 ### Model evaluation (Fluttersbys method):
@@ -1277,7 +1277,7 @@ R.ajust <- rbind(R.ajust, data.frame(Model=29, R2=R2[1]))
 ##### Model 30 #####
 # -----------------
 
-Cand.mod[[30]] <- glmmTMB::glmmTMB(formula = efficiency~fully_tarped + tarping_duration + (1|manager_id), data = eff,
+Cand.mod[[30]] <- glmmTMB::glmmTMB(formula = efficiency~fully_tarped + log(tarping_duration) + (1|manager_id), data = eff,
                                    family = glmmTMB::beta_family(link = "logit"), REML = FALSE)
 
 ### Model evaluation (Fluttersbys method):
@@ -1482,7 +1482,7 @@ R.ajust <- rbind(R.ajust, data.frame(Model=34, R2=R2[1]))
 ##### Model 35 #####
 # -----------------
 
-Cand.mod[[35]] <- glmmTMB::glmmTMB(formula = efficiency~log(stand_surface) + tarping_duration + (1|manager_id), data = eff,
+Cand.mod[[35]] <- glmmTMB::glmmTMB(formula = efficiency~log(stand_surface) + log(tarping_duration) + (1|manager_id), data = eff,
                                    family = glmmTMB::beta_family(link = "logit"), REML = FALSE)
 
 ### Model evaluation (Fluttersbys method):
@@ -1728,7 +1728,7 @@ R.ajust <- rbind(R.ajust, data.frame(Model=40, R2=R2[1]))
 ##### Model 41 #####
 # -----------------
 
-Cand.mod[[41]] <- glmmTMB::glmmTMB(formula = efficiency~distance + fully_tarped + followups + (1|manager_id), data = eff,
+Cand.mod[[41]] <- glmmTMB::glmmTMB(formula = efficiency~log(distance+1) + fully_tarped + followups + (1|manager_id), data = eff,
                                    family = glmmTMB::beta_family(link = "logit"), REML = FALSE)
 
 ### Model evaluation (Fluttersbys method):
@@ -1769,7 +1769,7 @@ R.ajust <- rbind(R.ajust, data.frame(Model=41, R2=R2[1]))
 ##### Model 42 #####
 # -----------------
 
-Cand.mod[[42]] <- glmmTMB::glmmTMB(formula = efficiency~distance + fully_tarped + geomem + (1|manager_id), data = eff,
+Cand.mod[[42]] <- glmmTMB::glmmTMB(formula = efficiency~log(distance+1) + fully_tarped + geomem + (1|manager_id), data = eff,
                                    family = glmmTMB::beta_family(link = "logit"), REML = FALSE)
 
 ### Model evaluation (Fluttersbys method):
@@ -1810,7 +1810,7 @@ R.ajust <- rbind(R.ajust, data.frame(Model=42, R2=R2[1]))
 ##### Model 43 #####
 # -----------------
 
-Cand.mod[[43]] <- glmmTMB::glmmTMB(formula = efficiency~distance + fully_tarped + obstacles + (1|manager_id), data = eff,
+Cand.mod[[43]] <- glmmTMB::glmmTMB(formula = efficiency~log(distance+1) + fully_tarped + obstacles + (1|manager_id), data = eff,
                                    family = glmmTMB::beta_family(link = "logit"), REML = FALSE)
 
 ### Model evaluation (Fluttersbys method):
@@ -1829,7 +1829,7 @@ Cand.mod[[43]] <- glmmTMB::glmmTMB(formula = efficiency~distance + fully_tarped 
 # }
 # par(.pardefault) # To restore defaults graphical parameters
 # plot(resid ~ fitted(Cand.mod[[43]]))
-
+#
 # ### Model evaluation (with the 'performance' package)
 # performance::check_autocorrelation(Cand.mod[[43]])
 # performance::check_collinearity(Cand.mod[[43]])
@@ -1837,7 +1837,7 @@ Cand.mod[[43]] <- glmmTMB::glmmTMB(formula = efficiency~distance + fully_tarped 
 #
 # # To plot the observed vs. fitted values:
 # plot(x = fitted(Cand.mod[[43]]), y = eff$efficiency, xlab = "Fitted values", ylab = "Observed values")
-#
+
 # ### Exploring the model parameters and test hypotheses:
 # summary(Cand.mod[[43]])
 # family(Cand.mod[[43]])$linkinv(glmmTMB::fixef(Cand.mod[[43]])$cond) # To get interpretable coefficients.
@@ -1851,7 +1851,7 @@ R.ajust <- rbind(R.ajust, data.frame(Model=43, R2=R2[1]))
 ##### Model 44 #####
 # -----------------
 
-Cand.mod[[44]] <- glmmTMB::glmmTMB(formula = efficiency~distance + fully_tarped + plantation + (1|manager_id), data = eff,
+Cand.mod[[44]] <- glmmTMB::glmmTMB(formula = efficiency~log(distance+1) + fully_tarped + plantation + (1|manager_id), data = eff,
                                    family = glmmTMB::beta_family(link = "logit"), REML = FALSE)
 
 ### Model evaluation (Fluttersbys method):
@@ -1892,7 +1892,7 @@ R.ajust <- rbind(R.ajust, data.frame(Model=44, R2=R2[1]))
 ##### Model 45 #####
 # -----------------
 
-Cand.mod[[45]] <- glmmTMB::glmmTMB(formula = efficiency~distance + fully_tarped + pb_fixation + (1|manager_id), data = eff,
+Cand.mod[[45]] <- glmmTMB::glmmTMB(formula = efficiency~log(distance+1) + fully_tarped + pb_fixation + (1|manager_id), data = eff,
                                    family = glmmTMB::beta_family(link = "logit"), REML = FALSE)
 
 ### Model evaluation (Fluttersbys method):
@@ -1933,7 +1933,7 @@ R.ajust <- rbind(R.ajust, data.frame(Model=45, R2=R2[1]))
 ##### Model 46 #####
 # -----------------
 
-Cand.mod[[46]] <- glmmTMB::glmmTMB(formula = efficiency~distance + fully_tarped + slope + (1|manager_id), data = eff,
+Cand.mod[[46]] <- glmmTMB::glmmTMB(formula = efficiency~log(distance+1) + fully_tarped + slope + (1|manager_id), data = eff,
                                    family = glmmTMB::beta_family(link = "logit"), REML = FALSE)
 
 ### Model evaluation (Fluttersbys method):
@@ -1972,9 +1972,9 @@ R.ajust <- rbind(R.ajust, data.frame(Model=46, R2=R2[1]))
 
 
 ##### Model 47 #####
-# -----------------
+# ------------------
 
-Cand.mod[[47]] <- glmmTMB::glmmTMB(formula = efficiency~distance + fully_tarped + sedicover_height + (1|manager_id), data = eff,
+Cand.mod[[47]] <- glmmTMB::glmmTMB(formula = efficiency~log(distance+1) + fully_tarped + log(sedicover_height+1) + (1|manager_id), data = eff,
                                    family = glmmTMB::beta_family(link = "logit"), REML = FALSE)
 
 ### Model evaluation (Fluttersbys method):
@@ -2015,7 +2015,7 @@ R.ajust <- rbind(R.ajust, data.frame(Model=47, R2=R2[1]))
 ##### Model 48 #####
 # -----------------
 
-Cand.mod[[48]] <- glmmTMB::glmmTMB(formula = efficiency~distance + fully_tarped + log(stand_surface) + (1|manager_id), data = eff,
+Cand.mod[[48]] <- glmmTMB::glmmTMB(formula = efficiency~log(distance+1) + fully_tarped + log(stand_surface) + (1|manager_id), data = eff,
                                    family = glmmTMB::beta_family(link = "logit"), REML = FALSE)
 
 ### Model evaluation (Fluttersbys method):
@@ -2056,7 +2056,7 @@ R.ajust <- rbind(R.ajust, data.frame(Model=48, R2=R2[1]))
 ##### Model 49 #####
 # -----------------
 
-Cand.mod[[49]] <- glmmTMB::glmmTMB(formula = efficiency~distance + fully_tarped + tarping_duration + (1|manager_id), data = eff,
+Cand.mod[[49]] <- glmmTMB::glmmTMB(formula = efficiency~log(distance+1) + fully_tarped + log(tarping_duration) + (1|manager_id), data = eff,
                                    family = glmmTMB::beta_family(link = "logit"), REML = FALSE)
 
 ### Model evaluation (Fluttersbys method):
@@ -2097,7 +2097,7 @@ R.ajust <- rbind(R.ajust, data.frame(Model=49, R2=R2[1]))
 ##### Model 50 #####
 # -----------------
 
-Cand.mod[[50]] <- glmmTMB::glmmTMB(formula = efficiency~distance + pb_fixation + followups + (1|manager_id), data = eff,
+Cand.mod[[50]] <- glmmTMB::glmmTMB(formula = efficiency~log(distance+1) + pb_fixation + followups + (1|manager_id), data = eff,
                                    family = glmmTMB::beta_family(link = "logit"), REML = FALSE)
 
 ### Model evaluation (Fluttersbys method):
@@ -2138,7 +2138,7 @@ R.ajust <- rbind(R.ajust, data.frame(Model=50, R2=R2[1]))
 ##### Model 51 #####
 # -----------------
 
-Cand.mod[[51]] <- glmmTMB::glmmTMB(formula = efficiency~distance + log(stand_surface) + followups + (1|manager_id), data = eff,
+Cand.mod[[51]] <- glmmTMB::glmmTMB(formula = efficiency~log(distance+1) + log(stand_surface) + followups + (1|manager_id), data = eff,
                                    family = glmmTMB::beta_family(link = "logit"), REML = FALSE)
 
 ### Model evaluation (Fluttersbys method):
@@ -2179,7 +2179,7 @@ R.ajust <- rbind(R.ajust, data.frame(Model=51, R2=R2[1]))
 ##### Model 52 #####
 # -----------------
 
-Cand.mod[[52]] <- glmmTMB::glmmTMB(formula = efficiency~distance + log(stand_surface) + obstacles + (1|manager_id), data = eff,
+Cand.mod[[52]] <- glmmTMB::glmmTMB(formula = efficiency~log(distance+1) + log(stand_surface) + obstacles + (1|manager_id), data = eff,
                                    family = glmmTMB::beta_family(link = "logit"), REML = FALSE)
 
 ### Model evaluation (Fluttersbys method):
@@ -2220,7 +2220,7 @@ R.ajust <- rbind(R.ajust, data.frame(Model=52, R2=R2[1]))
 ##### Model 53 #####
 # -----------------
 
-Cand.mod[[53]] <- glmmTMB::glmmTMB(formula = efficiency~distance + log(stand_surface) + pb_fixation + (1|manager_id), data = eff,
+Cand.mod[[53]] <- glmmTMB::glmmTMB(formula = efficiency~log(distance+1) + log(stand_surface) + pb_fixation + (1|manager_id), data = eff,
                                    family = glmmTMB::beta_family(link = "logit"), REML = FALSE)
 
 ### Model evaluation (Fluttersbys method):
@@ -2425,7 +2425,7 @@ R.ajust <- rbind(R.ajust, data.frame(Model=57, R2=R2[1]))
 ##### Model 58 #####
 # -----------------
 
-Cand.mod[[58]] <- glmmTMB::glmmTMB(formula = efficiency~fully_tarped + log(stand_surface) + sedicover_height + (1|manager_id), data = eff,
+Cand.mod[[58]] <- glmmTMB::glmmTMB(formula = efficiency~fully_tarped + log(stand_surface) + log(sedicover_height+1) + (1|manager_id), data = eff,
                                    family = glmmTMB::beta_family(link = "logit"), REML = FALSE)
 
 ### Model evaluation (Fluttersbys method):
@@ -2548,7 +2548,7 @@ R.ajust <- rbind(R.ajust, data.frame(Model=60, R2=R2[1]))
 ##### Model 61 #####
 # -----------------
 
-Cand.mod[[61]] <- glmmTMB::glmmTMB(formula = efficiency~fully_tarped + log(stand_surface) + tarping_duration + (1|manager_id), data = eff,
+Cand.mod[[61]] <- glmmTMB::glmmTMB(formula = efficiency~fully_tarped + log(stand_surface) + log(tarping_duration) + (1|manager_id), data = eff,
                                    family = glmmTMB::beta_family(link = "logit"), REML = FALSE)
 
 ### Model evaluation (Fluttersbys method):
@@ -2838,7 +2838,7 @@ R.ajust <- rbind(R.ajust, data.frame(Model=67, R2=R2[1]))
 ##### Model selection and averaging #####
 # ------------------------------------- #
 
-Model <- (1:67) # This disregard the null model (so 2:67 instead of 1:67)
+Model <- (1:67)
 
 Candidate <- c("null",
                "distance", "followups", "fully_tarped", "geomem", "obstacles", "plantation", "pb_fixation",
@@ -2866,7 +2866,7 @@ Candidate <- c("null",
                "fully_tarped	+	stand_surface	+	tarping_duration", "fully_tarped	+	followups	+	geomem",
                "fully_tarped	+	followups	+	obstacles", "plantation	+	pb_fixation	+	slope",
                "fully_tarped	+	obstacles	+	pb_fixation", "fully_tarped	+	obstacles	+	slope",
-               "fully_tarped	+	obstacles	+	uprootexcav") # WHAT ABOUT THE NULL MODEL??????
+               "fully_tarped	+	obstacles	+	uprootexcav")
 
 Cand.model <- data.frame(Model, Candidate)
 
@@ -2910,47 +2910,46 @@ readr::write_csv2(x = AICc.model, file = here::here("output", "tables", "Models_
 ##### Multimodel Inference (averaging) #####
 # ------------------------------------------
 
-Parameters <- c('Manag', 'Year', 'Elevation', 'Distance', 'Prop_Sedim', 'Depth_Sedim', 'Dura_Inund',
-                'Inte_Inund', 'Mean_Temp', 'Sum_Prec',
-                'Year * Elevation', 'Year * Distance', 'Year * Prop_Sedim', 'Year * Depth_Sedim',
-                'Year * Dura_Inund', 'Year * Inte_Inund', 'Year * Mean_Temp', 'Year * Sum_Prec')
-Var <- c("managplowing", "annee19", "topographie.2", "distance_eau.2", "sub_limons.2", "h_alluvions.2",
-         "Dura_inund.2", "Inte_inund.2", "Mean_Temp.2", "Sum_Prec.2",
-         "annee19:topographie.2", "annee19:distance_eau.2", "annee19:sub_limons.2", "annee19:h_alluvions.2",
-         "annee19ura_inund.2", "annee19:Inte_inund.2", "annee19:Mean_Temp.2", "annee19:Sum_Prec.2")
-Var.Imp <- c("manag", "annee", "topographie.2", "distance_eau.2", "sub_limons.2", "h_alluvions.2",
-             "Dura_inund.2", "Inte_inund.2", "Mean_Temp.2", "Sum_Prec.2",
-             "annee:topographie.2", "annee:distance_eau.2", "annee:sub_limons.2", "annee:h_alluvions.2",
-             "anneeura_inund.2", "annee:Inte_inund.2", "annee:Mean_Temp.2", "annee:Sum_Prec.2")
+Parameters <- c("Intercept", "distance", "followups", "fully_tarped", "geomem", "obstacles",
+                "plantation", "pb_fixation", "sedicover_height", "slope", "stand_surface",
+                "tarping_duration", "uprootexcav")
+Var <- c("cond((Int))", "cond(log(distance + 1))", "cond(followups)", "cond(fully_tarped1)", "cond(geomem1)",
+         "cond(obstacles)", "cond(plantation1)", "cond(pb_fixation1)", "cond(log(sedicover_height + 1))",
+         "cond(slope)", "cond(log(stand_surface))", "cond(log(tarping_duration))", "cond(uprootexcav1)")
+Var.Imp <- c("cond((Int))", "cond(log(distance + 1))", "cond(followups)", "cond(fully_tarped)", "cond(geomem)",
+             "cond(obstacles)", "cond(plantation)", "cond(pb_fixation)", "cond(log(sedicover_height + 1))",
+             "cond(slope)", "cond(log(stand_surface))", "cond(log(tarping_duration))", "cond(uprootexcav)")
 
 Para.model <- data.frame(Parameters, Var, Var.Imp)
-top.models <- MuMIn::get.models(AICc, cumsum(weight)<=1) # Pour prendre l'ensemble des modèles a priori
-# (sinon 0.95)
-# top.models <- get.models(AICc, delta<=7)
-Parameter <- MuMIn::model.avg(top.models, revised.var=T, adjusted=T, fit=T) # Model averaging
-Parameter.model <- as.data.frame(cbind(coefTable(Parameter), confint(Parameter)))
-Parameter.model <- Parameter.model[rownames(Parameter.model) != "X.Intercept.", ]
+
+### Select the top models:
+#top.models <- MuMIn::get.models(AICc, cumsum(weight) <= 0.95) # To take those with a cumulated sum of
+# AICc weights <= 0.95
+top.models <- MuMIn::get.models(AICc, cumsum(weight) <= 1) # To take them all
+# We could also select models according to their delta AICc (see Burnham & Anderson, 2002)!
+
+### Actual model parameters averaging:
+Parameter <- MuMIn::model.avg(top.models, revised.var=T, adjusted=T, fit=T)
+Parameter.model <- as.data.frame(cbind(MuMIn::coefTable(Parameter), stats::confint(Parameter)))
+
+### Improved formating:
 Parameter.model$Var <- row.names(Parameter.model)
 Parameter.model <- merge(Parameter.model, Para.model, by="Var", all=TRUE)
 Imp <- as.data.frame(format(round(MuMIn::importance(Parameter), digits=2)))
 colnames(Imp) <- "Imp."
 Imp$Var.Imp <- row.names(Imp)
 Parameter.model <- merge(Parameter.model, Imp, by="Var.Imp", all=TRUE)
+
 Parameter.model$'Estimate (±SE)' <- paste0(format(round(Parameter.model$Estimate, digits=3), trim=T),
                                            " (±", format(round(Parameter.model$'Std. Error', digits=3),
                                                          trim=T), ")")
 Parameter.model$'(95% CI)' <- paste0("(", format(round(Parameter.model$'2.5 %', digits=3), trim=T),
                                      "; ", format(round(Parameter.model$'97.5 %', digits=3), trim=T), ")")
-Parameter.model$Response <- "FD_sla"
+Parameter.model$Response <- "efficiency"
 Parameter.model$'N model' <- length(top.models)
 Parameter.model <- Parameter.model[,c("Response", "Parameters", "Imp.", "Estimate (±SE)", "(95% CI)",
                                       'N model')]
-Parameter.model <- Parameter.model[!is.na(Parameter.model$Parameters), ]
-write.table(Parameter.model,"output/Model/Parameters_FD_sla.csv", sep=";", row.names=F, col.names=T)
+Parameter.model <- Parameter.model[!is.na(Parameter.model$Imp.), ]
 
-
-
-
-
-
-
+### Table export:
+readr::write_csv2(x = Parameter.model, file = here::here("output", "tables", "Parameters_efficiency.csv"))
