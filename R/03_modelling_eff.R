@@ -24,7 +24,7 @@
 # --------------------------------------------------- #
 
 # List of used packages (for publication or package building): here, readr, (gamlss, gamlss.dist), MuMIn,
-# emmeans, glmmTMB, ggplot2, broom.mixed
+# glmmTMB, ggplot2, (broom.mixed),
 
 .pardefault <- par() # To save the default graphical parameters (in case I want to restore them).
 
@@ -785,7 +785,7 @@ R.ajust <- rbind(R.ajust, data.frame(Model=17, R2=R2[1]))
 ##### Model 18 #####
 # -----------------
 
-Cand.mod[[18]] <- glmmTMB::glmmTMB(formula = efficiency~distance_cent + sedicover_height + (1|manager_id), data = eff,
+Cand.mod[[18]] <- glmmTMB::glmmTMB(formula = efficiency~distance + sedicover_height + (1|manager_id), data = eff,
                                    family = glmmTMB::beta_family(link = "logit"), REML = FALSE)
 
 ### Model evaluation (Fluttersbys method):
@@ -2838,9 +2838,10 @@ R.ajust <- rbind(R.ajust, data.frame(Model=67, R2=R2[1]))
 ##### Model selection and averaging #####
 # ------------------------------------- #
 
-Model <- (2:67) # This disregard the null model (so 2:67 instead of 1:67)
+Model <- (1:67) # This disregard the null model (so 2:67 instead of 1:67)
 
-Candidate <- c("distance", "followups", "fully_tarped", "geomem", "obstacles", "plantation", "pb_fixation",
+Candidate <- c("null",
+               "distance", "followups", "fully_tarped", "geomem", "obstacles", "plantation", "pb_fixation",
                "sedicover_height", "slope", "stand_surface", "tarping_duration", "uprootexcav",
                "distance	+	followups", "distance	+	fully_tarped", "distance	+	obstacles",
                "distance	+	stand_surface", "distance	+	sedicover_height", "distance + uprootexcav",
@@ -2900,8 +2901,14 @@ colnames(AICc.model)[colnames(AICc.model) == 'Candidate'] <- 'Candidate model'
 colnames(AICc.model)[colnames(AICc.model) == 'df'] <- 'k'
 colnames(AICc.model)[colnames(AICc.model) == 'delta'] <- 'delta AICc'
 colnames(AICc.model)[colnames(AICc.model) == 'weight'] <- 'W'
-write.table(AICc.model,"output/Model/Models_FD_sla.csv", sep=";", row.names=F, col.names=T)
 
+### Table export:
+readr::write_csv2(x = AICc.model, file = here::here("output", "tables", "Models_efficiency.csv"))
+
+
+
+##### Multimodel Inference (averaging) #####
+# ------------------------------------------
 
 Parameters <- c('Manag', 'Year', 'Elevation', 'Distance', 'Prop_Sedim', 'Depth_Sedim', 'Dura_Inund',
                 'Inte_Inund', 'Mean_Temp', 'Sum_Prec',
@@ -2925,7 +2932,7 @@ Parameter.model <- as.data.frame(cbind(coefTable(Parameter), confint(Parameter))
 Parameter.model <- Parameter.model[rownames(Parameter.model) != "X.Intercept.", ]
 Parameter.model$Var <- row.names(Parameter.model)
 Parameter.model <- merge(Parameter.model, Para.model, by="Var", all=TRUE)
-Imp <- as.data.frame(format(round(importance(Parameter), digits=2)))
+Imp <- as.data.frame(format(round(MuMIn::importance(Parameter), digits=2)))
 colnames(Imp) <- "Imp."
 Imp$Var.Imp <- row.names(Imp)
 Parameter.model <- merge(Parameter.model, Imp, by="Var.Imp", all=TRUE)

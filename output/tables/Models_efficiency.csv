@@ -1,0 +1,68 @@
+Rank;Model;Response;Candidate model;k;AICc;delta AICc;W;R2
+1;43;efficiency;distance + fully_tarped + obstacles;6;-112.2; 0.000;0.283;0.344
+2;29;efficiency;fully_tarped + obstacles;5;-111.7; 0.422;0.229;0.323
+3;66;efficiency;fully_tarped	+	obstacles	+	slope;6;-111.1; 1.045;0.168;0.336
+4;65;efficiency;fully_tarped	+	obstacles	+	pb_fixation;6;-110.6; 1.603;0.127;0.332
+5;67;efficiency;fully_tarped	+	obstacles	+	uprootexcav;6;-110.3; 1.902;0.109;0.329
+6;63;efficiency;fully_tarped	+	followups	+	obstacles;6;-109.4; 2.719;0.073;0.323
+7;16;efficiency;distance	+	obstacles;5;-101.6;10.530;0.001;0.237
+8;40;efficiency;obstacles	+	slope;5;-101.3;10.905;0.001;0.234
+9;6;efficiency;obstacles;4;-100.7;11.512;0.001;0.208
+10;52;efficiency;distance	+	stand_surface	+	obstacles;6;-100.6;11.610;0.001;0.248
+11;15;efficiency;distance	+	fully_tarped;5;-100.5;11.713;0.001;0.227
+12;45;efficiency;distance + fully_tarped	+	pb_fixation;6;-100.1;12.096;0.001;0.244
+13;46;efficiency;distance	+	fully_tarped	+	slope;6;-100.0;12.172;0.001;0.243
+14;36;efficiency;pb_fixation + obstacles;5; -99.6;12.567;0.001;0.219
+15;32;efficiency;stand_surface	+	obstacles;5; -99.4;12.731;0.000;0.217
+16;39;efficiency;obstacles	+	plantation;5; -99.0;13.205;0.000;0.213
+17;47;efficiency;distance + fully_tarped	+	sedicover_height;6; -98.6;13.587;0.000;0.231
+18;22;efficiency;followups + obstacles;5; -98.5;13.691;0.000;0.208
+19;48;efficiency;distance	+	fully_tarped	+	stand_surface;6; -98.3;13.845;0.000;0.228
+20;4;efficiency;fully_tarped;4; -98.3;13.890;0.000;0.185
+21;42;efficiency;distance	+	fully_tarped	+	geomem;6; -98.3;13.906;0.000;0.228
+22;26;efficiency;fully_tarped + pb_fixation;5; -98.3;13.911;0.000;0.206
+23;49;efficiency;distance + fully_tarped	+	tarping_duration;6; -98.2;13.918;0.000;0.228
+24;44;efficiency;distance	+	fully_tarped	+	plantation;6; -98.2;13.997;0.000;0.227
+25;41;efficiency;distance + fully_tarped	+	followups;6; -98.1;14.026;0.000;0.227
+26;27;efficiency;fully_tarped + sedicover_height;5; -97.0;15.206;0.000;0.194
+27;60;efficiency;fully_tarped + stand_surface + uprootexcav;6; -96.9;15.229;0.000;0.216
+28;59;efficiency;fully_tarped + stand_surface + slope;6; -96.3;15.866;0.000;0.210
+29;28;efficiency;fully_tarped + stand_surface;5; -96.2;15.978;0.000;0.187
+30;20;efficiency;followups	+	fully_tarped;5; -96.2;15.994;0.000;0.187
+31;30;efficiency;fully_tarped + tarping_duration;5; -96.1;16.026;0.000;0.186
+32;25;efficiency;fully_tarped + geomem;5; -96.1;16.068;0.000;0.186
+33;54;efficiency;fully_tarped + pb_fixation + followups;6; -96.1;16.090;0.000;0.208
+34;57;efficiency;fully_tarped + stand_surface + pb_fixation;6; -96.0;16.191;0.000;0.207
+35;58;efficiency;fully_tarped + stand_surface + sedicover_height;6; -94.8;17.414;0.000;0.195
+36;56;efficiency;fully_tarped	+	stand_surface	+	followups;6; -94.0;18.150;0.000;0.188
+37;62;efficiency;fully_tarped	+	followups	+	geomem;6; -94.0;18.152;0.000;0.188
+38;61;efficiency;fully_tarped	+	stand_surface	+	tarping_duration;6; -93.9;18.235;0.000;0.187
+39;55;efficiency;fully_tarped + stand_surface + geomem;6; -93.9;18.240;0.000;0.187
+40;2;efficiency;distance;4; -86.5;25.701;0.000;0.064
+41;10;efficiency;slope;4; -85.4;26.722;0.000;0.052
+42;18;efficiency;distance	+	sedicover_height;5; -85.4;26.815;0.000;0.076
+43;17;efficiency;distance	+	stand_surface;5; -85.2;26.991;0.000;0.074
+44;19;efficiency;distance + uprootexcav;5; -85.1;27.042;0.000;0.074
+45;14;efficiency;distance	+	followups;5; -84.9;27.264;0.000;0.071
+46;50;efficiency;distance	+	pb_fixation	+	followups;6; -84.5;27.622;0.000;0.092
+47;53;efficiency;distance + stand_surface + pb_fixation;6; -84.2;27.959;0.000;0.089
+48;8;efficiency;pb_fixation;4; -83.5;28.630;0.000;0.031
+49;51;efficiency;distance + stand_surface + followups;6; -83.5;28.674;0.000;0.081
+50;13;efficiency;uprootexcav;4; -83.4;28.816;0.000;0.029
+51;34;efficiency;stand_surface	+	slope;5; -83.3;28.820;0.000;0.054
+52;1;efficiency;null;3; -83.3;28.848;0.000;0.003
+53;9;efficiency;sedicover_height;4; -82.7;29.489;0.000;0.021
+54;21;efficiency;followups	+	pb_fixation;5; -82.1;30.112;0.000;0.040
+55;3;efficiency;followups;4; -82.0;30.132;0.000;0.013
+56;64;efficiency;plantation	+	pb_fixation	+	slope;6; -82.0;30.170;0.000;0.065
+57;11;efficiency;stand_surface;4; -81.9;30.309;0.000;0.011
+58;12;efficiency;tarping_duration;4; -81.5;30.631;0.000;0.008
+59;38;efficiency;uprootexcav	+	plantation;5; -81.3;30.909;0.000;0.031
+60;7;efficiency;plantation;4; -81.2;30.923;0.000;0.004
+61;5;efficiency;geomem;4; -81.1;31.049;0.000;0.003
+62;37;efficiency;uprootexcav	+	geomem;5; -81.1;31.070;0.000;0.029
+63;23;efficiency;followups	+	stand_surface;5; -80.5;31.712;0.000;0.021
+64;24;efficiency;followups	+	tarping_duration;5; -80.2;31.930;0.000;0.019
+65;35;efficiency;stand_surface + tarping_duration;5; -79.8;32.333;0.000;0.014
+66;31;efficiency;stand_surface	+	geomem;5; -79.6;32.545;0.000;0.012
+67;33;efficiency;stand_surface + plantation;5; -79.6;32.562;0.000;0.012
