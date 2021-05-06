@@ -2838,7 +2838,7 @@ R.ajust <- rbind(R.ajust, data.frame(Model=67, R2=R2[1]))
 ##### Model selection and averaging #####
 # ------------------------------------- #
 
-Model <- (2:67) # WHAT ABOUT THE NULL MODEL?????? (2:67 instead of 1:67)
+Model <- (2:67) # This disregard the null model (so 2:67 instead of 1:67)
 
 Candidate <- c("distance", "followups", "fully_tarped", "geomem", "obstacles", "plantation", "pb_fixation",
                "sedicover_height", "slope", "stand_surface", "tarping_duration", "uprootexcav",
@@ -2874,8 +2874,10 @@ Cand.model <- data.frame(Model, Candidate)
 ##### Model selection #####
 # -------------------------
 
-AICc <- MuMIn::model.sel(object = Cand.mod) # Rank models based on AICc
+### Rank models based on AICc:
+AICc <- MuMIn::model.sel(object = Cand.mod)
 
+### Improved formating:
 AICc.model <- as.data.frame(AICc)
 AICc.model$csweigth <- cumsum(AICc.model$weight) # Add a column containing the cumulative sum of AICc weights
 AICc.model$Model <- row.names(AICc.model) # Add a column containing the n° of each candidate model
@@ -2884,19 +2886,12 @@ AICc.model <- merge(AICc.model, Cand.model, by="Model") # CAUTION: this merger r
 # the table based on Model, and it removes the NULL model from the table (as it doesn't exist in Cand.model).
 # Consequently, the new ordering begins at 10 (10, 11, 12, ..., 20, 21, ...)!
 
-R.ajust <- data.frame(Model=integer(0), R2=numeric(0))
-R2 <- r.squaredGLMM(Cand.mod[[1]])
-R.ajust <- rbind(R.ajust, data.frame(Model=1, R2=R2[1]))
+AICc.model <- merge(AICc.model, R.ajust, by="Model") # This merger adds the computed R2 (here: pseudo-R2)
 
-# FOR R2§§§§§§§
-AICc.model <- merge(AICc.model, R.ajust, by="Model")
-
-
-
-AICc.model <- AICc.model[order(AICc.model$delta),]
-AICc.model$Variables <- "FD_sla"
+AICc.model <- AICc.model[order(AICc.model$delta),] # To reorder rows according to delta AICc
+AICc.model$Response <- "efficiency"
 AICc.model$Rank <- 1:nrow(AICc.model)
-AICc.model <- AICc.model[,c("Rank", "Model", "Variables", "Candidate", "df", "AICc", "delta", "weight", "R2")]
+AICc.model <- AICc.model[,c("Rank", "Model", "Response", "Candidate", "df", "AICc", "delta", "weight", "R2")]
 AICc.model$AICc <- format(round(AICc.model$AICc, digits=1))
 AICc.model$delta <- format(round(AICc.model$delta, digits=3))
 AICc.model$weight <- format(round(AICc.model$weight, digits=3))
@@ -2939,9 +2934,9 @@ Parameter.model$'Estimate (±SE)' <- paste0(format(round(Parameter.model$Estimat
                                                          trim=T), ")")
 Parameter.model$'(95% CI)' <- paste0("(", format(round(Parameter.model$'2.5 %', digits=3), trim=T),
                                      "; ", format(round(Parameter.model$'97.5 %', digits=3), trim=T), ")")
-Parameter.model$Variables <- "FD_sla"
+Parameter.model$Response <- "FD_sla"
 Parameter.model$'N model' <- length(top.models)
-Parameter.model <- Parameter.model[,c("Variables", "Parameters", "Imp.", "Estimate (±SE)", "(95% CI)",
+Parameter.model <- Parameter.model[,c("Response", "Parameters", "Imp.", "Estimate (±SE)", "(95% CI)",
                                       'N model')]
 Parameter.model <- Parameter.model[!is.na(Parameter.model$Parameters), ]
 write.table(Parameter.model,"output/Model/Parameters_FD_sla.csv", sep=";", row.names=F, col.names=T)

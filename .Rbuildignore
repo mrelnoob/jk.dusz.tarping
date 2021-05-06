@@ -10,5 +10,6 @@
 ^_drake\.R$
 ^make\.R$
 ^output$
-^text$
+^texts$
 ^plots$
+^tables$

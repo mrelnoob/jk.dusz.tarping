@@ -236,7 +236,8 @@ file.create("_drake.R")
 # To create new folders (directories) to store the various kind of results my analysis will produce:
 dir.create("output")
 dir.create("output/plots")
-dir.create("output/text")
+dir.create("output/tables")
+dir.create("output/texts")
 
 # I also need to ignore most of these files:
 usethis::use_build_ignore(".drake")
@@ -244,7 +245,8 @@ usethis::use_build_ignore("_drake.R")
 usethis::use_build_ignore("make.R")
 usethis::use_git_ignore(".drake")
 usethis::use_build_ignore("output/")
-usethis::use_build_ignore("text/")
+usethis::use_build_ignore("tables/")
+usethis::use_build_ignore("texts/")
 usethis::use_build_ignore("plots/")
 
 
@@ -276,10 +278,10 @@ usethis::use_package("gridExtra")
 # So my 01_data_cleaning.R file is populated with some functions and the package works. So NOW, I need
 # to start addressing my data preparation step and start keeping tracks of my data wrangling and future data
 # analyses in a .Rmd report:
-file.create(... = "output/text/jk.d.tarp.data_preparation_report.Rmd") # Using this command, the .Rmd file
+file.create(... = "output/texts/jk.d.tarp.data_preparation_report.Rmd") # Using this command, the .Rmd file
 # will be created but will lack the YAML header skeleton that should thus be manually placed at the top of
 # the document.
-usethis::use_git(message = ":arrow_up: Updates for modelling efficiency!")
+usethis::use_git(message = ":boom: Improved output structure")
 system("git push")
 
 
