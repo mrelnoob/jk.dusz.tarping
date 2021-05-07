@@ -222,7 +222,7 @@ system("git push")
 usethis::use_r(name = "01_data_cleaning.R")
 usethis::use_r(name = "02_data_preparation.R") # These first 2 scripts are what others call "wrangle"
 usethis::use_r(name = "03_modelling_eff.R")
-usethis::use_r(name = "04_modelling_erad.R")
+usethis::use_r(name = "04_modelling_high_eff.R")
 usethis::use_r(name = "05_modelling_redges.R")
 usethis::use_r(name = "06_modelling_rtarped.R")
 usethis::use_r(name = "07_modelling_roverlaps.R")
@@ -281,7 +281,7 @@ usethis::use_package("gridExtra")
 file.create(... = "output/texts/jk.d.tarp.data_preparation_report.Rmd") # Using this command, the .Rmd file
 # will be created but will lack the YAML header skeleton that should thus be manually placed at the top of
 # the document.
-usethis::use_git(message = ":metal: Exported averaged parameters for efficiency!")
+usethis::use_git(message = ":boom: Prepared for modelling high_eff")
 system("git push")
 
 
