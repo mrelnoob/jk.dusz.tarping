@@ -55,73 +55,39 @@ summary(eff)
 
 
 
+##### Final pre-modelling assumption checks #####
+# --------------------------------------------- #
+
+### Testing the relevance of the random effect structure:
+m0.glm <- stats::glm(high_eff ~ log(distance+1), data = eff, family = binomial)
+m0.glmer <- lme4::glmer(high_eff ~ log(distance+1) + (1|manager_id), data = eff, family = binomial, nAGQ = 10)
+aic.glm <- AIC(logLik(m0.glm))
+aic.glmer <- AIC(logLik(m0.glmer))
+
+# Likelihood Ratio Test:
+null.id <- -2 * logLik(m0.glm) + 2 * logLik(m0.glmer)
+pchisq(as.numeric(null.id), df=1, lower.tail=F)
+rm(m0.glm, m0.glmer, aic.glm, aic.glmer, null.id)
+# The Likelihood Ratio Test is NOT significant so the use of the random effect structure is not necessary!
 
 
 
-
-##### ASSUMPTIONS of logistic models #####
-# ________________________________________
-### Independance, correlation and multivariate outliers:
-GGally::ggpairs(eff[, c("followups", "slope", "coarse_env", "obstacles", "stand_surface", "distance",
-                      "tarping_duration", "sedicover_height")])
-
-### Linearity assumption
-eff2 <- eff[,c("high_eff", "distance", "fully_tarped", "slope", "plantation")]
-model <- glm(high_eff ~., data = eff2, family = binomial)
-# Predict the probability (p) of diabete positivity
-probabilities <- predict(model, type = "response")
-predicted.classes <- ifelse(probabilities > 0.5, "pos", "neg")
-# Select only numeric predictors
-mydata <- eff2 %>%
-  dplyr::select_if(is.numeric)
-predictors <- colnames(mydata)
-# Bind the logit and tidying the data for plot (ggplot2, so long format)
-mydata <- mydata %>%
-  dplyr::mutate(logit = log(probabilities/(1-probabilities))) %>%
-  tidyr::gather(key = "predictors", value = "predictor.value", -logit)
-# Create scatterplot
-ggplot2::ggplot(mydata, ggplot2::aes(logit, predictor.value))+
-  ggplot2::geom_point(size = 0.5, alpha = 0.5) +
-  ggplot2::geom_smooth(method = "loess") +
-  ggplot2::theme_bw() +
-  ggplot2::facet_wrap(~predictors, scales = "free_y") # ASSUMPTION violated !!!!!!! (log transform?)
+### Assessing the presence of "complete separation" (or perfect prediction):
+# For binary variables:
+ifelse(min(ftable(eff$high_eff, eff$geomem)) == 0, "incomplete information", "okay") # Ok
+ifelse(min(ftable(eff$high_eff, eff$maxveg)) == 0, "incomplete information", "okay") # Ok
+ifelse(min(ftable(eff$high_eff, eff$uprootexcav)) == 0, "incomplete information", "okay") # Ok
+ifelse(min(ftable(eff$high_eff, eff$fully_tarped)) == 0, "incomplete information", "okay") # NOT ok !!!
+ifelse(min(ftable(eff$high_eff, eff$stripsoverlap_ok)) == 0, "incomplete information", "okay") # Ok
+ifelse(min(ftable(eff$high_eff, eff$tarpfix_multimethod)) == 0, "incomplete information", "okay") # Ok
+ifelse(min(ftable(eff$high_eff, eff$tarpfix_pierced)) == 0, "incomplete information", "okay") # Ok
+ifelse(min(ftable(eff$high_eff, eff$plantation)) == 0, "incomplete information", "okay") # Ok
+ifelse(min(ftable(eff$high_eff, eff$repairs)) == 0, "incomplete information", "okay") # Ok
+ifelse(min(ftable(eff$high_eff, eff$add_control)) == 0, "incomplete information", "okay") # Ok
+ifelse(min(ftable(eff$high_eff, eff$pb_fixation)) == 0, "incomplete information", "okay") # Ok
+# So PB with fully_tarped! We could simplify the code with apply/sapply, no?
 
 
-
-#$$$$$$$$$$$****************************************************************$
-#$$$$$$$$$$$****************************************************************$
-#$$$$$$$$$$$****************************************************************$
-#$$$$$$$$$$$****************************************************************$
-#$$$$$$$$$$$****************************************************************$
-#$$$$$$$$$$$****************************************************************$
-#$$$$$$$$$$$****************************************************************$
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-### Custom functions for modelling:
-# To help creating QQ-plots for beta regression models:
-
-qq.line = function(x) {
-  # following four lines from base R's qqline()
-  y <- quantile(x[!is.na(x)], c(0.25, 0.75))
-  x <- qnorm(c(0.25, 0.75))
-  slope <- diff(y)/diff(x)
-  int <- y[1L] - slope * x[1L]
-  return(c(int = int, slope = slope))
-}
 
 
 
@@ -137,10 +103,9 @@ R.ajust <- data.frame(Model=integer(0), R2=numeric(0)) # Creates an empty data.f
 
 
 ##### Model 1 (null model) #####
-# ------------------------------
+# ---------------------------- #
 
-Cand.mod[[1]] <- glmmTMB::glmmTMB(formula = efficiency~(1|manager_id), data = eff,
-                                  family = glmmTMB::beta_family(link = "logit"), REML = FALSE)
+Cand.mod[[1]] <- stats::glm(high_eff~1, data = eff, family = binomial(link = "logit"))
 
 ### Model evaluation (Flutterbys method)
 # ggplot2::ggplot(data = NULL) + ggplot2::geom_point(ggplot2::aes(y = residuals(Cand.mod[[1]],
@@ -178,7 +143,7 @@ R.ajust <- rbind(R.ajust, data.frame(Model=1, R2=R2[1]))
 
 
 ##### Model 2 #####
-# -----------------
+# --------------- #
 
 Cand.mod[[2]] <- glmmTMB::glmmTMB(formula = efficiency~log(distance+1) + (1|manager_id), data = eff,
                                   family = glmmTMB::beta_family(link = "logit"), REML = FALSE)

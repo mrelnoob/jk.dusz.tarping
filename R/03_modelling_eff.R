@@ -86,6 +86,26 @@ R.ajust <- data.frame(Model=integer(0), R2=numeric(0)) # Creates an empty data.f
 ##### Model 1 (null model) #####
 # ------------------------------
 
+
+
+### Testing the relevance of the random effect structure:
+m0.glm <- glmmTMB::glmmTMB(formula = efficiency~1, data = eff,
+                           family = glmmTMB::beta_family(link = "logit"), REML = FALSE)
+m0.glmer <- glmmTMB::glmmTMB(formula = efficiency~(1|manager_id), data = eff,
+                             family = glmmTMB::beta_family(link = "logit"), REML = FALSE)
+aic.glm <- AIC(logLik(m0.glm))
+aic.glmer <- AIC(logLik(m0.glmer))
+
+# Likelihood Ratio Test:
+null.id <- -2 * logLik(m0.glm) + 2 * logLik(m0.glmer)
+pchisq(as.numeric(null.id), df=1, lower.tail=F)
+rm(m0.glm, m0.glmer, aic.glm, aic.glmer, null.id)
+# The Likelihood Ratio Test is NOT significant so the use of the random effect structure is not necessary!
+
+
+
+
+
 Cand.mod[[1]] <- glmmTMB::glmmTMB(formula = efficiency~(1|manager_id), data = eff,
                          family = glmmTMB::beta_family(link = "logit"), REML = FALSE)
 
