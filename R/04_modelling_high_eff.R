@@ -47,10 +47,7 @@ readr::read_csv(here::here("mydata", "erad.csv"), col_names = TRUE, col_types =
                     repairs = readr::col_factor(c("0", "1")),
                     add_control = readr::col_factor(c("0", "1")),
                     pb_fixation = readr::col_factor(c("0", "1")),
-                    pb_durability = readr::col_factor(c("0", "1")))) %>%
-  dplyr::mutate(distance_cent = scale(x = distance, center = TRUE, scale = FALSE)) %>%
-  dplyr::mutate(st_surface_cent = scale(x = stand_surface, center = TRUE, scale = FALSE)) %>%
-  dplyr::mutate(followups_cent = scale(x = followups, center = TRUE, scale = FALSE)) -> eff
+                    pb_durability = readr::col_factor(c("0", "1")))) -> eff
 summary(eff)
 
 
@@ -59,33 +56,93 @@ summary(eff)
 # --------------------------------------------- #
 
 ### Testing the relevance of the random effect structure:
-m0.glm <- stats::glm(high_eff ~ log(distance+1), data = eff, family = binomial)
-m0.glmer <- lme4::glmer(high_eff ~ log(distance+1) + (1|manager_id), data = eff, family = binomial, nAGQ = 10)
-aic.glm <- AIC(logLik(m0.glm))
-aic.glmer <- AIC(logLik(m0.glmer))
-
-# Likelihood Ratio Test:
-null.id <- -2 * logLik(m0.glm) + 2 * logLik(m0.glmer)
-pchisq(as.numeric(null.id), df=1, lower.tail=F)
-rm(m0.glm, m0.glmer, aic.glm, aic.glmer, null.id)
+# m0.glm <- stats::glm(high_eff ~ log(distance+1), data = eff, family = binomial)
+# m0.glmer <- lme4::glmer(high_eff ~ log(distance+1) + (1|manager_id), data = eff, family = binomial, nAGQ = 10)
+# aic.glm <- AIC(logLik(m0.glm))
+# aic.glmer <- AIC(logLik(m0.glmer))
+#
+# # Likelihood Ratio Test:
+# null.id <- -2 * logLik(m0.glm) + 2 * logLik(m0.glmer)
+# pchisq(as.numeric(null.id), df=1, lower.tail=F)
+# rm(m0.glm, m0.glmer, aic.glm, aic.glmer, null.id)
 # The Likelihood Ratio Test is NOT significant so the use of the random effect structure is not necessary!
 
 
 
-### Assessing the presence of "complete separation" (or perfect prediction):
-# For binary variables:
-ifelse(min(ftable(eff$high_eff, eff$geomem)) == 0, "incomplete information", "okay") # Ok
-ifelse(min(ftable(eff$high_eff, eff$maxveg)) == 0, "incomplete information", "okay") # Ok
-ifelse(min(ftable(eff$high_eff, eff$uprootexcav)) == 0, "incomplete information", "okay") # Ok
-ifelse(min(ftable(eff$high_eff, eff$fully_tarped)) == 0, "incomplete information", "okay") # NOT ok !!!
-ifelse(min(ftable(eff$high_eff, eff$stripsoverlap_ok)) == 0, "incomplete information", "okay") # Ok
-ifelse(min(ftable(eff$high_eff, eff$tarpfix_multimethod)) == 0, "incomplete information", "okay") # Ok
-ifelse(min(ftable(eff$high_eff, eff$tarpfix_pierced)) == 0, "incomplete information", "okay") # Ok
-ifelse(min(ftable(eff$high_eff, eff$plantation)) == 0, "incomplete information", "okay") # Ok
-ifelse(min(ftable(eff$high_eff, eff$repairs)) == 0, "incomplete information", "okay") # Ok
-ifelse(min(ftable(eff$high_eff, eff$add_control)) == 0, "incomplete information", "okay") # Ok
-ifelse(min(ftable(eff$high_eff, eff$pb_fixation)) == 0, "incomplete information", "okay") # Ok
-# So PB with fully_tarped! We could simplify the code with apply/sapply, no?
+
+
+
+
+
+########################################@#@
+########################################@#@
+########################################@#@
+########################################@#@
+
+##### Test of cross-validated penalized logistic regressions (Ridge, LASSO and elastic net) #####
+# --------------------------------------------------------------------------------------------- #
+
+### Data preparation
+mydata <- eff[ ,c("eff_eradication", "distance", "fully_tarped", "followups", "obstacles",
+                  "slope", "stand_surface", "tarping_duration")]
+mydata %>%
+  dplyr::mutate(distance = log2(distance+1)) %>%
+  dplyr::mutate(stand_surface = log2(stand_surface)) -> mydata
+
+
+# To prepare for a 10-fold cross validation with 5 repeats:
+train.control <- caret::trainControl(method = "repeatedcv", number = 10, repeats = 5)
+
+# To convert the data to a matrix format accepted by glmnet:
+x <- stats::model.matrix(eff_eradication~., mydata)[,-1] # Creates a matrix of the potential predictors
+y <- jk.dusz.tarping::as.numfactor(x = mydata$eff_eradication) %>% as.matrix() # Same for Y
+
+
+### Train a model using the repeated 10-fold cross validation to find the best hyperparameters:
+set.seed(21) # Ok
+set.seed(26)
+trained.mod <- caret::train(eff_eradication~., data = mydata, method = "glmnet", family = "binomial",
+                               trControl = train.control,
+                               tuneLength = 15)
+
+# To extract the best hyperparameters:
+get_best_result <- function(caret_fit) {
+  best = which(rownames(caret_fit$results) == rownames(caret_fit$bestTune))
+  best_result = caret_fit$results[best, ]
+  rownames(best_result) = NULL
+  best_result
+}
+best_param <- get_best_result(caret_fit = trained.mod)
+best_param
+#      alpha       lambda  Accuracy     Kappa AccuracySD   KappaSD
+#1 0.9357143 0.0008972655 0.7420556 0.2757236  0.1260169 0.3631528 # Some other tuning gave slightly better
+# results but I'm having trouble with reproducibility here...
+
+# Final elastic-net model (to observe what variables are kept and their associated coefficients):
+elasticnet.model <- glmnet::glmnet(x = x, y = y, alpha = best_param$alpha,
+                                   lambda = best_param$lambda,
+                                   family = "binomial")
+glmnet::coef.glmnet(object = elasticnet.model, s = best_param$lambda)
+
+
+### Make predictions using the final elastic net model (glmnet):
+predic.glmnet <- predict(object = elasticnet.model, newx = x,
+                       s = best_param$lambda, type = "class") %>% as.factor()
+mean(predic.glmnet == mydata$eff_eradication) # 0.776 ±= Accuracy?
+pred.obs <- data.frame(cbind(predic.glmnet, mydata[,1]))
+sum(pred.obs$predic.glmnet == pred.obs$eff_eradication) # 66 out of 85 observations
+sum(pred.obs$predic.glmnet == 1 & pred.obs$eff_eradication == 1) # Correctly predicted eradication 10 times
+# out of 23 eradication events (not very good)!
+
+#foldid <- sample(1:10, size = length(y), replace = TRUE)
+
+
+
+########################################@#@
+########################################@#@
+########################################@#@
+########################################@#@
+
 
 
 
