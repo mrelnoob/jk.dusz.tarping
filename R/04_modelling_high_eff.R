@@ -82,6 +82,11 @@ summary(eff)
 ##### Test of cross-validated penalized logistic regressions (Ridge, LASSO and elastic net) #####
 # --------------------------------------------------------------------------------------------- #
 
+
+# TO IMPROVE RESULTS: standardiser (manuellement), pas via glmnet() (qui marche mal apparemment); tester
+# d'autres variables ? Toutes les interactions? Utiliser high_eff?
+
+
 ### Data preparation
 mydata <- eff[ ,c("eff_eradication", "distance", "fully_tarped", "followups", "obstacles",
                   "slope", "stand_surface", "tarping_duration")]
