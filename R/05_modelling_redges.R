@@ -122,7 +122,7 @@ R.ajust <- rbind(R.ajust, data.frame(Model=1, R2=R2[[1]]))
 ##### Model 2 #####
 # -----------------
 
-Cand.mod[[2]] <- glmmTMB::glmmTMB(formula = lreg_edges~log2(distance+1) + (1|manager_id), data = redges,
+Cand.mod[[2]] <- glmmTMB::glmmTMB(formula = lreg_edges~log2(distance+1) + add_control + (1|manager_id), data = redges,
                                   family = stats::binomial(link = "logit"), REML = FALSE)
 
 
@@ -130,6 +130,7 @@ Cand.mod[[2]] <- glmmTMB::glmmTMB(formula = lreg_edges~log2(distance+1) + (1|man
 # # Simulation-based scaled residuals (DHARMa method):
 # simu.resid <- DHARMa::simulateResiduals(fittedModel = Cand.mod[[2]], n = 1000, plot = FALSE)
 # plot(simu.resid) # Ok!
+# DHARMa::plotResiduals(simu.resid, form = redges$add_control) # Ok-ish!
 # DHARMa::plotResiduals(simu.resid, form = redges$distance) # Ok!
 # # Testing for overdispersion:
 # DHARMa::testDispersion(simu.resid) # Ok!
@@ -140,7 +141,7 @@ Cand.mod[[2]] <- glmmTMB::glmmTMB(formula = lreg_edges~log2(distance+1) + (1|man
 # performance::check_distribution(Cand.mod[[2]])
 # performance::check_autocorrelation(Cand.mod[[2]])
 # performance::check_collinearity(Cand.mod[[2]])
-# performance::check_singularity(Cand.mod[[2]])
+# performance::check_singularity(Cand.mod[[2]]) # Singularity! Dealt with decreased tolerance for convergence
 #
 # ### Assessing goodness-of-fit:
 # # Test of Pearson's Chi2 residuals:
@@ -152,7 +153,7 @@ Cand.mod[[2]] <- glmmTMB::glmmTMB(formula = lreg_edges~log2(distance+1) + (1|man
 # # Computing a pseudo-R2:
 1 - (as.numeric(-2 * stats::logLik(Cand.mod[[2]]))/as.numeric(-2 * stats::logLik(
   update(Cand.mod[[2]], ~1)))) # McFadden's pseudo-R2
-R2 <- performance::r2_nakagawa(Cand.mod[[2]]) # Nakagawa's (pseudo-R2 for GLMMs)
+R2 <- performance::r2_nakagawa(Cand.mod[[2]], tolerance = 1e-08) # Nakagawa's (pseudo-R2 for GLMMs)
 R.ajust <- rbind(R.ajust, data.frame(Model=2, R2=R2[[1]]))
 
 
@@ -160,15 +161,16 @@ R.ajust <- rbind(R.ajust, data.frame(Model=2, R2=R2[[1]]))
 ##### Model 3 #####
 # -----------------
 
-Cand.mod[[3]] <- glmmTMB::glmmTMB(formula = lreg_edges~add_control + (1|manager_id), data = redges,
-                                  family = stats::binomial(link = "logit"), REML = FALSE)
+Cand.mod[[3]] <- glmmTMB::glmmTMB(formula = lreg_edges~log2(distance+1) + obstacles + (1|manager_id), data = redges,
+                                   family = stats::binomial(link = "logit"), REML = FALSE)
 
 
 # ### Model diagnostics:
 # # Simulation-based scaled residuals (DHARMa method):
 # simu.resid <- DHARMa::simulateResiduals(fittedModel = Cand.mod[[3]], n = 1000, plot = FALSE)
 # plot(simu.resid) # Ok!
-# DHARMa::plotResiduals(simu.resid, form = redges$add_control) # Ok!
+# DHARMa::plotResiduals(simu.resid, form = redges$obstacles) # Ok!
+# DHARMa::plotResiduals(simu.resid, form = redges$distance) # Ok!
 # # Testing for overdispersion:
 # DHARMa::testDispersion(simu.resid) # Ok!
 # # Testing for spatial autocorrelation:
@@ -178,7 +180,7 @@ Cand.mod[[3]] <- glmmTMB::glmmTMB(formula = lreg_edges~add_control + (1|manager_
 # performance::check_distribution(Cand.mod[[3]])
 # performance::check_autocorrelation(Cand.mod[[3]])
 # performance::check_collinearity(Cand.mod[[3]])
-# performance::check_singularity(Cand.mod[[3]]) # Singularity! Dealt with decreased tolerance for convergence
+# performance::check_singularity(Cand.mod[[3]])
 #
 # ### Assessing goodness-of-fit:
 # # Test of Pearson's Chi2 residuals:
@@ -190,7 +192,7 @@ Cand.mod[[3]] <- glmmTMB::glmmTMB(formula = lreg_edges~add_control + (1|manager_
 # # Computing a pseudo-R2:
 1 - (as.numeric(-2 * stats::logLik(Cand.mod[[3]]))/as.numeric(-2 * stats::logLik(
   update(Cand.mod[[3]], ~1)))) # McFadden's pseudo-R2
-R2 <- performance::r2_nakagawa(Cand.mod[[3]], tolerance = 1e-08) # Nakagawa's (pseudo-R2 for GLMMs)
+R2 <- performance::r2_nakagawa(Cand.mod[[3]]) # Nakagawa's (pseudo-R2 for GLMMs)
 R.ajust <- rbind(R.ajust, data.frame(Model=3, R2=R2[[1]]))
 
 
@@ -198,15 +200,16 @@ R.ajust <- rbind(R.ajust, data.frame(Model=3, R2=R2[[1]]))
 ##### Model 4 #####
 # -----------------
 
-Cand.mod[[4]] <- glmmTMB::glmmTMB(formula = lreg_edges~obstacles + (1|manager_id), data = redges,
-                                  family = stats::binomial(link = "logit"), REML = FALSE)
+Cand.mod[[4]] <- glmmTMB::glmmTMB(formula = lreg_edges~log2(distance+1) + repairs + (1|manager_id), data = redges,
+                                   family = stats::binomial(link = "logit"), REML = FALSE)
 
 
 # ### Model diagnostics:
 # # Simulation-based scaled residuals (DHARMa method):
 # simu.resid <- DHARMa::simulateResiduals(fittedModel = Cand.mod[[4]], n = 1000, plot = FALSE)
 # plot(simu.resid) # Ok!
-# DHARMa::plotResiduals(simu.resid, form = redges$obstacles) # Ok!
+# DHARMa::plotResiduals(simu.resid, form = redges$repairs) # Ok!
+# DHARMa::plotResiduals(simu.resid, form = redges$distance) # Ok!
 # # Testing for overdispersion:
 # DHARMa::testDispersion(simu.resid) # Ok!
 # # Testing for spatial autocorrelation:
@@ -221,7 +224,7 @@ Cand.mod[[4]] <- glmmTMB::glmmTMB(formula = lreg_edges~obstacles + (1|manager_id
 # ### Assessing goodness-of-fit:
 # # Test of Pearson's Chi2 residuals:
 # dat.resid <- sum(stats::resid(Cand.mod[[4]], type = "pearson")^2)
-# 1 - stats::pchisq(dat.resid, stats::df.residual(Cand.mod[[4]])) # Ok!
+# 1 - stats::pchisq(dat.resid, stats::df.residual(Cand.mod[[4]])) # Not ok!
 #
 # ### Exploring the model parameters and test hypotheses:
 # summary(Cand.mod[[4]])
@@ -236,8 +239,8 @@ R.ajust <- rbind(R.ajust, data.frame(Model=4, R2=R2[[1]]))
 ##### Model 5 #####
 # -----------------
 
-Cand.mod[[5]] <- glmmTMB::glmmTMB(formula = lreg_edges~pb_fixation + (1|manager_id), data = redges,
-                                  family = stats::binomial(link = "logit"), REML = FALSE)
+Cand.mod[[5]] <- glmmTMB::glmmTMB(formula = lreg_edges~log2(distance+1) + pb_fixation + (1|manager_id), data = redges,
+                                   family = stats::binomial(link = "logit"), REML = FALSE)
 
 
 # ### Model diagnostics:
@@ -245,6 +248,7 @@ Cand.mod[[5]] <- glmmTMB::glmmTMB(formula = lreg_edges~pb_fixation + (1|manager_
 # simu.resid <- DHARMa::simulateResiduals(fittedModel = Cand.mod[[5]], n = 1000, plot = FALSE)
 # plot(simu.resid) # Ok!
 # DHARMa::plotResiduals(simu.resid, form = redges$pb_fixation) # Ok!
+# DHARMa::plotResiduals(simu.resid, form = redges$distance) # Ok!
 # # Testing for overdispersion:
 # DHARMa::testDispersion(simu.resid) # Ok!
 # # Testing for spatial autocorrelation:
@@ -259,7 +263,7 @@ Cand.mod[[5]] <- glmmTMB::glmmTMB(formula = lreg_edges~pb_fixation + (1|manager_
 # ### Assessing goodness-of-fit:
 # # Test of Pearson's Chi2 residuals:
 # dat.resid <- sum(stats::resid(Cand.mod[[5]], type = "pearson")^2)
-# 1 - stats::pchisq(dat.resid, stats::df.residual(Cand.mod[[5]])) # Ok!
+# 1 - stats::pchisq(dat.resid, stats::df.residual(Cand.mod[[5]])) # Close
 #
 # ### Exploring the model parameters and test hypotheses:
 # summary(Cand.mod[[5]])
@@ -274,16 +278,16 @@ R.ajust <- rbind(R.ajust, data.frame(Model=5, R2=R2[[1]]))
 ##### Model 6 #####
 # -----------------
 
-Cand.mod[[6]] <- glmmTMB::glmmTMB(formula = lreg_edges~slope + (1|manager_id), data = redges,
-                                  family = stats::binomial(link = "logit"), REML = FALSE)
+Cand.mod[[6]] <- glmmTMB::glmmTMB(formula = lreg_edges~log2(distance+1) + log2(stand_surface) + (1|manager_id), data = redges,
+                                   family = stats::binomial(link = "logit"), REML = FALSE)
 
 
 # ### Model diagnostics:
 # # Simulation-based scaled residuals (DHARMa method):
 # simu.resid <- DHARMa::simulateResiduals(fittedModel = Cand.mod[[6]], n = 1000, plot = FALSE)
-# plot(simu.resid) # Ok-ish: adding a quadratic term could perhaps improve them (but they look ok enough so we
-# # won't in order to avoid overfitting)
-# DHARMa::plotResiduals(simu.resid, form = redges$slope) # Same
+# plot(simu.resid) # Ok!
+# DHARMa::plotResiduals(simu.resid, form = redges$stand_surface) # Ok!
+# DHARMa::plotResiduals(simu.resid, form = redges$distance) # Ok!
 # # Testing for overdispersion:
 # DHARMa::testDispersion(simu.resid) # Ok!
 # # Testing for spatial autocorrelation:
@@ -298,7 +302,7 @@ Cand.mod[[6]] <- glmmTMB::glmmTMB(formula = lreg_edges~slope + (1|manager_id), d
 # ### Assessing goodness-of-fit:
 # # Test of Pearson's Chi2 residuals:
 # dat.resid <- sum(stats::resid(Cand.mod[[6]], type = "pearson")^2)
-# 1 - stats::pchisq(dat.resid, stats::df.residual(Cand.mod[[6]])) # Ok!
+# 1 - stats::pchisq(dat.resid, stats::df.residual(Cand.mod[[6]])) # Close
 #
 # ### Exploring the model parameters and test hypotheses:
 # summary(Cand.mod[[6]])
@@ -310,18 +314,20 @@ R.ajust <- rbind(R.ajust, data.frame(Model=6, R2=R2[[1]]))
 
 
 
+
 ##### Model 7 #####
 # -----------------
 
-Cand.mod[[7]] <- glmmTMB::glmmTMB(formula = lreg_edges~log2(stand_surface) + (1|manager_id), data = redges,
-                                  family = stats::binomial(link = "logit"), REML = FALSE)
+Cand.mod[[7]] <- glmmTMB::glmmTMB(formula = lreg_edges~log2(distance+1) + geomem + (1|manager_id), data = redges,
+                                   family = stats::binomial(link = "logit"), REML = FALSE)
 
 
 # ### Model diagnostics:
 # # Simulation-based scaled residuals (DHARMa method):
 # simu.resid <- DHARMa::simulateResiduals(fittedModel = Cand.mod[[7]], n = 1000, plot = FALSE)
-# plot(simu.resid) # Ok!
-# DHARMa::plotResiduals(simu.resid, form = redges$stand_surface) # Ok!
+# plot(simu.resid) # Ok-ish!
+# DHARMa::plotResiduals(simu.resid, form = redges$geomem) # Ok!
+# DHARMa::plotResiduals(simu.resid, form = redges$distance) # Ok!
 # # Testing for overdispersion:
 # DHARMa::testDispersion(simu.resid) # Ok!
 # # Testing for spatial autocorrelation:
@@ -331,19 +337,19 @@ Cand.mod[[7]] <- glmmTMB::glmmTMB(formula = lreg_edges~log2(stand_surface) + (1|
 # performance::check_distribution(Cand.mod[[7]])
 # performance::check_autocorrelation(Cand.mod[[7]])
 # performance::check_collinearity(Cand.mod[[7]])
-# performance::check_singularity(Cand.mod[[7]])
+# performance::check_singularity(Cand.mod[[7]]) # Singularity! Dealt with decreased tolerance for convergence
 #
 # ### Assessing goodness-of-fit:
 # # Test of Pearson's Chi2 residuals:
 # dat.resid <- sum(stats::resid(Cand.mod[[7]], type = "pearson")^2)
-# 1 - stats::pchisq(dat.resid, stats::df.residual(Cand.mod[[7]])) # Ok!
+# 1 - stats::pchisq(dat.resid, stats::df.residual(Cand.mod[[7]])) # Close!
 #
 # ### Exploring the model parameters and test hypotheses:
 # summary(Cand.mod[[7]])
 # # Computing a pseudo-R2:
 1 - (as.numeric(-2 * stats::logLik(Cand.mod[[7]]))/as.numeric(-2 * stats::logLik(
   update(Cand.mod[[7]], ~1)))) # McFadden's pseudo-R2
-R2 <- performance::r2_nakagawa(Cand.mod[[7]]) # Nakagawa's (pseudo-R2 for GLMMs)
+R2 <- performance::r2_nakagawa(Cand.mod[[7]], tolerance = 1e-08) # Nakagawa's (pseudo-R2 for GLMMs)
 R.ajust <- rbind(R.ajust, data.frame(Model=7, R2=R2[[1]]))
 
 
@@ -351,15 +357,16 @@ R.ajust <- rbind(R.ajust, data.frame(Model=7, R2=R2[[1]]))
 ##### Model 8 #####
 # -----------------
 
-Cand.mod[[8]] <- glmmTMB::glmmTMB(formula = lreg_edges~tarping_duration + (1|manager_id), data = redges,
-                                  family = stats::binomial(link = "logit"), REML = FALSE)
+Cand.mod[[8]] <- glmmTMB::glmmTMB(formula = lreg_edges~log2(distance+1) + tarping_duration + (1|manager_id), data = redges,
+                                   family = stats::binomial(link = "logit"), REML = FALSE)
 
 
 # ### Model diagnostics:
 # # Simulation-based scaled residuals (DHARMa method):
 # simu.resid <- DHARMa::simulateResiduals(fittedModel = Cand.mod[[8]], n = 1000, plot = FALSE)
-# plot(simu.resid) # Ok!
+# plot(simu.resid) # Ok-ish!
 # DHARMa::plotResiduals(simu.resid, form = redges$tarping_duration) # Ok!
+# DHARMa::plotResiduals(simu.resid, form = redges$distance) # Ok!
 # # Testing for overdispersion:
 # DHARMa::testDispersion(simu.resid) # Ok!
 # # Testing for spatial autocorrelation:
@@ -374,7 +381,7 @@ Cand.mod[[8]] <- glmmTMB::glmmTMB(formula = lreg_edges~tarping_duration + (1|man
 # ### Assessing goodness-of-fit:
 # # Test of Pearson's Chi2 residuals:
 # dat.resid <- sum(stats::resid(Cand.mod[[8]], type = "pearson")^2)
-# 1 - stats::pchisq(dat.resid, stats::df.residual(Cand.mod[[8]])) # Ok!
+# 1 - stats::pchisq(dat.resid, stats::df.residual(Cand.mod[[8]])) # Close
 #
 # ### Exploring the model parameters and test hypotheses:
 # summary(Cand.mod[[8]])
@@ -389,8 +396,8 @@ R.ajust <- rbind(R.ajust, data.frame(Model=8, R2=R2[[1]]))
 ##### Model 9 #####
 # -----------------
 
-Cand.mod[[9]] <- glmmTMB::glmmTMB(formula = lreg_edges~log2(trench_depth+1) + (1|manager_id), data = redges,
-                                  family = stats::binomial(link = "logit"), REML = FALSE)
+Cand.mod[[9]] <- glmmTMB::glmmTMB(formula = lreg_edges~log2(distance+1) + log2(trench_depth+1) + (1|manager_id), data = redges,
+                                   family = stats::binomial(link = "logit"), REML = FALSE)
 
 
 # ### Model diagnostics:
@@ -398,6 +405,7 @@ Cand.mod[[9]] <- glmmTMB::glmmTMB(formula = lreg_edges~log2(trench_depth+1) + (1
 # simu.resid <- DHARMa::simulateResiduals(fittedModel = Cand.mod[[9]], n = 1000, plot = FALSE)
 # plot(simu.resid) # Ok!
 # DHARMa::plotResiduals(simu.resid, form = redges$trench_depth) # Ok!
+# DHARMa::plotResiduals(simu.resid, form = redges$distance) # Ok!
 # # Testing for overdispersion:
 # DHARMa::testDispersion(simu.resid) # Ok!
 # # Testing for spatial autocorrelation:
@@ -407,19 +415,19 @@ Cand.mod[[9]] <- glmmTMB::glmmTMB(formula = lreg_edges~log2(trench_depth+1) + (1
 # performance::check_distribution(Cand.mod[[9]])
 # performance::check_autocorrelation(Cand.mod[[9]])
 # performance::check_collinearity(Cand.mod[[9]])
-# performance::check_singularity(Cand.mod[[9]]) # Singularity! Dealt with decreased tolerance for convergence
+# performance::check_singularity(Cand.mod[[9]])
 #
 # ### Assessing goodness-of-fit:
 # # Test of Pearson's Chi2 residuals:
 # dat.resid <- sum(stats::resid(Cand.mod[[9]], type = "pearson")^2)
-# 1 - stats::pchisq(dat.resid, stats::df.residual(Cand.mod[[9]])) # Ok!
+# 1 - stats::pchisq(dat.resid, stats::df.residual(Cand.mod[[9]])) # Close
 #
 # ### Exploring the model parameters and test hypotheses:
 # summary(Cand.mod[[9]])
 # # Computing a pseudo-R2:
 1 - (as.numeric(-2 * stats::logLik(Cand.mod[[9]]))/as.numeric(-2 * stats::logLik(
   update(Cand.mod[[9]], ~1)))) # McFadden's pseudo-R2
-R2 <- performance::r2_nakagawa(Cand.mod[[9]], tolerance = 1e-08) # Nakagawa's (pseudo-R2 for GLMMs)
+R2 <- performance::r2_nakagawa(Cand.mod[[9]]) # Nakagawa's (pseudo-R2 for GLMMs)
 R.ajust <- rbind(R.ajust, data.frame(Model=9, R2=R2[[1]]))
 
 
@@ -427,15 +435,15 @@ R.ajust <- rbind(R.ajust, data.frame(Model=9, R2=R2[[1]]))
 ##### Model 10 #####
 # -----------------
 
-Cand.mod[[10]] <- glmmTMB::glmmTMB(formula = lreg_edges~log2(distance+1) + add_control + (1|manager_id), data = redges,
-                                  family = stats::binomial(link = "logit"), REML = FALSE)
+Cand.mod[[10]] <- glmmTMB::glmmTMB(formula = lreg_edges~log2(distance+1) * log2(trench_depth+1) + (1|manager_id), data = redges,
+                                   family = stats::binomial(link = "logit"), REML = FALSE)
 
 
 # ### Model diagnostics:
 # # Simulation-based scaled residuals (DHARMa method):
 # simu.resid <- DHARMa::simulateResiduals(fittedModel = Cand.mod[[10]], n = 1000, plot = FALSE)
 # plot(simu.resid) # Ok!
-# DHARMa::plotResiduals(simu.resid, form = redges$add_control) # Ok-ish!
+# DHARMa::plotResiduals(simu.resid, form = redges$trench_depth) # Ok!
 # DHARMa::plotResiduals(simu.resid, form = redges$distance) # Ok!
 # # Testing for overdispersion:
 # DHARMa::testDispersion(simu.resid) # Ok!
@@ -445,8 +453,9 @@ Cand.mod[[10]] <- glmmTMB::glmmTMB(formula = lreg_edges~log2(distance+1) + add_c
 # # Using the 'performance' package:
 # performance::check_distribution(Cand.mod[[10]])
 # performance::check_autocorrelation(Cand.mod[[10]])
-# performance::check_collinearity(Cand.mod[[10]])
-# performance::check_singularity(Cand.mod[[10]]) # Singularity! Dealt with decreased tolerance for convergence
+# performance::check_collinearity(Cand.mod[[10]]) # Produces moderate correlation even though predictors are
+# # centered (and/or scaled). This is unusual but not very problematic since standard errors remain acceptable
+# performance::check_singularity(Cand.mod[[10]])
 #
 # ### Assessing goodness-of-fit:
 # # Test of Pearson's Chi2 residuals:
@@ -458,7 +467,7 @@ Cand.mod[[10]] <- glmmTMB::glmmTMB(formula = lreg_edges~log2(distance+1) + add_c
 # # Computing a pseudo-R2:
 1 - (as.numeric(-2 * stats::logLik(Cand.mod[[10]]))/as.numeric(-2 * stats::logLik(
   update(Cand.mod[[10]], ~1)))) # McFadden's pseudo-R2
-R2 <- performance::r2_nakagawa(Cand.mod[[10]], tolerance = 1e-08) # Nakagawa's (pseudo-R2 for GLMMs)
+R2 <- performance::r2_nakagawa(Cand.mod[[10]]) # Nakagawa's (pseudo-R2 for GLMMs)
 R.ajust <- rbind(R.ajust, data.frame(Model=10, R2=R2[[1]]))
 
 
@@ -466,7 +475,7 @@ R.ajust <- rbind(R.ajust, data.frame(Model=10, R2=R2[[1]]))
 ##### Model 11 #####
 # -----------------
 
-Cand.mod[[11]] <- glmmTMB::glmmTMB(formula = lreg_edges~log2(distance+1) + obstacles + (1|manager_id), data = redges,
+Cand.mod[[11]] <- glmmTMB::glmmTMB(formula = lreg_edges~log2(trench_depth+1) + add_control + (1|manager_id), data = redges,
                                    family = stats::binomial(link = "logit"), REML = FALSE)
 
 
@@ -474,8 +483,8 @@ Cand.mod[[11]] <- glmmTMB::glmmTMB(formula = lreg_edges~log2(distance+1) + obsta
 # # Simulation-based scaled residuals (DHARMa method):
 # simu.resid <- DHARMa::simulateResiduals(fittedModel = Cand.mod[[11]], n = 1000, plot = FALSE)
 # plot(simu.resid) # Ok!
-# DHARMa::plotResiduals(simu.resid, form = redges$obstacles) # Ok!
-# DHARMa::plotResiduals(simu.resid, form = redges$distance) # Ok!
+# DHARMa::plotResiduals(simu.resid, form = redges$trench_depth) # Ok!
+# DHARMa::plotResiduals(simu.resid, form = redges$add_control) # Ok!
 # # Testing for overdispersion:
 # DHARMa::testDispersion(simu.resid) # Ok!
 # # Testing for spatial autocorrelation:
@@ -485,7 +494,7 @@ Cand.mod[[11]] <- glmmTMB::glmmTMB(formula = lreg_edges~log2(distance+1) + obsta
 # performance::check_distribution(Cand.mod[[11]])
 # performance::check_autocorrelation(Cand.mod[[11]])
 # performance::check_collinearity(Cand.mod[[11]])
-# performance::check_singularity(Cand.mod[[11]])
+# performance::check_singularity(Cand.mod[[11]]) # Singularity! Dealt with decreased tolerance for convergence
 #
 # ### Assessing goodness-of-fit:
 # # Test of Pearson's Chi2 residuals:
@@ -497,7 +506,7 @@ Cand.mod[[11]] <- glmmTMB::glmmTMB(formula = lreg_edges~log2(distance+1) + obsta
 # # Computing a pseudo-R2:
 1 - (as.numeric(-2 * stats::logLik(Cand.mod[[11]]))/as.numeric(-2 * stats::logLik(
   update(Cand.mod[[11]], ~1)))) # McFadden's pseudo-R2
-R2 <- performance::r2_nakagawa(Cand.mod[[11]]) # Nakagawa's (pseudo-R2 for GLMMs)
+R2 <- performance::r2_nakagawa(Cand.mod[[11]], tolerance = 1e-08) # Nakagawa's (pseudo-R2 for GLMMs)
 R.ajust <- rbind(R.ajust, data.frame(Model=11, R2=R2[[1]]))
 
 
@@ -505,16 +514,16 @@ R.ajust <- rbind(R.ajust, data.frame(Model=11, R2=R2[[1]]))
 ##### Model 12 #####
 # -----------------
 
-Cand.mod[[12]] <- glmmTMB::glmmTMB(formula = lreg_edges~log2(distance+1) + repairs + (1|manager_id), data = redges,
+Cand.mod[[12]] <- glmmTMB::glmmTMB(formula = lreg_edges~log2(trench_depth+1) + obstacles + (1|manager_id), data = redges,
                                    family = stats::binomial(link = "logit"), REML = FALSE)
 
 
 # ### Model diagnostics:
 # # Simulation-based scaled residuals (DHARMa method):
 # simu.resid <- DHARMa::simulateResiduals(fittedModel = Cand.mod[[12]], n = 1000, plot = FALSE)
-# plot(simu.resid) # Ok!
-# DHARMa::plotResiduals(simu.resid, form = redges$repairs) # Ok!
-# DHARMa::plotResiduals(simu.resid, form = redges$distance) # Ok!
+# plot(simu.resid) # Ok-ish!
+# DHARMa::plotResiduals(simu.resid, form = redges$trench_depth) # Ok!
+# DHARMa::plotResiduals(simu.resid, form = redges$obstacles) # Ok!
 # # Testing for overdispersion:
 # DHARMa::testDispersion(simu.resid) # Ok!
 # # Testing for spatial autocorrelation:
@@ -529,7 +538,7 @@ Cand.mod[[12]] <- glmmTMB::glmmTMB(formula = lreg_edges~log2(distance+1) + repai
 # ### Assessing goodness-of-fit:
 # # Test of Pearson's Chi2 residuals:
 # dat.resid <- sum(stats::resid(Cand.mod[[12]], type = "pearson")^2)
-# 1 - stats::pchisq(dat.resid, stats::df.residual(Cand.mod[[12]])) # Not ok!
+# 1 - stats::pchisq(dat.resid, stats::df.residual(Cand.mod[[12]])) # Ok!
 #
 # ### Exploring the model parameters and test hypotheses:
 # summary(Cand.mod[[12]])
@@ -544,16 +553,16 @@ R.ajust <- rbind(R.ajust, data.frame(Model=12, R2=R2[[1]]))
 ##### Model 13 #####
 # -----------------
 
-Cand.mod[[13]] <- glmmTMB::glmmTMB(formula = lreg_edges~log2(distance+1) + pb_fixation + (1|manager_id), data = redges,
+Cand.mod[[13]] <- glmmTMB::glmmTMB(formula = lreg_edges~log2(trench_depth+1) + log2(stand_surface) + (1|manager_id), data = redges,
                                    family = stats::binomial(link = "logit"), REML = FALSE)
 
 
 # ### Model diagnostics:
 # # Simulation-based scaled residuals (DHARMa method):
 # simu.resid <- DHARMa::simulateResiduals(fittedModel = Cand.mod[[13]], n = 1000, plot = FALSE)
-# plot(simu.resid) # Ok!
-# DHARMa::plotResiduals(simu.resid, form = redges$pb_fixation) # Ok!
-# DHARMa::plotResiduals(simu.resid, form = redges$distance) # Ok!
+# plot(simu.resid) # Ok-ish!
+# DHARMa::plotResiduals(simu.resid, form = redges$trench_depth) # Ok!
+# DHARMa::plotResiduals(simu.resid, form = redges$stand_surface) # Ok!
 # # Testing for overdispersion:
 # DHARMa::testDispersion(simu.resid) # Ok!
 # # Testing for spatial autocorrelation:
@@ -563,19 +572,19 @@ Cand.mod[[13]] <- glmmTMB::glmmTMB(formula = lreg_edges~log2(distance+1) + pb_fi
 # performance::check_distribution(Cand.mod[[13]])
 # performance::check_autocorrelation(Cand.mod[[13]])
 # performance::check_collinearity(Cand.mod[[13]])
-# performance::check_singularity(Cand.mod[[13]])
+# performance::check_singularity(Cand.mod[[13]]) # Singularity! Dealt with decreased tolerance for convergence
 #
 # ### Assessing goodness-of-fit:
 # # Test of Pearson's Chi2 residuals:
 # dat.resid <- sum(stats::resid(Cand.mod[[13]], type = "pearson")^2)
-# 1 - stats::pchisq(dat.resid, stats::df.residual(Cand.mod[[13]])) # Close
+# 1 - stats::pchisq(dat.resid, stats::df.residual(Cand.mod[[13]])) # Ok!
 #
 # ### Exploring the model parameters and test hypotheses:
 # summary(Cand.mod[[13]])
 # # Computing a pseudo-R2:
 1 - (as.numeric(-2 * stats::logLik(Cand.mod[[13]]))/as.numeric(-2 * stats::logLik(
   update(Cand.mod[[13]], ~1)))) # McFadden's pseudo-R2
-R2 <- performance::r2_nakagawa(Cand.mod[[13]]) # Nakagawa's (pseudo-R2 for GLMMs)
+R2 <- performance::r2_nakagawa(Cand.mod[[13]], tolerance = 1e-08) # Nakagawa's (pseudo-R2 for GLMMs)
 R.ajust <- rbind(R.ajust, data.frame(Model=13, R2=R2[[1]]))
 
 
@@ -583,16 +592,16 @@ R.ajust <- rbind(R.ajust, data.frame(Model=13, R2=R2[[1]]))
 ##### Model 14 #####
 # -----------------
 
-Cand.mod[[14]] <- glmmTMB::glmmTMB(formula = lreg_edges~log2(distance+1) + log2(stand_surface) + (1|manager_id), data = redges,
+Cand.mod[[14]] <- glmmTMB::glmmTMB(formula = lreg_edges~log2(stand_surface) + add_control + (1|manager_id), data = redges,
                                    family = stats::binomial(link = "logit"), REML = FALSE)
 
 
 # ### Model diagnostics:
 # # Simulation-based scaled residuals (DHARMa method):
 # simu.resid <- DHARMa::simulateResiduals(fittedModel = Cand.mod[[14]], n = 1000, plot = FALSE)
-# plot(simu.resid) # Ok!
+# plot(simu.resid) # Ok-ish!
 # DHARMa::plotResiduals(simu.resid, form = redges$stand_surface) # Ok!
-# DHARMa::plotResiduals(simu.resid, form = redges$distance) # Ok!
+# DHARMa::plotResiduals(simu.resid, form = redges$add_control) # Ok-ish!
 # # Testing for overdispersion:
 # DHARMa::testDispersion(simu.resid) # Ok!
 # # Testing for spatial autocorrelation:
@@ -602,28 +611,27 @@ Cand.mod[[14]] <- glmmTMB::glmmTMB(formula = lreg_edges~log2(distance+1) + log2(
 # performance::check_distribution(Cand.mod[[14]])
 # performance::check_autocorrelation(Cand.mod[[14]])
 # performance::check_collinearity(Cand.mod[[14]])
-# performance::check_singularity(Cand.mod[[14]])
+# performance::check_singularity(Cand.mod[[14]]) # Singularity! Dealt with decreased tolerance for convergence
 #
 # ### Assessing goodness-of-fit:
 # # Test of Pearson's Chi2 residuals:
 # dat.resid <- sum(stats::resid(Cand.mod[[14]], type = "pearson")^2)
-# 1 - stats::pchisq(dat.resid, stats::df.residual(Cand.mod[[14]])) # Close
+# 1 - stats::pchisq(dat.resid, stats::df.residual(Cand.mod[[14]])) # Ok!
 #
 # ### Exploring the model parameters and test hypotheses:
 # summary(Cand.mod[[14]])
 # # Computing a pseudo-R2:
 1 - (as.numeric(-2 * stats::logLik(Cand.mod[[14]]))/as.numeric(-2 * stats::logLik(
   update(Cand.mod[[14]], ~1)))) # McFadden's pseudo-R2
-R2 <- performance::r2_nakagawa(Cand.mod[[14]]) # Nakagawa's (pseudo-R2 for GLMMs)
+R2 <- performance::r2_nakagawa(Cand.mod[[14]], tolerance = 1e-08) # Nakagawa's (pseudo-R2 for GLMMs)
 R.ajust <- rbind(R.ajust, data.frame(Model=14, R2=R2[[1]]))
-
 
 
 
 ##### Model 15 #####
 # -----------------
 
-Cand.mod[[15]] <- glmmTMB::glmmTMB(formula = lreg_edges~log2(distance+1) + geomem + (1|manager_id), data = redges,
+Cand.mod[[15]] <- glmmTMB::glmmTMB(formula = lreg_edges~log2(stand_surface) + obstacles + (1|manager_id), data = redges,
                                    family = stats::binomial(link = "logit"), REML = FALSE)
 
 
@@ -631,8 +639,8 @@ Cand.mod[[15]] <- glmmTMB::glmmTMB(formula = lreg_edges~log2(distance+1) + geome
 # # Simulation-based scaled residuals (DHARMa method):
 # simu.resid <- DHARMa::simulateResiduals(fittedModel = Cand.mod[[15]], n = 1000, plot = FALSE)
 # plot(simu.resid) # Ok-ish!
-# DHARMa::plotResiduals(simu.resid, form = redges$geomem) # Ok!
-# DHARMa::plotResiduals(simu.resid, form = redges$distance) # Ok!
+# DHARMa::plotResiduals(simu.resid, form = redges$stand_surface) # Ok-ish!
+# DHARMa::plotResiduals(simu.resid, form = redges$obstacles) # Ok!
 # # Testing for overdispersion:
 # DHARMa::testDispersion(simu.resid) # Ok!
 # # Testing for spatial autocorrelation:
@@ -642,19 +650,19 @@ Cand.mod[[15]] <- glmmTMB::glmmTMB(formula = lreg_edges~log2(distance+1) + geome
 # performance::check_distribution(Cand.mod[[15]])
 # performance::check_autocorrelation(Cand.mod[[15]])
 # performance::check_collinearity(Cand.mod[[15]])
-# performance::check_singularity(Cand.mod[[15]]) # Singularity! Dealt with decreased tolerance for convergence
+# performance::check_singularity(Cand.mod[[15]])
 #
 # ### Assessing goodness-of-fit:
 # # Test of Pearson's Chi2 residuals:
 # dat.resid <- sum(stats::resid(Cand.mod[[15]], type = "pearson")^2)
-# 1 - stats::pchisq(dat.resid, stats::df.residual(Cand.mod[[15]])) # Close!
+# 1 - stats::pchisq(dat.resid, stats::df.residual(Cand.mod[[15]])) # Ok!
 #
 # ### Exploring the model parameters and test hypotheses:
 # summary(Cand.mod[[15]])
 # # Computing a pseudo-R2:
 1 - (as.numeric(-2 * stats::logLik(Cand.mod[[15]]))/as.numeric(-2 * stats::logLik(
   update(Cand.mod[[15]], ~1)))) # McFadden's pseudo-R2
-R2 <- performance::r2_nakagawa(Cand.mod[[15]], tolerance = 1e-08) # Nakagawa's (pseudo-R2 for GLMMs)
+R2 <- performance::r2_nakagawa(Cand.mod[[15]]) # Nakagawa's (pseudo-R2 for GLMMs)
 R.ajust <- rbind(R.ajust, data.frame(Model=15, R2=R2[[1]]))
 
 
@@ -662,16 +670,19 @@ R.ajust <- rbind(R.ajust, data.frame(Model=15, R2=R2[[1]]))
 ##### Model 16 #####
 # -----------------
 
-Cand.mod[[16]] <- glmmTMB::glmmTMB(formula = lreg_edges~log2(distance+1) + tarping_duration + (1|manager_id), data = redges,
+Cand.mod[[16]] <- glmmTMB::glmmTMB(formula = lreg_edges~log2(stand_surface) + pb_fixation + (1|manager_id), data = redges,
                                    family = stats::binomial(link = "logit"), REML = FALSE)
 
 
 # ### Model diagnostics:
 # # Simulation-based scaled residuals (DHARMa method):
 # simu.resid <- DHARMa::simulateResiduals(fittedModel = Cand.mod[[16]], n = 1000, plot = FALSE)
-# plot(simu.resid) # Ok-ish!
-# DHARMa::plotResiduals(simu.resid, form = redges$tarping_duration) # Ok!
-# DHARMa::plotResiduals(simu.resid, form = redges$distance) # Ok!
+# plot(simu.resid) # Not ok! I fitted various alternative models with various packages and not red flags
+# # appeared. Therefore, I'm not sure where the problem comes from... As all test are okay, I will leave
+# # the model as is (it won't be among the influancial models anyway so it should not bias inferences too
+# # badly).
+# DHARMa::plotResiduals(simu.resid, form = redges$stand_surface) # Ok!
+# DHARMa::plotResiduals(simu.resid, form = redges$pb_fixation) # Ok!
 # # Testing for overdispersion:
 # DHARMa::testDispersion(simu.resid) # Ok!
 # # Testing for spatial autocorrelation:
@@ -686,7 +697,7 @@ Cand.mod[[16]] <- glmmTMB::glmmTMB(formula = lreg_edges~log2(distance+1) + tarpi
 # ### Assessing goodness-of-fit:
 # # Test of Pearson's Chi2 residuals:
 # dat.resid <- sum(stats::resid(Cand.mod[[16]], type = "pearson")^2)
-# 1 - stats::pchisq(dat.resid, stats::df.residual(Cand.mod[[16]])) # Close
+# 1 - stats::pchisq(dat.resid, stats::df.residual(Cand.mod[[16]])) # Ok!
 #
 # ### Exploring the model parameters and test hypotheses:
 # summary(Cand.mod[[16]])
@@ -701,16 +712,16 @@ R.ajust <- rbind(R.ajust, data.frame(Model=16, R2=R2[[1]]))
 ##### Model 17 #####
 # -----------------
 
-Cand.mod[[17]] <- glmmTMB::glmmTMB(formula = lreg_edges~log2(distance+1) + log2(trench_depth+1) + (1|manager_id), data = redges,
+Cand.mod[[17]] <- glmmTMB::glmmTMB(formula = lreg_edges~log2(stand_surface) + tarping_duration + (1|manager_id), data = redges,
                                    family = stats::binomial(link = "logit"), REML = FALSE)
 
 
 # ### Model diagnostics:
 # # Simulation-based scaled residuals (DHARMa method):
 # simu.resid <- DHARMa::simulateResiduals(fittedModel = Cand.mod[[17]], n = 1000, plot = FALSE)
-# plot(simu.resid) # Ok!
-# DHARMa::plotResiduals(simu.resid, form = redges$trench_depth) # Ok!
-# DHARMa::plotResiduals(simu.resid, form = redges$distance) # Ok!
+# plot(simu.resid) # Ok-ish!
+# DHARMa::plotResiduals(simu.resid, form = redges$stand_surface) # Ok!
+# DHARMa::plotResiduals(simu.resid, form = redges$tarping_duration) # Ok!
 # # Testing for overdispersion:
 # DHARMa::testDispersion(simu.resid) # Ok!
 # # Testing for spatial autocorrelation:
@@ -725,7 +736,7 @@ Cand.mod[[17]] <- glmmTMB::glmmTMB(formula = lreg_edges~log2(distance+1) + log2(
 # ### Assessing goodness-of-fit:
 # # Test of Pearson's Chi2 residuals:
 # dat.resid <- sum(stats::resid(Cand.mod[[17]], type = "pearson")^2)
-# 1 - stats::pchisq(dat.resid, stats::df.residual(Cand.mod[[17]])) # Close
+# 1 - stats::pchisq(dat.resid, stats::df.residual(Cand.mod[[17]])) # Ok!
 #
 # ### Exploring the model parameters and test hypotheses:
 # summary(Cand.mod[[17]])
@@ -740,16 +751,16 @@ R.ajust <- rbind(R.ajust, data.frame(Model=17, R2=R2[[1]]))
 ##### Model 18 #####
 # -----------------
 
-Cand.mod[[18]] <- glmmTMB::glmmTMB(formula = lreg_edges~log2(distance+1) * log2(trench_depth+1) + (1|manager_id), data = redges,
+Cand.mod[[18]] <- glmmTMB::glmmTMB(formula = lreg_edges~log2(trench_depth+1) + repairs + (1|manager_id), data = redges,
                                    family = stats::binomial(link = "logit"), REML = FALSE)
 
 
 # ### Model diagnostics:
 # # Simulation-based scaled residuals (DHARMa method):
 # simu.resid <- DHARMa::simulateResiduals(fittedModel = Cand.mod[[18]], n = 1000, plot = FALSE)
-# plot(simu.resid) # Ok!
+# plot(simu.resid) # Ok-ish!
 # DHARMa::plotResiduals(simu.resid, form = redges$trench_depth) # Ok!
-# DHARMa::plotResiduals(simu.resid, form = redges$distance) # Ok!
+# DHARMa::plotResiduals(simu.resid, form = redges$repairs) # Ok!
 # # Testing for overdispersion:
 # DHARMa::testDispersion(simu.resid) # Ok!
 # # Testing for spatial autocorrelation:
@@ -758,9 +769,8 @@ Cand.mod[[18]] <- glmmTMB::glmmTMB(formula = lreg_edges~log2(distance+1) * log2(
 # # Using the 'performance' package:
 # performance::check_distribution(Cand.mod[[18]])
 # performance::check_autocorrelation(Cand.mod[[18]])
-# performance::check_collinearity(Cand.mod[[18]]) # Produces moderate correlation even though predictors are
-# # centered (and/or scaled). This is unusual but not very problematic since standard errors remain acceptable
-# performance::check_singularity(Cand.mod[[18]])
+# performance::check_collinearity(Cand.mod[[18]])
+# performance::check_singularity(Cand.mod[[18]]) # Singularity! Dealt with decreased tolerance for convergence
 #
 # ### Assessing goodness-of-fit:
 # # Test of Pearson's Chi2 residuals:
@@ -772,7 +782,7 @@ Cand.mod[[18]] <- glmmTMB::glmmTMB(formula = lreg_edges~log2(distance+1) * log2(
 # # Computing a pseudo-R2:
 1 - (as.numeric(-2 * stats::logLik(Cand.mod[[18]]))/as.numeric(-2 * stats::logLik(
   update(Cand.mod[[18]], ~1)))) # McFadden's pseudo-R2
-R2 <- performance::r2_nakagawa(Cand.mod[[18]]) # Nakagawa's (pseudo-R2 for GLMMs)
+R2 <- performance::r2_nakagawa(Cand.mod[[18]], tolerance = 1e-08) # Nakagawa's (pseudo-R2 for GLMMs)
 R.ajust <- rbind(R.ajust, data.frame(Model=18, R2=R2[[1]]))
 
 
@@ -780,16 +790,16 @@ R.ajust <- rbind(R.ajust, data.frame(Model=18, R2=R2[[1]]))
 ##### Model 19 #####
 # -----------------
 
-Cand.mod[[19]] <- glmmTMB::glmmTMB(formula = lreg_edges~log2(trench_depth+1) + add_control + (1|manager_id), data = redges,
+Cand.mod[[19]] <- glmmTMB::glmmTMB(formula = lreg_edges~log2(trench_depth+1) + slope + (1|manager_id), data = redges,
                                    family = stats::binomial(link = "logit"), REML = FALSE)
 
 
 # ### Model diagnostics:
 # # Simulation-based scaled residuals (DHARMa method):
 # simu.resid <- DHARMa::simulateResiduals(fittedModel = Cand.mod[[19]], n = 1000, plot = FALSE)
-# plot(simu.resid) # Ok!
+# plot(simu.resid) # Ok-ish!
 # DHARMa::plotResiduals(simu.resid, form = redges$trench_depth) # Ok!
-# DHARMa::plotResiduals(simu.resid, form = redges$add_control) # Ok!
+# DHARMa::plotResiduals(simu.resid, form = redges$slope) # Ok-ish!
 # # Testing for overdispersion:
 # DHARMa::testDispersion(simu.resid) # Ok!
 # # Testing for spatial autocorrelation:
@@ -819,7 +829,7 @@ R.ajust <- rbind(R.ajust, data.frame(Model=19, R2=R2[[1]]))
 ##### Model 20 #####
 # -----------------
 
-Cand.mod[[20]] <- glmmTMB::glmmTMB(formula = lreg_edges~log2(trench_depth+1) + obstacles + (1|manager_id), data = redges,
+Cand.mod[[20]] <- glmmTMB::glmmTMB(formula = lreg_edges~add_control + obstacles + (1|manager_id), data = redges,
                                    family = stats::binomial(link = "logit"), REML = FALSE)
 
 
@@ -827,7 +837,7 @@ Cand.mod[[20]] <- glmmTMB::glmmTMB(formula = lreg_edges~log2(trench_depth+1) + o
 # # Simulation-based scaled residuals (DHARMa method):
 # simu.resid <- DHARMa::simulateResiduals(fittedModel = Cand.mod[[20]], n = 1000, plot = FALSE)
 # plot(simu.resid) # Ok-ish!
-# DHARMa::plotResiduals(simu.resid, form = redges$trench_depth) # Ok!
+# DHARMa::plotResiduals(simu.resid, form = redges$add_control) # Ok-ish!
 # DHARMa::plotResiduals(simu.resid, form = redges$obstacles) # Ok!
 # # Testing for overdispersion:
 # DHARMa::testDispersion(simu.resid) # Ok!
@@ -858,7 +868,7 @@ R.ajust <- rbind(R.ajust, data.frame(Model=20, R2=R2[[1]]))
 ##### Model 21 #####
 # -----------------
 
-Cand.mod[[21]] <- glmmTMB::glmmTMB(formula = lreg_edges~log2(trench_depth+1) + log2(stand_surface) + (1|manager_id), data = redges,
+Cand.mod[[21]] <- glmmTMB::glmmTMB(formula = lreg_edges~add_control + pb_fixation + (1|manager_id), data = redges,
                                    family = stats::binomial(link = "logit"), REML = FALSE)
 
 
@@ -866,8 +876,8 @@ Cand.mod[[21]] <- glmmTMB::glmmTMB(formula = lreg_edges~log2(trench_depth+1) + l
 # # Simulation-based scaled residuals (DHARMa method):
 # simu.resid <- DHARMa::simulateResiduals(fittedModel = Cand.mod[[21]], n = 1000, plot = FALSE)
 # plot(simu.resid) # Ok-ish!
-# DHARMa::plotResiduals(simu.resid, form = redges$trench_depth) # Ok!
-# DHARMa::plotResiduals(simu.resid, form = redges$stand_surface) # Ok!
+# DHARMa::plotResiduals(simu.resid, form = redges$add_control) # Ok!
+# DHARMa::plotResiduals(simu.resid, form = redges$pb_fixation) # Ok-ish!
 # # Testing for overdispersion:
 # DHARMa::testDispersion(simu.resid) # Ok!
 # # Testing for spatial autocorrelation:
@@ -877,7 +887,7 @@ Cand.mod[[21]] <- glmmTMB::glmmTMB(formula = lreg_edges~log2(trench_depth+1) + l
 # performance::check_distribution(Cand.mod[[21]])
 # performance::check_autocorrelation(Cand.mod[[21]])
 # performance::check_collinearity(Cand.mod[[21]])
-# performance::check_singularity(Cand.mod[[21]]) # Singularity! Dealt with decreased tolerance for convergence
+# performance::check_singularity(Cand.mod[[21]]) # Singularity! Dealt by decreased tolerance for convergence
 #
 # ### Assessing goodness-of-fit:
 # # Test of Pearson's Chi2 residuals:
@@ -897,16 +907,16 @@ R.ajust <- rbind(R.ajust, data.frame(Model=21, R2=R2[[1]]))
 ##### Model 22 #####
 # -----------------
 
-Cand.mod[[22]] <- glmmTMB::glmmTMB(formula = lreg_edges~log2(stand_surface) + add_control + (1|manager_id), data = redges,
+Cand.mod[[22]] <- glmmTMB::glmmTMB(formula = lreg_edges~add_control + slope + (1|manager_id), data = redges,
                                    family = stats::binomial(link = "logit"), REML = FALSE)
 
 
 # ### Model diagnostics:
 # # Simulation-based scaled residuals (DHARMa method):
 # simu.resid <- DHARMa::simulateResiduals(fittedModel = Cand.mod[[22]], n = 1000, plot = FALSE)
-# plot(simu.resid) # Ok-ish!
-# DHARMa::plotResiduals(simu.resid, form = redges$stand_surface) # Ok!
-# DHARMa::plotResiduals(simu.resid, form = redges$add_control) # Ok-ish!
+# plot(simu.resid) # Ok!
+# DHARMa::plotResiduals(simu.resid, form = redges$add_control) # Ok!
+# DHARMa::plotResiduals(simu.resid, form = redges$slope) # Ok-ish!
 # # Testing for overdispersion:
 # DHARMa::testDispersion(simu.resid) # Ok!
 # # Testing for spatial autocorrelation:
@@ -936,7 +946,7 @@ R.ajust <- rbind(R.ajust, data.frame(Model=22, R2=R2[[1]]))
 ##### Model 23 #####
 # -----------------
 
-Cand.mod[[23]] <- glmmTMB::glmmTMB(formula = lreg_edges~log2(stand_surface) + obstacles + (1|manager_id), data = redges,
+Cand.mod[[23]] <- glmmTMB::glmmTMB(formula = lreg_edges~add_control + tarping_duration + (1|manager_id), data = redges,
                                    family = stats::binomial(link = "logit"), REML = FALSE)
 
 
@@ -944,8 +954,8 @@ Cand.mod[[23]] <- glmmTMB::glmmTMB(formula = lreg_edges~log2(stand_surface) + ob
 # # Simulation-based scaled residuals (DHARMa method):
 # simu.resid <- DHARMa::simulateResiduals(fittedModel = Cand.mod[[23]], n = 1000, plot = FALSE)
 # plot(simu.resid) # Ok-ish!
-# DHARMa::plotResiduals(simu.resid, form = redges$stand_surface) # Ok-ish!
-# DHARMa::plotResiduals(simu.resid, form = redges$obstacles) # Ok!
+# DHARMa::plotResiduals(simu.resid, form = redges$add_control) # Ok!
+# DHARMa::plotResiduals(simu.resid, form = redges$tarping_duration) # Ok!
 # # Testing for overdispersion:
 # DHARMa::testDispersion(simu.resid) # Ok!
 # # Testing for spatial autocorrelation:
@@ -955,7 +965,7 @@ Cand.mod[[23]] <- glmmTMB::glmmTMB(formula = lreg_edges~log2(stand_surface) + ob
 # performance::check_distribution(Cand.mod[[23]])
 # performance::check_autocorrelation(Cand.mod[[23]])
 # performance::check_collinearity(Cand.mod[[23]])
-# performance::check_singularity(Cand.mod[[23]])
+# performance::check_singularity(Cand.mod[[23]]) # Singularity! Dealt with decreased tolerance for convergence
 #
 # ### Assessing goodness-of-fit:
 # # Test of Pearson's Chi2 residuals:
@@ -967,27 +977,24 @@ Cand.mod[[23]] <- glmmTMB::glmmTMB(formula = lreg_edges~log2(stand_surface) + ob
 # # Computing a pseudo-R2:
 1 - (as.numeric(-2 * stats::logLik(Cand.mod[[23]]))/as.numeric(-2 * stats::logLik(
   update(Cand.mod[[23]], ~1)))) # McFadden's pseudo-R2
-R2 <- performance::r2_nakagawa(Cand.mod[[23]]) # Nakagawa's (pseudo-R2 for GLMMs)
+R2 <- performance::r2_nakagawa(Cand.mod[[23]], tolerance = 1e-08) # Nakagawa's (pseudo-R2 for GLMMs)
 R.ajust <- rbind(R.ajust, data.frame(Model=23, R2=R2[[1]]))
 
 
 
 ##### Model 24 #####
-# -----------------
+# ------------------
 
-Cand.mod[[24]] <- glmmTMB::glmmTMB(formula = lreg_edges~log2(stand_surface) + pb_fixation + (1|manager_id), data = redges,
+Cand.mod[[24]] <- glmmTMB::glmmTMB(formula = lreg_edges~obstacles + pb_fixation + (1|manager_id), data = redges,
                                    family = stats::binomial(link = "logit"), REML = FALSE)
 
 
 # ### Model diagnostics:
 # # Simulation-based scaled residuals (DHARMa method):
 # simu.resid <- DHARMa::simulateResiduals(fittedModel = Cand.mod[[24]], n = 1000, plot = FALSE)
-# plot(simu.resid) # Not ok! I fitted various alternative models with various packages and not red flags
-# # appeared. Therefore, I'm not sure where the problem comes from... As all test are okay, I will leave
-# # the model as is (it won't be among the influancial models anyway so it should not bias inferences too
-# # badly).
-# DHARMa::plotResiduals(simu.resid, form = redges$stand_surface) # Ok!
-# DHARMa::plotResiduals(simu.resid, form = redges$pb_fixation) # Ok!
+# plot(simu.resid) # Ok-ish!
+# DHARMa::plotResiduals(simu.resid, form = redges$obstacles) # Ok!
+# DHARMa::plotResiduals(simu.resid, form = redges$pb_fixation) # Ok-ish!
 # # Testing for overdispersion:
 # DHARMa::testDispersion(simu.resid) # Ok!
 # # Testing for spatial autocorrelation:
@@ -1017,7 +1024,7 @@ R.ajust <- rbind(R.ajust, data.frame(Model=24, R2=R2[[1]]))
 ##### Model 25 #####
 # -----------------
 
-Cand.mod[[25]] <- glmmTMB::glmmTMB(formula = lreg_edges~log2(stand_surface) + tarping_duration + (1|manager_id), data = redges,
+Cand.mod[[25]] <- glmmTMB::glmmTMB(formula = lreg_edges~obstacles + geomem + (1|manager_id), data = redges,
                                    family = stats::binomial(link = "logit"), REML = FALSE)
 
 
@@ -1025,8 +1032,8 @@ Cand.mod[[25]] <- glmmTMB::glmmTMB(formula = lreg_edges~log2(stand_surface) + ta
 # # Simulation-based scaled residuals (DHARMa method):
 # simu.resid <- DHARMa::simulateResiduals(fittedModel = Cand.mod[[25]], n = 1000, plot = FALSE)
 # plot(simu.resid) # Ok-ish!
-# DHARMa::plotResiduals(simu.resid, form = redges$stand_surface) # Ok!
-# DHARMa::plotResiduals(simu.resid, form = redges$tarping_duration) # Ok!
+# DHARMa::plotResiduals(simu.resid, form = redges$obstacles) # Ok!
+# DHARMa::plotResiduals(simu.resid, form = redges$geomem) # Ok-ish!
 # # Testing for overdispersion:
 # DHARMa::testDispersion(simu.resid) # Ok!
 # # Testing for spatial autocorrelation:
@@ -1036,7 +1043,7 @@ Cand.mod[[25]] <- glmmTMB::glmmTMB(formula = lreg_edges~log2(stand_surface) + ta
 # performance::check_distribution(Cand.mod[[25]])
 # performance::check_autocorrelation(Cand.mod[[25]])
 # performance::check_collinearity(Cand.mod[[25]])
-# performance::check_singularity(Cand.mod[[25]])
+# performance::check_singularity(Cand.mod[[25]]) # Singularity! Dealt with decreased tolerance for convergence
 #
 # ### Assessing goodness-of-fit:
 # # Test of Pearson's Chi2 residuals:
@@ -1048,7 +1055,7 @@ Cand.mod[[25]] <- glmmTMB::glmmTMB(formula = lreg_edges~log2(stand_surface) + ta
 # # Computing a pseudo-R2:
 1 - (as.numeric(-2 * stats::logLik(Cand.mod[[25]]))/as.numeric(-2 * stats::logLik(
   update(Cand.mod[[25]], ~1)))) # McFadden's pseudo-R2
-R2 <- performance::r2_nakagawa(Cand.mod[[25]]) # Nakagawa's (pseudo-R2 for GLMMs)
+R2 <- performance::r2_nakagawa(Cand.mod[[25]], tolerance = 1e-08) # Nakagawa's (pseudo-R2 for GLMMs)
 R.ajust <- rbind(R.ajust, data.frame(Model=25, R2=R2[[1]]))
 
 
@@ -1056,16 +1063,16 @@ R.ajust <- rbind(R.ajust, data.frame(Model=25, R2=R2[[1]]))
 ##### Model 26 #####
 # -----------------
 
-Cand.mod[[26]] <- glmmTMB::glmmTMB(formula = lreg_edges~log2(trench_depth+1) + repairs + (1|manager_id), data = redges,
+Cand.mod[[26]] <- glmmTMB::glmmTMB(formula = lreg_edges~obstacles + repairs + (1|manager_id), data = redges,
                                    family = stats::binomial(link = "logit"), REML = FALSE)
 
 
 # ### Model diagnostics:
 # # Simulation-based scaled residuals (DHARMa method):
 # simu.resid <- DHARMa::simulateResiduals(fittedModel = Cand.mod[[26]], n = 1000, plot = FALSE)
-# plot(simu.resid) # Ok-ish!
-# DHARMa::plotResiduals(simu.resid, form = redges$trench_depth) # Ok!
-# DHARMa::plotResiduals(simu.resid, form = redges$repairs) # Ok!
+# plot(simu.resid) # Ok!
+# DHARMa::plotResiduals(simu.resid, form = redges$obstacles) # Ok!
+# DHARMa::plotResiduals(simu.resid, form = redges$repairs) # Ok-ish!
 # # Testing for overdispersion:
 # DHARMa::testDispersion(simu.resid) # Ok!
 # # Testing for spatial autocorrelation:
@@ -1075,7 +1082,7 @@ Cand.mod[[26]] <- glmmTMB::glmmTMB(formula = lreg_edges~log2(trench_depth+1) + r
 # performance::check_distribution(Cand.mod[[26]])
 # performance::check_autocorrelation(Cand.mod[[26]])
 # performance::check_collinearity(Cand.mod[[26]])
-# performance::check_singularity(Cand.mod[[26]]) # Singularity! Dealt with decreased tolerance for convergence
+# performance::check_singularity(Cand.mod[[26]])
 #
 # ### Assessing goodness-of-fit:
 # # Test of Pearson's Chi2 residuals:
@@ -1087,7 +1094,7 @@ Cand.mod[[26]] <- glmmTMB::glmmTMB(formula = lreg_edges~log2(trench_depth+1) + r
 # # Computing a pseudo-R2:
 1 - (as.numeric(-2 * stats::logLik(Cand.mod[[26]]))/as.numeric(-2 * stats::logLik(
   update(Cand.mod[[26]], ~1)))) # McFadden's pseudo-R2
-R2 <- performance::r2_nakagawa(Cand.mod[[26]], tolerance = 1e-08) # Nakagawa's (pseudo-R2 for GLMMs)
+R2 <- performance::r2_nakagawa(Cand.mod[[26]]) # Nakagawa's (pseudo-R2 for GLMMs)
 R.ajust <- rbind(R.ajust, data.frame(Model=26, R2=R2[[1]]))
 
 
@@ -1095,7 +1102,7 @@ R.ajust <- rbind(R.ajust, data.frame(Model=26, R2=R2[[1]]))
 ##### Model 27 #####
 # -----------------
 
-Cand.mod[[27]] <- glmmTMB::glmmTMB(formula = lreg_edges~log2(trench_depth+1) + slope + (1|manager_id), data = redges,
+Cand.mod[[27]] <- glmmTMB::glmmTMB(formula = lreg_edges~slope + geomem + (1|manager_id), data = redges,
                                    family = stats::binomial(link = "logit"), REML = FALSE)
 
 
@@ -1103,8 +1110,8 @@ Cand.mod[[27]] <- glmmTMB::glmmTMB(formula = lreg_edges~log2(trench_depth+1) + s
 # # Simulation-based scaled residuals (DHARMa method):
 # simu.resid <- DHARMa::simulateResiduals(fittedModel = Cand.mod[[27]], n = 1000, plot = FALSE)
 # plot(simu.resid) # Ok-ish!
-# DHARMa::plotResiduals(simu.resid, form = redges$trench_depth) # Ok!
 # DHARMa::plotResiduals(simu.resid, form = redges$slope) # Ok-ish!
+# DHARMa::plotResiduals(simu.resid, form = redges$geomem) # Ok!
 # # Testing for overdispersion:
 # DHARMa::testDispersion(simu.resid) # Ok!
 # # Testing for spatial autocorrelation:
@@ -1134,7 +1141,7 @@ R.ajust <- rbind(R.ajust, data.frame(Model=27, R2=R2[[1]]))
 ##### Model 28 #####
 # -----------------
 
-Cand.mod[[28]] <- glmmTMB::glmmTMB(formula = lreg_edges~add_control + obstacles + (1|manager_id), data = redges,
+Cand.mod[[28]] <- glmmTMB::glmmTMB(formula = lreg_edges~slope + pb_fixation + (1|manager_id), data = redges,
                                    family = stats::binomial(link = "logit"), REML = FALSE)
 
 
@@ -1142,8 +1149,8 @@ Cand.mod[[28]] <- glmmTMB::glmmTMB(formula = lreg_edges~add_control + obstacles 
 # # Simulation-based scaled residuals (DHARMa method):
 # simu.resid <- DHARMa::simulateResiduals(fittedModel = Cand.mod[[28]], n = 1000, plot = FALSE)
 # plot(simu.resid) # Ok-ish!
-# DHARMa::plotResiduals(simu.resid, form = redges$add_control) # Ok-ish!
-# DHARMa::plotResiduals(simu.resid, form = redges$obstacles) # Ok!
+# DHARMa::plotResiduals(simu.resid, form = redges$slope) # Ok-ish!
+# DHARMa::plotResiduals(simu.resid, form = redges$pb_fixation) # Ok!
 # # Testing for overdispersion:
 # DHARMa::testDispersion(simu.resid) # Ok!
 # # Testing for spatial autocorrelation:
@@ -1173,7 +1180,7 @@ R.ajust <- rbind(R.ajust, data.frame(Model=28, R2=R2[[1]]))
 ##### Model 29 #####
 # -----------------
 
-Cand.mod[[29]] <- glmmTMB::glmmTMB(formula = lreg_edges~add_control + pb_fixation + (1|manager_id), data = redges,
+Cand.mod[[29]] <- glmmTMB::glmmTMB(formula = lreg_edges~slope + tarping_duration + (1|manager_id), data = redges,
                                    family = stats::binomial(link = "logit"), REML = FALSE)
 
 
@@ -1181,8 +1188,8 @@ Cand.mod[[29]] <- glmmTMB::glmmTMB(formula = lreg_edges~add_control + pb_fixatio
 # # Simulation-based scaled residuals (DHARMa method):
 # simu.resid <- DHARMa::simulateResiduals(fittedModel = Cand.mod[[29]], n = 1000, plot = FALSE)
 # plot(simu.resid) # Ok-ish!
-# DHARMa::plotResiduals(simu.resid, form = redges$add_control) # Ok!
-# DHARMa::plotResiduals(simu.resid, form = redges$pb_fixation) # Ok-ish!
+# DHARMa::plotResiduals(simu.resid, form = redges$slope) # Ok-ish!
+# DHARMa::plotResiduals(simu.resid, form = redges$tarping_duration) # Ok!
 # # Testing for overdispersion:
 # DHARMa::testDispersion(simu.resid) # Ok!
 # # Testing for spatial autocorrelation:
@@ -1192,7 +1199,7 @@ Cand.mod[[29]] <- glmmTMB::glmmTMB(formula = lreg_edges~add_control + pb_fixatio
 # performance::check_distribution(Cand.mod[[29]])
 # performance::check_autocorrelation(Cand.mod[[29]])
 # performance::check_collinearity(Cand.mod[[29]])
-# performance::check_singularity(Cand.mod[[29]]) # Singularity! Dealt by decreased tolerance for convergence
+# performance::check_singularity(Cand.mod[[29]])
 #
 # ### Assessing goodness-of-fit:
 # # Test of Pearson's Chi2 residuals:
@@ -1204,7 +1211,7 @@ Cand.mod[[29]] <- glmmTMB::glmmTMB(formula = lreg_edges~add_control + pb_fixatio
 # # Computing a pseudo-R2:
 1 - (as.numeric(-2 * stats::logLik(Cand.mod[[29]]))/as.numeric(-2 * stats::logLik(
   update(Cand.mod[[29]], ~1)))) # McFadden's pseudo-R2
-R2 <- performance::r2_nakagawa(Cand.mod[[29]], tolerance = 1e-08) # Nakagawa's (pseudo-R2 for GLMMs)
+R2 <- performance::r2_nakagawa(Cand.mod[[29]]) # Nakagawa's (pseudo-R2 for GLMMs)
 R.ajust <- rbind(R.ajust, data.frame(Model=29, R2=R2[[1]]))
 
 
@@ -1212,16 +1219,18 @@ R.ajust <- rbind(R.ajust, data.frame(Model=29, R2=R2[[1]]))
 ##### Model 30 #####
 # -----------------
 
-Cand.mod[[30]] <- glmmTMB::glmmTMB(formula = lreg_edges~add_control + slope + (1|manager_id), data = redges,
-                                   family = stats::binomial(link = "logit"), REML = FALSE)
+Cand.mod[[30]] <- glmmTMB::glmmTMB(formula = lreg_edges~log2(distance+1) + log2(trench_depth+1) + add_control
+                                   + (1|manager_id), data = redges, family = stats::binomial(link = "logit"),
+                                   REML = FALSE)
 
 
 # ### Model diagnostics:
 # # Simulation-based scaled residuals (DHARMa method):
 # simu.resid <- DHARMa::simulateResiduals(fittedModel = Cand.mod[[30]], n = 1000, plot = FALSE)
-# plot(simu.resid) # Ok!
+# plot(simu.resid) # Ok-ish!
+# DHARMa::plotResiduals(simu.resid, form = redges$distance) # Ok!
+# DHARMa::plotResiduals(simu.resid, form = redges$trench_depth) # Ok!
 # DHARMa::plotResiduals(simu.resid, form = redges$add_control) # Ok!
-# DHARMa::plotResiduals(simu.resid, form = redges$slope) # Ok-ish!
 # # Testing for overdispersion:
 # DHARMa::testDispersion(simu.resid) # Ok!
 # # Testing for spatial autocorrelation:
@@ -1243,7 +1252,7 @@ Cand.mod[[30]] <- glmmTMB::glmmTMB(formula = lreg_edges~add_control + slope + (1
 # # Computing a pseudo-R2:
 1 - (as.numeric(-2 * stats::logLik(Cand.mod[[30]]))/as.numeric(-2 * stats::logLik(
   update(Cand.mod[[30]], ~1)))) # McFadden's pseudo-R2
-R2 <- performance::r2_nakagawa(Cand.mod[[30]], tolerance = 1e-08) # Nakagawa's (pseudo-R2 for GLMMs)
+R2 <- performance::r2_nakagawa(Cand.mod[[30]], tolerance = 1e-07) # Nakagawa's (pseudo-R2 for GLMMs)
 R.ajust <- rbind(R.ajust, data.frame(Model=30, R2=R2[[1]]))
 
 
@@ -1251,16 +1260,18 @@ R.ajust <- rbind(R.ajust, data.frame(Model=30, R2=R2[[1]]))
 ##### Model 31 #####
 # -----------------
 
-Cand.mod[[31]] <- glmmTMB::glmmTMB(formula = lreg_edges~add_control + tarping_duration + (1|manager_id), data = redges,
-                                   family = stats::binomial(link = "logit"), REML = FALSE)
+Cand.mod[[31]] <- glmmTMB::glmmTMB(formula = lreg_edges~log2(distance+1) + log2(trench_depth+1) + obstacles
+                                   + (1|manager_id), data = redges, family = stats::binomial(link = "logit"),
+                                   REML = FALSE)
 
 
 # ### Model diagnostics:
 # # Simulation-based scaled residuals (DHARMa method):
 # simu.resid <- DHARMa::simulateResiduals(fittedModel = Cand.mod[[31]], n = 1000, plot = FALSE)
 # plot(simu.resid) # Ok-ish!
-# DHARMa::plotResiduals(simu.resid, form = redges$add_control) # Ok!
-# DHARMa::plotResiduals(simu.resid, form = redges$tarping_duration) # Ok!
+# DHARMa::plotResiduals(simu.resid, form = redges$distance) # Ok!
+# DHARMa::plotResiduals(simu.resid, form = redges$trench_depth) # Ok!
+# DHARMa::plotResiduals(simu.resid, form = redges$obstacles) # Ok!
 # # Testing for overdispersion:
 # DHARMa::testDispersion(simu.resid) # Ok!
 # # Testing for spatial autocorrelation:
@@ -1270,7 +1281,7 @@ Cand.mod[[31]] <- glmmTMB::glmmTMB(formula = lreg_edges~add_control + tarping_du
 # performance::check_distribution(Cand.mod[[31]])
 # performance::check_autocorrelation(Cand.mod[[31]])
 # performance::check_collinearity(Cand.mod[[31]])
-# performance::check_singularity(Cand.mod[[31]]) # Singularity! Dealt with decreased tolerance for convergence
+# performance::check_singularity(Cand.mod[[31]])
 #
 # ### Assessing goodness-of-fit:
 # # Test of Pearson's Chi2 residuals:
@@ -1282,24 +1293,26 @@ Cand.mod[[31]] <- glmmTMB::glmmTMB(formula = lreg_edges~add_control + tarping_du
 # # Computing a pseudo-R2:
 1 - (as.numeric(-2 * stats::logLik(Cand.mod[[31]]))/as.numeric(-2 * stats::logLik(
   update(Cand.mod[[31]], ~1)))) # McFadden's pseudo-R2
-R2 <- performance::r2_nakagawa(Cand.mod[[31]], tolerance = 1e-08) # Nakagawa's (pseudo-R2 for GLMMs)
+R2 <- performance::r2_nakagawa(Cand.mod[[31]]) # Nakagawa's (pseudo-R2 for GLMMs)
 R.ajust <- rbind(R.ajust, data.frame(Model=31, R2=R2[[1]]))
 
 
 
 ##### Model 32 #####
-# ------------------
+# -----------------
 
-Cand.mod[[32]] <- glmmTMB::glmmTMB(formula = lreg_edges~obstacles + pb_fixation + (1|manager_id), data = redges,
-                                   family = stats::binomial(link = "logit"), REML = FALSE)
+Cand.mod[[32]] <- glmmTMB::glmmTMB(formula = lreg_edges~log2(distance+1) + log2(trench_depth+1) + geomem
+                                   + (1|manager_id), data = redges, family = stats::binomial(link = "logit"),
+                                   REML = FALSE)
 
 
 # ### Model diagnostics:
 # # Simulation-based scaled residuals (DHARMa method):
 # simu.resid <- DHARMa::simulateResiduals(fittedModel = Cand.mod[[32]], n = 1000, plot = FALSE)
 # plot(simu.resid) # Ok-ish!
-# DHARMa::plotResiduals(simu.resid, form = redges$obstacles) # Ok!
-# DHARMa::plotResiduals(simu.resid, form = redges$pb_fixation) # Ok-ish!
+# DHARMa::plotResiduals(simu.resid, form = redges$distance) # Ok!
+# DHARMa::plotResiduals(simu.resid, form = redges$trench_depth) # Ok!
+# DHARMa::plotResiduals(simu.resid, form = redges$geomem) # Ok-ish!
 # # Testing for overdispersion:
 # DHARMa::testDispersion(simu.resid) # Ok!
 # # Testing for spatial autocorrelation:
@@ -1309,7 +1322,7 @@ Cand.mod[[32]] <- glmmTMB::glmmTMB(formula = lreg_edges~obstacles + pb_fixation 
 # performance::check_distribution(Cand.mod[[32]])
 # performance::check_autocorrelation(Cand.mod[[32]])
 # performance::check_collinearity(Cand.mod[[32]])
-# performance::check_singularity(Cand.mod[[32]])
+# performance::check_singularity(Cand.mod[[32]]) # Singularity! Dealt with decreased tolerance for convergence
 #
 # ### Assessing goodness-of-fit:
 # # Test of Pearson's Chi2 residuals:
@@ -1321,7 +1334,7 @@ Cand.mod[[32]] <- glmmTMB::glmmTMB(formula = lreg_edges~obstacles + pb_fixation 
 # # Computing a pseudo-R2:
 1 - (as.numeric(-2 * stats::logLik(Cand.mod[[32]]))/as.numeric(-2 * stats::logLik(
   update(Cand.mod[[32]], ~1)))) # McFadden's pseudo-R2
-R2 <- performance::r2_nakagawa(Cand.mod[[32]]) # Nakagawa's (pseudo-R2 for GLMMs)
+R2 <- performance::r2_nakagawa(Cand.mod[[32]], tolerance = 1e-08) # Nakagawa's (pseudo-R2 for GLMMs)
 R.ajust <- rbind(R.ajust, data.frame(Model=32, R2=R2[[1]]))
 
 
@@ -1329,16 +1342,18 @@ R.ajust <- rbind(R.ajust, data.frame(Model=32, R2=R2[[1]]))
 ##### Model 33 #####
 # -----------------
 
-Cand.mod[[33]] <- glmmTMB::glmmTMB(formula = lreg_edges~obstacles + geomem + (1|manager_id), data = redges,
-                                   family = stats::binomial(link = "logit"), REML = FALSE)
+Cand.mod[[33]] <- glmmTMB::glmmTMB(formula = lreg_edges~log2(distance+1) + log2(trench_depth+1) + log2(stand_surface)
+                                   + (1|manager_id), data = redges, family = stats::binomial(link = "logit"),
+                                   REML = FALSE)
 
 
 # ### Model diagnostics:
 # # Simulation-based scaled residuals (DHARMa method):
 # simu.resid <- DHARMa::simulateResiduals(fittedModel = Cand.mod[[33]], n = 1000, plot = FALSE)
 # plot(simu.resid) # Ok-ish!
-# DHARMa::plotResiduals(simu.resid, form = redges$obstacles) # Ok!
-# DHARMa::plotResiduals(simu.resid, form = redges$geomem) # Ok-ish!
+# DHARMa::plotResiduals(simu.resid, form = redges$distance) # Ok!
+# DHARMa::plotResiduals(simu.resid, form = redges$trench_depth) # Ok!
+# DHARMa::plotResiduals(simu.resid, form = redges$stand_surface) # Ok!
 # # Testing for overdispersion:
 # DHARMa::testDispersion(simu.resid) # Ok!
 # # Testing for spatial autocorrelation:
@@ -1348,7 +1363,7 @@ Cand.mod[[33]] <- glmmTMB::glmmTMB(formula = lreg_edges~obstacles + geomem + (1|
 # performance::check_distribution(Cand.mod[[33]])
 # performance::check_autocorrelation(Cand.mod[[33]])
 # performance::check_collinearity(Cand.mod[[33]])
-# performance::check_singularity(Cand.mod[[33]]) # Singularity! Dealt with decreased tolerance for convergence
+# performance::check_singularity(Cand.mod[[33]])
 #
 # ### Assessing goodness-of-fit:
 # # Test of Pearson's Chi2 residuals:
@@ -1360,7 +1375,7 @@ Cand.mod[[33]] <- glmmTMB::glmmTMB(formula = lreg_edges~obstacles + geomem + (1|
 # # Computing a pseudo-R2:
 1 - (as.numeric(-2 * stats::logLik(Cand.mod[[33]]))/as.numeric(-2 * stats::logLik(
   update(Cand.mod[[33]], ~1)))) # McFadden's pseudo-R2
-R2 <- performance::r2_nakagawa(Cand.mod[[33]], tolerance = 1e-08) # Nakagawa's (pseudo-R2 for GLMMs)
+R2 <- performance::r2_nakagawa(Cand.mod[[33]]) # Nakagawa's (pseudo-R2 for GLMMs)
 R.ajust <- rbind(R.ajust, data.frame(Model=33, R2=R2[[1]]))
 
 
@@ -1368,16 +1383,17 @@ R.ajust <- rbind(R.ajust, data.frame(Model=33, R2=R2[[1]]))
 ##### Model 34 #####
 # -----------------
 
-Cand.mod[[34]] <- glmmTMB::glmmTMB(formula = lreg_edges~obstacles + repairs + (1|manager_id), data = redges,
-                                   family = stats::binomial(link = "logit"), REML = FALSE)
-
+Cand.mod[[34]] <- glmmTMB::glmmTMB(formula = lreg_edges~log2(distance+1) + log2(trench_depth+1) + slope
+                                   + (1|manager_id), data = redges, family = stats::binomial(link = "logit"),
+                                   REML = FALSE)
 
 # ### Model diagnostics:
 # # Simulation-based scaled residuals (DHARMa method):
 # simu.resid <- DHARMa::simulateResiduals(fittedModel = Cand.mod[[34]], n = 1000, plot = FALSE)
-# plot(simu.resid) # Ok!
-# DHARMa::plotResiduals(simu.resid, form = redges$obstacles) # Ok!
-# DHARMa::plotResiduals(simu.resid, form = redges$repairs) # Ok-ish!
+# plot(simu.resid) # Ok-ish!
+# DHARMa::plotResiduals(simu.resid, form = redges$distance) # Ok!
+# DHARMa::plotResiduals(simu.resid, form = redges$trench_depth) # Ok!
+# DHARMa::plotResiduals(simu.resid, form = redges$slope) # Ok!
 # # Testing for overdispersion:
 # DHARMa::testDispersion(simu.resid) # Ok!
 # # Testing for spatial autocorrelation:
@@ -1407,16 +1423,18 @@ R.ajust <- rbind(R.ajust, data.frame(Model=34, R2=R2[[1]]))
 ##### Model 35 #####
 # -----------------
 
-Cand.mod[[35]] <- glmmTMB::glmmTMB(formula = lreg_edges~slope + geomem + (1|manager_id), data = redges,
-                                   family = stats::binomial(link = "logit"), REML = FALSE)
+Cand.mod[[35]] <- glmmTMB::glmmTMB(formula = lreg_edges~log2(distance+1) + log2(stand_surface) + add_control
+                                   + (1|manager_id), data = redges, family = stats::binomial(link = "logit"),
+                                   REML = FALSE)
 
 
 # ### Model diagnostics:
 # # Simulation-based scaled residuals (DHARMa method):
 # simu.resid <- DHARMa::simulateResiduals(fittedModel = Cand.mod[[35]], n = 1000, plot = FALSE)
 # plot(simu.resid) # Ok-ish!
-# DHARMa::plotResiduals(simu.resid, form = redges$slope) # Ok-ish!
-# DHARMa::plotResiduals(simu.resid, form = redges$geomem) # Ok!
+# DHARMa::plotResiduals(simu.resid, form = redges$distance) # Ok!
+# DHARMa::plotResiduals(simu.resid, form = redges$stand_surface) # Ok!
+# DHARMa::plotResiduals(simu.resid, form = redges$add_control) # Ok-ish!
 # # Testing for overdispersion:
 # DHARMa::testDispersion(simu.resid) # Ok!
 # # Testing for spatial autocorrelation:
@@ -1431,7 +1449,7 @@ Cand.mod[[35]] <- glmmTMB::glmmTMB(formula = lreg_edges~slope + geomem + (1|mana
 # ### Assessing goodness-of-fit:
 # # Test of Pearson's Chi2 residuals:
 # dat.resid <- sum(stats::resid(Cand.mod[[35]], type = "pearson")^2)
-# 1 - stats::pchisq(dat.resid, stats::df.residual(Cand.mod[[35]])) # Ok!
+# 1 - stats::pchisq(dat.resid, stats::df.residual(Cand.mod[[35]])) # Nope!
 #
 # ### Exploring the model parameters and test hypotheses:
 # summary(Cand.mod[[35]])
@@ -1446,16 +1464,18 @@ R.ajust <- rbind(R.ajust, data.frame(Model=35, R2=R2[[1]]))
 ##### Model 36 #####
 # -----------------
 
-Cand.mod[[36]] <- glmmTMB::glmmTMB(formula = lreg_edges~slope + pb_fixation + (1|manager_id), data = redges,
-                                   family = stats::binomial(link = "logit"), REML = FALSE)
+Cand.mod[[36]] <- glmmTMB::glmmTMB(formula = lreg_edges~log2(distance+1) + log2(stand_surface) + obstacles
+                                   + (1|manager_id), data = redges, family = stats::binomial(link = "logit"),
+                                   REML = FALSE)
 
 
 # ### Model diagnostics:
 # # Simulation-based scaled residuals (DHARMa method):
 # simu.resid <- DHARMa::simulateResiduals(fittedModel = Cand.mod[[36]], n = 1000, plot = FALSE)
 # plot(simu.resid) # Ok-ish!
-# DHARMa::plotResiduals(simu.resid, form = redges$slope) # Ok-ish!
-# DHARMa::plotResiduals(simu.resid, form = redges$pb_fixation) # Ok!
+# DHARMa::plotResiduals(simu.resid, form = redges$distance) # Ok!
+# DHARMa::plotResiduals(simu.resid, form = redges$stand_surface) # Ok!
+# DHARMa::plotResiduals(simu.resid, form = redges$obstacles) # Ok!
 # # Testing for overdispersion:
 # DHARMa::testDispersion(simu.resid) # Ok!
 # # Testing for spatial autocorrelation:
@@ -1470,7 +1490,7 @@ Cand.mod[[36]] <- glmmTMB::glmmTMB(formula = lreg_edges~slope + pb_fixation + (1
 # ### Assessing goodness-of-fit:
 # # Test of Pearson's Chi2 residuals:
 # dat.resid <- sum(stats::resid(Cand.mod[[36]], type = "pearson")^2)
-# 1 - stats::pchisq(dat.resid, stats::df.residual(Cand.mod[[36]])) # Ok!
+# 1 - stats::pchisq(dat.resid, stats::df.residual(Cand.mod[[36]])) # Close!
 #
 # ### Exploring the model parameters and test hypotheses:
 # summary(Cand.mod[[36]])
@@ -1485,16 +1505,18 @@ R.ajust <- rbind(R.ajust, data.frame(Model=36, R2=R2[[1]]))
 ##### Model 37 #####
 # -----------------
 
-Cand.mod[[37]] <- glmmTMB::glmmTMB(formula = lreg_edges~slope + tarping_duration + (1|manager_id), data = redges,
-                                   family = stats::binomial(link = "logit"), REML = FALSE)
+Cand.mod[[37]] <- glmmTMB::glmmTMB(formula = lreg_edges~log2(distance+1) + log2(stand_surface) + pb_fixation
+                                   + (1|manager_id), data = redges, family = stats::binomial(link = "logit"),
+                                   REML = FALSE)
 
 
 # ### Model diagnostics:
 # # Simulation-based scaled residuals (DHARMa method):
 # simu.resid <- DHARMa::simulateResiduals(fittedModel = Cand.mod[[37]], n = 1000, plot = FALSE)
 # plot(simu.resid) # Ok-ish!
-# DHARMa::plotResiduals(simu.resid, form = redges$slope) # Ok-ish!
-# DHARMa::plotResiduals(simu.resid, form = redges$tarping_duration) # Ok!
+# DHARMa::plotResiduals(simu.resid, form = redges$distance) # Ok!
+# DHARMa::plotResiduals(simu.resid, form = redges$stand_surface) # Ok-ish!
+# DHARMa::plotResiduals(simu.resid, form = redges$pb_fixation) # Ok!
 # # Testing for overdispersion:
 # DHARMa::testDispersion(simu.resid) # Ok!
 # # Testing for spatial autocorrelation:
@@ -1509,7 +1531,7 @@ Cand.mod[[37]] <- glmmTMB::glmmTMB(formula = lreg_edges~slope + tarping_duration
 # ### Assessing goodness-of-fit:
 # # Test of Pearson's Chi2 residuals:
 # dat.resid <- sum(stats::resid(Cand.mod[[37]], type = "pearson")^2)
-# 1 - stats::pchisq(dat.resid, stats::df.residual(Cand.mod[[37]])) # Ok!
+# 1 - stats::pchisq(dat.resid, stats::df.residual(Cand.mod[[37]])) # Close!
 #
 # ### Exploring the model parameters and test hypotheses:
 # summary(Cand.mod[[37]])
@@ -1524,7 +1546,7 @@ R.ajust <- rbind(R.ajust, data.frame(Model=37, R2=R2[[1]]))
 ##### Model 38 #####
 # -----------------
 
-Cand.mod[[38]] <- glmmTMB::glmmTMB(formula = lreg_edges~log2(distance+1) + log2(trench_depth+1) + add_control
+Cand.mod[[38]] <- glmmTMB::glmmTMB(formula = lreg_edges~log2(distance+1) + geomem + tarping_duration
                                    + (1|manager_id), data = redges, family = stats::binomial(link = "logit"),
                                    REML = FALSE)
 
@@ -1534,8 +1556,8 @@ Cand.mod[[38]] <- glmmTMB::glmmTMB(formula = lreg_edges~log2(distance+1) + log2(
 # simu.resid <- DHARMa::simulateResiduals(fittedModel = Cand.mod[[38]], n = 1000, plot = FALSE)
 # plot(simu.resid) # Ok-ish!
 # DHARMa::plotResiduals(simu.resid, form = redges$distance) # Ok!
-# DHARMa::plotResiduals(simu.resid, form = redges$trench_depth) # Ok!
-# DHARMa::plotResiduals(simu.resid, form = redges$add_control) # Ok!
+# DHARMa::plotResiduals(simu.resid, form = redges$geomem) # Ok!
+# DHARMa::plotResiduals(simu.resid, form = redges$tarping_duration) # Ok!
 # # Testing for overdispersion:
 # DHARMa::testDispersion(simu.resid) # Ok!
 # # Testing for spatial autocorrelation:
@@ -1557,15 +1579,15 @@ Cand.mod[[38]] <- glmmTMB::glmmTMB(formula = lreg_edges~log2(distance+1) + log2(
 # # Computing a pseudo-R2:
 1 - (as.numeric(-2 * stats::logLik(Cand.mod[[38]]))/as.numeric(-2 * stats::logLik(
   update(Cand.mod[[38]], ~1)))) # McFadden's pseudo-R2
-R2 <- performance::r2_nakagawa(Cand.mod[[38]], tolerance = 1e-07) # Nakagawa's (pseudo-R2 for GLMMs)
+R2 <- performance::r2_nakagawa(Cand.mod[[38]], tolerance = 1e-08) # Nakagawa's (pseudo-R2 for GLMMs)
 R.ajust <- rbind(R.ajust, data.frame(Model=38, R2=R2[[1]]))
 
 
 
 ##### Model 39 #####
-# -----------------
+# ------------------
 
-Cand.mod[[39]] <- glmmTMB::glmmTMB(formula = lreg_edges~log2(distance+1) + log2(trench_depth+1) + obstacles
+Cand.mod[[39]] <- glmmTMB::glmmTMB(formula = lreg_edges~log2(stand_surface) + log2(trench_depth+1) + obstacles
                                    + (1|manager_id), data = redges, family = stats::binomial(link = "logit"),
                                    REML = FALSE)
 
@@ -1574,8 +1596,8 @@ Cand.mod[[39]] <- glmmTMB::glmmTMB(formula = lreg_edges~log2(distance+1) + log2(
 # # Simulation-based scaled residuals (DHARMa method):
 # simu.resid <- DHARMa::simulateResiduals(fittedModel = Cand.mod[[39]], n = 1000, plot = FALSE)
 # plot(simu.resid) # Ok-ish!
-# DHARMa::plotResiduals(simu.resid, form = redges$distance) # Ok!
 # DHARMa::plotResiduals(simu.resid, form = redges$trench_depth) # Ok!
+# DHARMa::plotResiduals(simu.resid, form = redges$stand_surface) # Ok-ish!
 # DHARMa::plotResiduals(simu.resid, form = redges$obstacles) # Ok!
 # # Testing for overdispersion:
 # DHARMa::testDispersion(simu.resid) # Ok!
@@ -1591,7 +1613,7 @@ Cand.mod[[39]] <- glmmTMB::glmmTMB(formula = lreg_edges~log2(distance+1) + log2(
 # ### Assessing goodness-of-fit:
 # # Test of Pearson's Chi2 residuals:
 # dat.resid <- sum(stats::resid(Cand.mod[[39]], type = "pearson")^2)
-# 1 - stats::pchisq(dat.resid, stats::df.residual(Cand.mod[[39]])) # Ok!
+# 1 - stats::pchisq(dat.resid, stats::df.residual(Cand.mod[[39]])) # Close!
 #
 # ### Exploring the model parameters and test hypotheses:
 # summary(Cand.mod[[39]])
@@ -1606,7 +1628,7 @@ R.ajust <- rbind(R.ajust, data.frame(Model=39, R2=R2[[1]]))
 ##### Model 40 #####
 # -----------------
 
-Cand.mod[[40]] <- glmmTMB::glmmTMB(formula = lreg_edges~log2(distance+1) + log2(trench_depth+1) + geomem
+Cand.mod[[40]] <- glmmTMB::glmmTMB(formula = lreg_edges~log2(stand_surface) + log2(trench_depth+1) + slope
                                    + (1|manager_id), data = redges, family = stats::binomial(link = "logit"),
                                    REML = FALSE)
 
@@ -1614,10 +1636,10 @@ Cand.mod[[40]] <- glmmTMB::glmmTMB(formula = lreg_edges~log2(distance+1) + log2(
 # ### Model diagnostics:
 # # Simulation-based scaled residuals (DHARMa method):
 # simu.resid <- DHARMa::simulateResiduals(fittedModel = Cand.mod[[40]], n = 1000, plot = FALSE)
-# plot(simu.resid) # Ok-ish!
-# DHARMa::plotResiduals(simu.resid, form = redges$distance) # Ok!
+# plot(simu.resid) # Nope! Same as for model #24!
 # DHARMa::plotResiduals(simu.resid, form = redges$trench_depth) # Ok!
-# DHARMa::plotResiduals(simu.resid, form = redges$geomem) # Ok-ish!
+# DHARMa::plotResiduals(simu.resid, form = redges$stand_surface) # Ok-ish!
+# DHARMa::plotResiduals(simu.resid, form = redges$slope) # Nope!
 # # Testing for overdispersion:
 # DHARMa::testDispersion(simu.resid) # Ok!
 # # Testing for spatial autocorrelation:
@@ -1627,19 +1649,19 @@ Cand.mod[[40]] <- glmmTMB::glmmTMB(formula = lreg_edges~log2(distance+1) + log2(
 # performance::check_distribution(Cand.mod[[40]])
 # performance::check_autocorrelation(Cand.mod[[40]])
 # performance::check_collinearity(Cand.mod[[40]])
-# performance::check_singularity(Cand.mod[[40]]) # Singularity! Dealt with decreased tolerance for convergence
+# performance::check_singularity(Cand.mod[[40]])
 #
 # ### Assessing goodness-of-fit:
 # # Test of Pearson's Chi2 residuals:
 # dat.resid <- sum(stats::resid(Cand.mod[[40]], type = "pearson")^2)
-# 1 - stats::pchisq(dat.resid, stats::df.residual(Cand.mod[[40]])) # Ok!
+# 1 - stats::pchisq(dat.resid, stats::df.residual(Cand.mod[[40]])) # Close!
 #
 # ### Exploring the model parameters and test hypotheses:
 # summary(Cand.mod[[40]])
 # # Computing a pseudo-R2:
 1 - (as.numeric(-2 * stats::logLik(Cand.mod[[40]]))/as.numeric(-2 * stats::logLik(
   update(Cand.mod[[40]], ~1)))) # McFadden's pseudo-R2
-R2 <- performance::r2_nakagawa(Cand.mod[[40]], tolerance = 1e-08) # Nakagawa's (pseudo-R2 for GLMMs)
+R2 <- performance::r2_nakagawa(Cand.mod[[40]]) # Nakagawa's (pseudo-R2 for GLMMs)
 R.ajust <- rbind(R.ajust, data.frame(Model=40, R2=R2[[1]]))
 
 
@@ -1647,7 +1669,7 @@ R.ajust <- rbind(R.ajust, data.frame(Model=40, R2=R2[[1]]))
 ##### Model 41 #####
 # -----------------
 
-Cand.mod[[41]] <- glmmTMB::glmmTMB(formula = lreg_edges~log2(distance+1) + log2(trench_depth+1) + log2(stand_surface)
+Cand.mod[[41]] <- glmmTMB::glmmTMB(formula = lreg_edges~log2(distance+1) + tarping_duration + add_control
                                    + (1|manager_id), data = redges, family = stats::binomial(link = "logit"),
                                    REML = FALSE)
 
@@ -1657,8 +1679,8 @@ Cand.mod[[41]] <- glmmTMB::glmmTMB(formula = lreg_edges~log2(distance+1) + log2(
 # simu.resid <- DHARMa::simulateResiduals(fittedModel = Cand.mod[[41]], n = 1000, plot = FALSE)
 # plot(simu.resid) # Ok-ish!
 # DHARMa::plotResiduals(simu.resid, form = redges$distance) # Ok!
-# DHARMa::plotResiduals(simu.resid, form = redges$trench_depth) # Ok!
-# DHARMa::plotResiduals(simu.resid, form = redges$stand_surface) # Ok!
+# DHARMa::plotResiduals(simu.resid, form = redges$tarping_duration) # Ok!
+# DHARMa::plotResiduals(simu.resid, form = redges$add_control) # Ok!
 # # Testing for overdispersion:
 # DHARMa::testDispersion(simu.resid) # Ok!
 # # Testing for spatial autocorrelation:
@@ -1668,19 +1690,19 @@ Cand.mod[[41]] <- glmmTMB::glmmTMB(formula = lreg_edges~log2(distance+1) + log2(
 # performance::check_distribution(Cand.mod[[41]])
 # performance::check_autocorrelation(Cand.mod[[41]])
 # performance::check_collinearity(Cand.mod[[41]])
-# performance::check_singularity(Cand.mod[[41]])
+# performance::check_singularity(Cand.mod[[41]]) # Singularity!
 #
 # ### Assessing goodness-of-fit:
 # # Test of Pearson's Chi2 residuals:
 # dat.resid <- sum(stats::resid(Cand.mod[[41]], type = "pearson")^2)
-# 1 - stats::pchisq(dat.resid, stats::df.residual(Cand.mod[[41]])) # Ok!
+# 1 - stats::pchisq(dat.resid, stats::df.residual(Cand.mod[[41]])) # Close!
 #
 # ### Exploring the model parameters and test hypotheses:
 # summary(Cand.mod[[41]])
 # # Computing a pseudo-R2:
 1 - (as.numeric(-2 * stats::logLik(Cand.mod[[41]]))/as.numeric(-2 * stats::logLik(
   update(Cand.mod[[41]], ~1)))) # McFadden's pseudo-R2
-R2 <- performance::r2_nakagawa(Cand.mod[[41]]) # Nakagawa's (pseudo-R2 for GLMMs)
+R2 <- performance::r2_nakagawa(Cand.mod[[41]], tolerance = 1e-08) # Nakagawa's (pseudo-R2 for GLMMs)
 R.ajust <- rbind(R.ajust, data.frame(Model=41, R2=R2[[1]]))
 
 
@@ -1688,7 +1710,7 @@ R.ajust <- rbind(R.ajust, data.frame(Model=41, R2=R2[[1]]))
 ##### Model 42 #####
 # -----------------
 
-Cand.mod[[42]] <- glmmTMB::glmmTMB(formula = lreg_edges~log2(distance+1) + log2(trench_depth+1) + slope
+Cand.mod[[42]] <- glmmTMB::glmmTMB(formula = lreg_edges~obstacles + repairs + add_control
                                    + (1|manager_id), data = redges, family = stats::binomial(link = "logit"),
                                    REML = FALSE)
 
@@ -1697,9 +1719,9 @@ Cand.mod[[42]] <- glmmTMB::glmmTMB(formula = lreg_edges~log2(distance+1) + log2(
 # # Simulation-based scaled residuals (DHARMa method):
 # simu.resid <- DHARMa::simulateResiduals(fittedModel = Cand.mod[[42]], n = 1000, plot = FALSE)
 # plot(simu.resid) # Ok-ish!
-# DHARMa::plotResiduals(simu.resid, form = redges$distance) # Ok!
-# DHARMa::plotResiduals(simu.resid, form = redges$trench_depth) # Ok!
-# DHARMa::plotResiduals(simu.resid, form = redges$slope) # Ok!
+# DHARMa::plotResiduals(simu.resid, form = redges$obstacles) # Ok!
+# DHARMa::plotResiduals(simu.resid, form = redges$repairs) # Ok-ish!
+# DHARMa::plotResiduals(simu.resid, form = redges$add_control) # Ok-ish!
 # # Testing for overdispersion:
 # DHARMa::testDispersion(simu.resid) # Ok!
 # # Testing for spatial autocorrelation:
@@ -1714,7 +1736,7 @@ Cand.mod[[42]] <- glmmTMB::glmmTMB(formula = lreg_edges~log2(distance+1) + log2(
 # ### Assessing goodness-of-fit:
 # # Test of Pearson's Chi2 residuals:
 # dat.resid <- sum(stats::resid(Cand.mod[[42]], type = "pearson")^2)
-# 1 - stats::pchisq(dat.resid, stats::df.residual(Cand.mod[[42]])) # Ok!
+# 1 - stats::pchisq(dat.resid, stats::df.residual(Cand.mod[[42]])) # Close!
 #
 # ### Exploring the model parameters and test hypotheses:
 # summary(Cand.mod[[42]])
@@ -1729,7 +1751,7 @@ R.ajust <- rbind(R.ajust, data.frame(Model=42, R2=R2[[1]]))
 ##### Model 43 #####
 # -----------------
 
-Cand.mod[[43]] <- glmmTMB::glmmTMB(formula = lreg_edges~log2(distance+1) + log2(stand_surface) + add_control
+Cand.mod[[43]] <- glmmTMB::glmmTMB(formula = lreg_edges~obstacles + add_control + geomem
                                    + (1|manager_id), data = redges, family = stats::binomial(link = "logit"),
                                    REML = FALSE)
 
@@ -1738,9 +1760,9 @@ Cand.mod[[43]] <- glmmTMB::glmmTMB(formula = lreg_edges~log2(distance+1) + log2(
 # # Simulation-based scaled residuals (DHARMa method):
 # simu.resid <- DHARMa::simulateResiduals(fittedModel = Cand.mod[[43]], n = 1000, plot = FALSE)
 # plot(simu.resid) # Ok-ish!
-# DHARMa::plotResiduals(simu.resid, form = redges$distance) # Ok!
-# DHARMa::plotResiduals(simu.resid, form = redges$stand_surface) # Ok!
-# DHARMa::plotResiduals(simu.resid, form = redges$add_control) # Ok-ish!
+# DHARMa::plotResiduals(simu.resid, form = redges$obstacles) # Ok!
+# DHARMa::plotResiduals(simu.resid, form = redges$add_control) # Ok!
+# DHARMa::plotResiduals(simu.resid, form = redges$geomem) # Ok-ish!
 # # Testing for overdispersion:
 # DHARMa::testDispersion(simu.resid) # Ok!
 # # Testing for spatial autocorrelation:
@@ -1750,12 +1772,12 @@ Cand.mod[[43]] <- glmmTMB::glmmTMB(formula = lreg_edges~log2(distance+1) + log2(
 # performance::check_distribution(Cand.mod[[43]])
 # performance::check_autocorrelation(Cand.mod[[43]])
 # performance::check_collinearity(Cand.mod[[43]])
-# performance::check_singularity(Cand.mod[[43]]) # Singularity! Dealt with decreased tolerance for convergence
+# performance::check_singularity(Cand.mod[[43]]) # Singularity!
 #
 # ### Assessing goodness-of-fit:
 # # Test of Pearson's Chi2 residuals:
 # dat.resid <- sum(stats::resid(Cand.mod[[43]], type = "pearson")^2)
-# 1 - stats::pchisq(dat.resid, stats::df.residual(Cand.mod[[43]])) # Nope!
+# 1 - stats::pchisq(dat.resid, stats::df.residual(Cand.mod[[43]])) # Close!
 #
 # ### Exploring the model parameters and test hypotheses:
 # summary(Cand.mod[[43]])
@@ -1770,7 +1792,7 @@ R.ajust <- rbind(R.ajust, data.frame(Model=43, R2=R2[[1]]))
 ##### Model 44 #####
 # -----------------
 
-Cand.mod[[44]] <- glmmTMB::glmmTMB(formula = lreg_edges~log2(distance+1) + log2(stand_surface) + obstacles
+Cand.mod[[44]] <- glmmTMB::glmmTMB(formula = lreg_edges~obstacles + add_control + tarping_duration
                                    + (1|manager_id), data = redges, family = stats::binomial(link = "logit"),
                                    REML = FALSE)
 
@@ -1779,9 +1801,9 @@ Cand.mod[[44]] <- glmmTMB::glmmTMB(formula = lreg_edges~log2(distance+1) + log2(
 # # Simulation-based scaled residuals (DHARMa method):
 # simu.resid <- DHARMa::simulateResiduals(fittedModel = Cand.mod[[44]], n = 1000, plot = FALSE)
 # plot(simu.resid) # Ok-ish!
-# DHARMa::plotResiduals(simu.resid, form = redges$distance) # Ok!
-# DHARMa::plotResiduals(simu.resid, form = redges$stand_surface) # Ok!
 # DHARMa::plotResiduals(simu.resid, form = redges$obstacles) # Ok!
+# DHARMa::plotResiduals(simu.resid, form = redges$add_control) # Ok-ish!
+# DHARMa::plotResiduals(simu.resid, form = redges$tarping_duration) # Ok!
 # # Testing for overdispersion:
 # DHARMa::testDispersion(simu.resid) # Ok!
 # # Testing for spatial autocorrelation:
@@ -1811,7 +1833,7 @@ R.ajust <- rbind(R.ajust, data.frame(Model=44, R2=R2[[1]]))
 ##### Model 45 #####
 # -----------------
 
-Cand.mod[[45]] <- glmmTMB::glmmTMB(formula = lreg_edges~log2(distance+1) + log2(stand_surface) + pb_fixation
+Cand.mod[[45]] <- glmmTMB::glmmTMB(formula = lreg_edges~obstacles + add_control + log2(trench_depth+1)
                                    + (1|manager_id), data = redges, family = stats::binomial(link = "logit"),
                                    REML = FALSE)
 
@@ -1820,9 +1842,9 @@ Cand.mod[[45]] <- glmmTMB::glmmTMB(formula = lreg_edges~log2(distance+1) + log2(
 # # Simulation-based scaled residuals (DHARMa method):
 # simu.resid <- DHARMa::simulateResiduals(fittedModel = Cand.mod[[45]], n = 1000, plot = FALSE)
 # plot(simu.resid) # Ok-ish!
-# DHARMa::plotResiduals(simu.resid, form = redges$distance) # Ok!
-# DHARMa::plotResiduals(simu.resid, form = redges$stand_surface) # Ok-ish!
-# DHARMa::plotResiduals(simu.resid, form = redges$pb_fixation) # Ok!
+# DHARMa::plotResiduals(simu.resid, form = redges$obstacles) # Ok!
+# DHARMa::plotResiduals(simu.resid, form = redges$add_control) # Ok-ish!
+# DHARMa::plotResiduals(simu.resid, form = redges$trench_depth) # Ok!
 # # Testing for overdispersion:
 # DHARMa::testDispersion(simu.resid) # Ok!
 # # Testing for spatial autocorrelation:
@@ -1852,7 +1874,7 @@ R.ajust <- rbind(R.ajust, data.frame(Model=45, R2=R2[[1]]))
 ##### Model 46 #####
 # -----------------
 
-Cand.mod[[46]] <- glmmTMB::glmmTMB(formula = lreg_edges~log2(distance+1) + geomem + tarping_duration
+Cand.mod[[46]] <- glmmTMB::glmmTMB(formula = lreg_edges~obstacles + add_control + log2(stand_surface)
                                    + (1|manager_id), data = redges, family = stats::binomial(link = "logit"),
                                    REML = FALSE)
 
@@ -1861,9 +1883,9 @@ Cand.mod[[46]] <- glmmTMB::glmmTMB(formula = lreg_edges~log2(distance+1) + geome
 # # Simulation-based scaled residuals (DHARMa method):
 # simu.resid <- DHARMa::simulateResiduals(fittedModel = Cand.mod[[46]], n = 1000, plot = FALSE)
 # plot(simu.resid) # Ok-ish!
-# DHARMa::plotResiduals(simu.resid, form = redges$distance) # Ok!
-# DHARMa::plotResiduals(simu.resid, form = redges$geomem) # Ok!
-# DHARMa::plotResiduals(simu.resid, form = redges$tarping_duration) # Ok!
+# DHARMa::plotResiduals(simu.resid, form = redges$obstacles) # Ok!
+# DHARMa::plotResiduals(simu.resid, form = redges$add_control) # Ok-ish!
+# DHARMa::plotResiduals(simu.resid, form = redges$stand_surface) # Ok!
 # # Testing for overdispersion:
 # DHARMa::testDispersion(simu.resid) # Ok!
 # # Testing for spatial autocorrelation:
@@ -1873,27 +1895,27 @@ Cand.mod[[46]] <- glmmTMB::glmmTMB(formula = lreg_edges~log2(distance+1) + geome
 # performance::check_distribution(Cand.mod[[46]])
 # performance::check_autocorrelation(Cand.mod[[46]])
 # performance::check_collinearity(Cand.mod[[46]])
-# performance::check_singularity(Cand.mod[[46]]) # Singularity! Dealt with decreased tolerance for convergence
+# performance::check_singularity(Cand.mod[[46]])
 #
 # ### Assessing goodness-of-fit:
 # # Test of Pearson's Chi2 residuals:
 # dat.resid <- sum(stats::resid(Cand.mod[[46]], type = "pearson")^2)
-# 1 - stats::pchisq(dat.resid, stats::df.residual(Cand.mod[[46]])) # Ok!
+# 1 - stats::pchisq(dat.resid, stats::df.residual(Cand.mod[[46]])) # Close!
 #
 # ### Exploring the model parameters and test hypotheses:
 # summary(Cand.mod[[46]])
 # # Computing a pseudo-R2:
 1 - (as.numeric(-2 * stats::logLik(Cand.mod[[46]]))/as.numeric(-2 * stats::logLik(
   update(Cand.mod[[46]], ~1)))) # McFadden's pseudo-R2
-R2 <- performance::r2_nakagawa(Cand.mod[[46]], tolerance = 1e-08) # Nakagawa's (pseudo-R2 for GLMMs)
+R2 <- performance::r2_nakagawa(Cand.mod[[46]]) # Nakagawa's (pseudo-R2 for GLMMs)
 R.ajust <- rbind(R.ajust, data.frame(Model=46, R2=R2[[1]]))
 
 
 
 ##### Model 47 #####
-# ------------------
+# -----------------
 
-Cand.mod[[47]] <- glmmTMB::glmmTMB(formula = lreg_edges~log2(stand_surface) + log2(trench_depth+1) + obstacles
+Cand.mod[[47]] <- glmmTMB::glmmTMB(formula = lreg_edges~obstacles + add_control + slope
                                    + (1|manager_id), data = redges, family = stats::binomial(link = "logit"),
                                    REML = FALSE)
 
@@ -1902,9 +1924,9 @@ Cand.mod[[47]] <- glmmTMB::glmmTMB(formula = lreg_edges~log2(stand_surface) + lo
 # # Simulation-based scaled residuals (DHARMa method):
 # simu.resid <- DHARMa::simulateResiduals(fittedModel = Cand.mod[[47]], n = 1000, plot = FALSE)
 # plot(simu.resid) # Ok-ish!
-# DHARMa::plotResiduals(simu.resid, form = redges$trench_depth) # Ok!
-# DHARMa::plotResiduals(simu.resid, form = redges$stand_surface) # Ok-ish!
 # DHARMa::plotResiduals(simu.resid, form = redges$obstacles) # Ok!
+# DHARMa::plotResiduals(simu.resid, form = redges$add_control) # Ok-ish!
+# DHARMa::plotResiduals(simu.resid, form = redges$slope) # Ok-ish!
 # # Testing for overdispersion:
 # DHARMa::testDispersion(simu.resid) # Ok!
 # # Testing for spatial autocorrelation:
@@ -1934,7 +1956,7 @@ R.ajust <- rbind(R.ajust, data.frame(Model=47, R2=R2[[1]]))
 ##### Model 48 #####
 # -----------------
 
-Cand.mod[[48]] <- glmmTMB::glmmTMB(formula = lreg_edges~log2(stand_surface) + log2(trench_depth+1) + slope
+Cand.mod[[48]] <- glmmTMB::glmmTMB(formula = lreg_edges~log2(trench_depth+1) + log2(distance+1) + repairs
                                    + (1|manager_id), data = redges, family = stats::binomial(link = "logit"),
                                    REML = FALSE)
 
@@ -1942,10 +1964,10 @@ Cand.mod[[48]] <- glmmTMB::glmmTMB(formula = lreg_edges~log2(stand_surface) + lo
 # ### Model diagnostics:
 # # Simulation-based scaled residuals (DHARMa method):
 # simu.resid <- DHARMa::simulateResiduals(fittedModel = Cand.mod[[48]], n = 1000, plot = FALSE)
-# plot(simu.resid) # Nope! Same as for model #24!
+# plot(simu.resid) # Ok-ish!
 # DHARMa::plotResiduals(simu.resid, form = redges$trench_depth) # Ok!
-# DHARMa::plotResiduals(simu.resid, form = redges$stand_surface) # Ok-ish!
-# DHARMa::plotResiduals(simu.resid, form = redges$slope) # Nope!
+# DHARMa::plotResiduals(simu.resid, form = redges$distance) # Ok!
+# DHARMa::plotResiduals(simu.resid, form = redges$repairs) # Ok-ish!
 # # Testing for overdispersion:
 # DHARMa::testDispersion(simu.resid) # Ok!
 # # Testing for spatial autocorrelation:
@@ -1975,7 +1997,7 @@ R.ajust <- rbind(R.ajust, data.frame(Model=48, R2=R2[[1]]))
 ##### Model 49 #####
 # -----------------
 
-Cand.mod[[49]] <- glmmTMB::glmmTMB(formula = lreg_edges~log2(distance+1) + tarping_duration + add_control
+Cand.mod[[49]] <- glmmTMB::glmmTMB(formula = lreg_edges~log2(trench_depth+1) + obstacles + repairs
                                    + (1|manager_id), data = redges, family = stats::binomial(link = "logit"),
                                    REML = FALSE)
 
@@ -1984,9 +2006,9 @@ Cand.mod[[49]] <- glmmTMB::glmmTMB(formula = lreg_edges~log2(distance+1) + tarpi
 # # Simulation-based scaled residuals (DHARMa method):
 # simu.resid <- DHARMa::simulateResiduals(fittedModel = Cand.mod[[49]], n = 1000, plot = FALSE)
 # plot(simu.resid) # Ok-ish!
-# DHARMa::plotResiduals(simu.resid, form = redges$distance) # Ok!
-# DHARMa::plotResiduals(simu.resid, form = redges$tarping_duration) # Ok!
-# DHARMa::plotResiduals(simu.resid, form = redges$add_control) # Ok!
+# DHARMa::plotResiduals(simu.resid, form = redges$trench_depth) # Ok!
+# DHARMa::plotResiduals(simu.resid, form = redges$obstacles) # Ok!
+# DHARMa::plotResiduals(simu.resid, form = redges$repairs) # Ok-ish!
 # # Testing for overdispersion:
 # DHARMa::testDispersion(simu.resid) # Ok!
 # # Testing for spatial autocorrelation:
@@ -1996,7 +2018,7 @@ Cand.mod[[49]] <- glmmTMB::glmmTMB(formula = lreg_edges~log2(distance+1) + tarpi
 # performance::check_distribution(Cand.mod[[49]])
 # performance::check_autocorrelation(Cand.mod[[49]])
 # performance::check_collinearity(Cand.mod[[49]])
-# performance::check_singularity(Cand.mod[[49]]) # Singularity!
+# performance::check_singularity(Cand.mod[[49]])
 #
 # ### Assessing goodness-of-fit:
 # # Test of Pearson's Chi2 residuals:
@@ -2008,7 +2030,7 @@ Cand.mod[[49]] <- glmmTMB::glmmTMB(formula = lreg_edges~log2(distance+1) + tarpi
 # # Computing a pseudo-R2:
 1 - (as.numeric(-2 * stats::logLik(Cand.mod[[49]]))/as.numeric(-2 * stats::logLik(
   update(Cand.mod[[49]], ~1)))) # McFadden's pseudo-R2
-R2 <- performance::r2_nakagawa(Cand.mod[[49]], tolerance = 1e-08) # Nakagawa's (pseudo-R2 for GLMMs)
+R2 <- performance::r2_nakagawa(Cand.mod[[49]]) # Nakagawa's (pseudo-R2 for GLMMs)
 R.ajust <- rbind(R.ajust, data.frame(Model=49, R2=R2[[1]]))
 
 
@@ -2016,7 +2038,7 @@ R.ajust <- rbind(R.ajust, data.frame(Model=49, R2=R2[[1]]))
 ##### Model 50 #####
 # -----------------
 
-Cand.mod[[50]] <- glmmTMB::glmmTMB(formula = lreg_edges~obstacles + repairs + add_control
+Cand.mod[[50]] <- glmmTMB::glmmTMB(formula = lreg_edges~log2(trench_depth+1) + obstacles + geomem
                                    + (1|manager_id), data = redges, family = stats::binomial(link = "logit"),
                                    REML = FALSE)
 
@@ -2025,9 +2047,9 @@ Cand.mod[[50]] <- glmmTMB::glmmTMB(formula = lreg_edges~obstacles + repairs + ad
 # # Simulation-based scaled residuals (DHARMa method):
 # simu.resid <- DHARMa::simulateResiduals(fittedModel = Cand.mod[[50]], n = 1000, plot = FALSE)
 # plot(simu.resid) # Ok-ish!
+# DHARMa::plotResiduals(simu.resid, form = redges$trench_depth) # Ok!
 # DHARMa::plotResiduals(simu.resid, form = redges$obstacles) # Ok!
-# DHARMa::plotResiduals(simu.resid, form = redges$repairs) # Ok-ish!
-# DHARMa::plotResiduals(simu.resid, form = redges$add_control) # Ok-ish!
+# DHARMa::plotResiduals(simu.resid, form = redges$geomem) # Ok-ish!
 # # Testing for overdispersion:
 # DHARMa::testDispersion(simu.resid) # Ok!
 # # Testing for spatial autocorrelation:
@@ -2037,7 +2059,7 @@ Cand.mod[[50]] <- glmmTMB::glmmTMB(formula = lreg_edges~obstacles + repairs + ad
 # performance::check_distribution(Cand.mod[[50]])
 # performance::check_autocorrelation(Cand.mod[[50]])
 # performance::check_collinearity(Cand.mod[[50]])
-# performance::check_singularity(Cand.mod[[50]])
+# performance::check_singularity(Cand.mod[[50]]) # Singularity!
 #
 # ### Assessing goodness-of-fit:
 # # Test of Pearson's Chi2 residuals:
@@ -2049,336 +2071,8 @@ Cand.mod[[50]] <- glmmTMB::glmmTMB(formula = lreg_edges~obstacles + repairs + ad
 # # Computing a pseudo-R2:
 1 - (as.numeric(-2 * stats::logLik(Cand.mod[[50]]))/as.numeric(-2 * stats::logLik(
   update(Cand.mod[[50]], ~1)))) # McFadden's pseudo-R2
-R2 <- performance::r2_nakagawa(Cand.mod[[50]]) # Nakagawa's (pseudo-R2 for GLMMs)
+R2 <- performance::r2_nakagawa(Cand.mod[[50]], tolerance = 1e-08) # Nakagawa's (pseudo-R2 for GLMMs)
 R.ajust <- rbind(R.ajust, data.frame(Model=50, R2=R2[[1]]))
-
-
-
-##### Model 51 #####
-# -----------------
-
-Cand.mod[[51]] <- glmmTMB::glmmTMB(formula = lreg_edges~obstacles + add_control + geomem
-                                   + (1|manager_id), data = redges, family = stats::binomial(link = "logit"),
-                                   REML = FALSE)
-
-
-# ### Model diagnostics:
-# # Simulation-based scaled residuals (DHARMa method):
-# simu.resid <- DHARMa::simulateResiduals(fittedModel = Cand.mod[[51]], n = 1000, plot = FALSE)
-# plot(simu.resid) # Ok-ish!
-# DHARMa::plotResiduals(simu.resid, form = redges$obstacles) # Ok!
-# DHARMa::plotResiduals(simu.resid, form = redges$add_control) # Ok!
-# DHARMa::plotResiduals(simu.resid, form = redges$geomem) # Ok-ish!
-# # Testing for overdispersion:
-# DHARMa::testDispersion(simu.resid) # Ok!
-# # Testing for spatial autocorrelation:
-# DHARMa::testSpatialAutocorrelation(simulationOutput = simu.resid,
-#                                    x = redges$longitude, y = redges$latitude, plot = TRUE) # Ok!
-# # Using the 'performance' package:
-# performance::check_distribution(Cand.mod[[51]])
-# performance::check_autocorrelation(Cand.mod[[51]])
-# performance::check_collinearity(Cand.mod[[51]])
-# performance::check_singularity(Cand.mod[[51]]) # Singularity!
-#
-# ### Assessing goodness-of-fit:
-# # Test of Pearson's Chi2 residuals:
-# dat.resid <- sum(stats::resid(Cand.mod[[51]], type = "pearson")^2)
-# 1 - stats::pchisq(dat.resid, stats::df.residual(Cand.mod[[51]])) # Close!
-#
-# ### Exploring the model parameters and test hypotheses:
-# summary(Cand.mod[[51]])
-# # Computing a pseudo-R2:
-1 - (as.numeric(-2 * stats::logLik(Cand.mod[[51]]))/as.numeric(-2 * stats::logLik(
-  update(Cand.mod[[51]], ~1)))) # McFadden's pseudo-R2
-R2 <- performance::r2_nakagawa(Cand.mod[[51]], tolerance = 1e-08) # Nakagawa's (pseudo-R2 for GLMMs)
-R.ajust <- rbind(R.ajust, data.frame(Model=51, R2=R2[[1]]))
-
-
-
-##### Model 52 #####
-# -----------------
-
-Cand.mod[[52]] <- glmmTMB::glmmTMB(formula = lreg_edges~obstacles + add_control + tarping_duration
-                                   + (1|manager_id), data = redges, family = stats::binomial(link = "logit"),
-                                   REML = FALSE)
-
-
-# ### Model diagnostics:
-# # Simulation-based scaled residuals (DHARMa method):
-# simu.resid <- DHARMa::simulateResiduals(fittedModel = Cand.mod[[52]], n = 1000, plot = FALSE)
-# plot(simu.resid) # Ok-ish!
-# DHARMa::plotResiduals(simu.resid, form = redges$obstacles) # Ok!
-# DHARMa::plotResiduals(simu.resid, form = redges$add_control) # Ok-ish!
-# DHARMa::plotResiduals(simu.resid, form = redges$tarping_duration) # Ok!
-# # Testing for overdispersion:
-# DHARMa::testDispersion(simu.resid) # Ok!
-# # Testing for spatial autocorrelation:
-# DHARMa::testSpatialAutocorrelation(simulationOutput = simu.resid,
-#                                    x = redges$longitude, y = redges$latitude, plot = TRUE) # Ok!
-# # Using the 'performance' package:
-# performance::check_distribution(Cand.mod[[52]])
-# performance::check_autocorrelation(Cand.mod[[52]])
-# performance::check_collinearity(Cand.mod[[52]])
-# performance::check_singularity(Cand.mod[[52]])
-#
-# ### Assessing goodness-of-fit:
-# # Test of Pearson's Chi2 residuals:
-# dat.resid <- sum(stats::resid(Cand.mod[[52]], type = "pearson")^2)
-# 1 - stats::pchisq(dat.resid, stats::df.residual(Cand.mod[[52]])) # Close!
-#
-# ### Exploring the model parameters and test hypotheses:
-# summary(Cand.mod[[52]])
-# # Computing a pseudo-R2:
-1 - (as.numeric(-2 * stats::logLik(Cand.mod[[52]]))/as.numeric(-2 * stats::logLik(
-  update(Cand.mod[[52]], ~1)))) # McFadden's pseudo-R2
-R2 <- performance::r2_nakagawa(Cand.mod[[52]]) # Nakagawa's (pseudo-R2 for GLMMs)
-R.ajust <- rbind(R.ajust, data.frame(Model=52, R2=R2[[1]]))
-
-
-
-##### Model 53 #####
-# -----------------
-
-Cand.mod[[53]] <- glmmTMB::glmmTMB(formula = lreg_edges~obstacles + add_control + log2(trench_depth+1)
-                                   + (1|manager_id), data = redges, family = stats::binomial(link = "logit"),
-                                   REML = FALSE)
-
-
-# ### Model diagnostics:
-# # Simulation-based scaled residuals (DHARMa method):
-# simu.resid <- DHARMa::simulateResiduals(fittedModel = Cand.mod[[53]], n = 1000, plot = FALSE)
-# plot(simu.resid) # Ok-ish!
-# DHARMa::plotResiduals(simu.resid, form = redges$obstacles) # Ok!
-# DHARMa::plotResiduals(simu.resid, form = redges$add_control) # Ok-ish!
-# DHARMa::plotResiduals(simu.resid, form = redges$trench_depth) # Ok!
-# # Testing for overdispersion:
-# DHARMa::testDispersion(simu.resid) # Ok!
-# # Testing for spatial autocorrelation:
-# DHARMa::testSpatialAutocorrelation(simulationOutput = simu.resid,
-#                                    x = redges$longitude, y = redges$latitude, plot = TRUE) # Ok!
-# # Using the 'performance' package:
-# performance::check_distribution(Cand.mod[[53]])
-# performance::check_autocorrelation(Cand.mod[[53]])
-# performance::check_collinearity(Cand.mod[[53]])
-# performance::check_singularity(Cand.mod[[53]])
-#
-# ### Assessing goodness-of-fit:
-# # Test of Pearson's Chi2 residuals:
-# dat.resid <- sum(stats::resid(Cand.mod[[53]], type = "pearson")^2)
-# 1 - stats::pchisq(dat.resid, stats::df.residual(Cand.mod[[53]])) # Close!
-#
-# ### Exploring the model parameters and test hypotheses:
-# summary(Cand.mod[[53]])
-# # Computing a pseudo-R2:
-1 - (as.numeric(-2 * stats::logLik(Cand.mod[[53]]))/as.numeric(-2 * stats::logLik(
-  update(Cand.mod[[53]], ~1)))) # McFadden's pseudo-R2
-R2 <- performance::r2_nakagawa(Cand.mod[[53]]) # Nakagawa's (pseudo-R2 for GLMMs)
-R.ajust <- rbind(R.ajust, data.frame(Model=53, R2=R2[[1]]))
-
-
-
-##### Model 54 #####
-# -----------------
-
-Cand.mod[[54]] <- glmmTMB::glmmTMB(formula = lreg_edges~obstacles + add_control + log2(stand_surface)
-                                   + (1|manager_id), data = redges, family = stats::binomial(link = "logit"),
-                                   REML = FALSE)
-
-
-# ### Model diagnostics:
-# # Simulation-based scaled residuals (DHARMa method):
-# simu.resid <- DHARMa::simulateResiduals(fittedModel = Cand.mod[[54]], n = 1000, plot = FALSE)
-# plot(simu.resid) # Ok-ish!
-# DHARMa::plotResiduals(simu.resid, form = redges$obstacles) # Ok!
-# DHARMa::plotResiduals(simu.resid, form = redges$add_control) # Ok-ish!
-# DHARMa::plotResiduals(simu.resid, form = redges$stand_surface) # Ok!
-# # Testing for overdispersion:
-# DHARMa::testDispersion(simu.resid) # Ok!
-# # Testing for spatial autocorrelation:
-# DHARMa::testSpatialAutocorrelation(simulationOutput = simu.resid,
-#                                    x = redges$longitude, y = redges$latitude, plot = TRUE) # Ok!
-# # Using the 'performance' package:
-# performance::check_distribution(Cand.mod[[54]])
-# performance::check_autocorrelation(Cand.mod[[54]])
-# performance::check_collinearity(Cand.mod[[54]])
-# performance::check_singularity(Cand.mod[[54]])
-#
-# ### Assessing goodness-of-fit:
-# # Test of Pearson's Chi2 residuals:
-# dat.resid <- sum(stats::resid(Cand.mod[[54]], type = "pearson")^2)
-# 1 - stats::pchisq(dat.resid, stats::df.residual(Cand.mod[[54]])) # Close!
-#
-# ### Exploring the model parameters and test hypotheses:
-# summary(Cand.mod[[54]])
-# # Computing a pseudo-R2:
-1 - (as.numeric(-2 * stats::logLik(Cand.mod[[54]]))/as.numeric(-2 * stats::logLik(
-  update(Cand.mod[[54]], ~1)))) # McFadden's pseudo-R2
-R2 <- performance::r2_nakagawa(Cand.mod[[54]]) # Nakagawa's (pseudo-R2 for GLMMs)
-R.ajust <- rbind(R.ajust, data.frame(Model=54, R2=R2[[1]]))
-
-
-
-##### Model 55 #####
-# -----------------
-
-Cand.mod[[55]] <- glmmTMB::glmmTMB(formula = lreg_edges~obstacles + add_control + slope
-                                   + (1|manager_id), data = redges, family = stats::binomial(link = "logit"),
-                                   REML = FALSE)
-
-
-# ### Model diagnostics:
-# # Simulation-based scaled residuals (DHARMa method):
-# simu.resid <- DHARMa::simulateResiduals(fittedModel = Cand.mod[[55]], n = 1000, plot = FALSE)
-# plot(simu.resid) # Ok-ish!
-# DHARMa::plotResiduals(simu.resid, form = redges$obstacles) # Ok!
-# DHARMa::plotResiduals(simu.resid, form = redges$add_control) # Ok-ish!
-# DHARMa::plotResiduals(simu.resid, form = redges$slope) # Ok-ish!
-# # Testing for overdispersion:
-# DHARMa::testDispersion(simu.resid) # Ok!
-# # Testing for spatial autocorrelation:
-# DHARMa::testSpatialAutocorrelation(simulationOutput = simu.resid,
-#                                    x = redges$longitude, y = redges$latitude, plot = TRUE) # Ok!
-# # Using the 'performance' package:
-# performance::check_distribution(Cand.mod[[55]])
-# performance::check_autocorrelation(Cand.mod[[55]])
-# performance::check_collinearity(Cand.mod[[55]])
-# performance::check_singularity(Cand.mod[[55]])
-#
-# ### Assessing goodness-of-fit:
-# # Test of Pearson's Chi2 residuals:
-# dat.resid <- sum(stats::resid(Cand.mod[[55]], type = "pearson")^2)
-# 1 - stats::pchisq(dat.resid, stats::df.residual(Cand.mod[[55]])) # Close!
-#
-# ### Exploring the model parameters and test hypotheses:
-# summary(Cand.mod[[55]])
-# # Computing a pseudo-R2:
-1 - (as.numeric(-2 * stats::logLik(Cand.mod[[55]]))/as.numeric(-2 * stats::logLik(
-  update(Cand.mod[[55]], ~1)))) # McFadden's pseudo-R2
-R2 <- performance::r2_nakagawa(Cand.mod[[55]]) # Nakagawa's (pseudo-R2 for GLMMs)
-R.ajust <- rbind(R.ajust, data.frame(Model=55, R2=R2[[1]]))
-
-
-
-##### Model 56 #####
-# -----------------
-
-Cand.mod[[56]] <- glmmTMB::glmmTMB(formula = lreg_edges~log2(trench_depth+1) + log2(distance+1) + repairs
-                                   + (1|manager_id), data = redges, family = stats::binomial(link = "logit"),
-                                   REML = FALSE)
-
-
-# ### Model diagnostics:
-# # Simulation-based scaled residuals (DHARMa method):
-# simu.resid <- DHARMa::simulateResiduals(fittedModel = Cand.mod[[56]], n = 1000, plot = FALSE)
-# plot(simu.resid) # Ok-ish!
-# DHARMa::plotResiduals(simu.resid, form = redges$trench_depth) # Ok!
-# DHARMa::plotResiduals(simu.resid, form = redges$distance) # Ok!
-# DHARMa::plotResiduals(simu.resid, form = redges$repairs) # Ok-ish!
-# # Testing for overdispersion:
-# DHARMa::testDispersion(simu.resid) # Ok!
-# # Testing for spatial autocorrelation:
-# DHARMa::testSpatialAutocorrelation(simulationOutput = simu.resid,
-#                                    x = redges$longitude, y = redges$latitude, plot = TRUE) # Ok!
-# # Using the 'performance' package:
-# performance::check_distribution(Cand.mod[[56]])
-# performance::check_autocorrelation(Cand.mod[[56]])
-# performance::check_collinearity(Cand.mod[[56]])
-# performance::check_singularity(Cand.mod[[56]])
-#
-# ### Assessing goodness-of-fit:
-# # Test of Pearson's Chi2 residuals:
-# dat.resid <- sum(stats::resid(Cand.mod[[56]], type = "pearson")^2)
-# 1 - stats::pchisq(dat.resid, stats::df.residual(Cand.mod[[56]])) # Close!
-#
-# ### Exploring the model parameters and test hypotheses:
-# summary(Cand.mod[[56]])
-# # Computing a pseudo-R2:
-1 - (as.numeric(-2 * stats::logLik(Cand.mod[[56]]))/as.numeric(-2 * stats::logLik(
-  update(Cand.mod[[56]], ~1)))) # McFadden's pseudo-R2
-R2 <- performance::r2_nakagawa(Cand.mod[[56]]) # Nakagawa's (pseudo-R2 for GLMMs)
-R.ajust <- rbind(R.ajust, data.frame(Model=56, R2=R2[[1]]))
-
-
-
-##### Model 57 #####
-# -----------------
-
-Cand.mod[[57]] <- glmmTMB::glmmTMB(formula = lreg_edges~log2(trench_depth+1) + obstacles + repairs
-                                   + (1|manager_id), data = redges, family = stats::binomial(link = "logit"),
-                                   REML = FALSE)
-
-
-# ### Model diagnostics:
-# # Simulation-based scaled residuals (DHARMa method):
-# simu.resid <- DHARMa::simulateResiduals(fittedModel = Cand.mod[[57]], n = 1000, plot = FALSE)
-# plot(simu.resid) # Ok-ish!
-# DHARMa::plotResiduals(simu.resid, form = redges$trench_depth) # Ok!
-# DHARMa::plotResiduals(simu.resid, form = redges$obstacles) # Ok!
-# DHARMa::plotResiduals(simu.resid, form = redges$repairs) # Ok-ish!
-# # Testing for overdispersion:
-# DHARMa::testDispersion(simu.resid) # Ok!
-# # Testing for spatial autocorrelation:
-# DHARMa::testSpatialAutocorrelation(simulationOutput = simu.resid,
-#                                    x = redges$longitude, y = redges$latitude, plot = TRUE) # Ok!
-# # Using the 'performance' package:
-# performance::check_distribution(Cand.mod[[57]])
-# performance::check_autocorrelation(Cand.mod[[57]])
-# performance::check_collinearity(Cand.mod[[57]])
-# performance::check_singularity(Cand.mod[[57]])
-#
-# ### Assessing goodness-of-fit:
-# # Test of Pearson's Chi2 residuals:
-# dat.resid <- sum(stats::resid(Cand.mod[[57]], type = "pearson")^2)
-# 1 - stats::pchisq(dat.resid, stats::df.residual(Cand.mod[[57]])) # Close!
-#
-# ### Exploring the model parameters and test hypotheses:
-# summary(Cand.mod[[57]])
-# # Computing a pseudo-R2:
-1 - (as.numeric(-2 * stats::logLik(Cand.mod[[57]]))/as.numeric(-2 * stats::logLik(
-  update(Cand.mod[[57]], ~1)))) # McFadden's pseudo-R2
-R2 <- performance::r2_nakagawa(Cand.mod[[57]]) # Nakagawa's (pseudo-R2 for GLMMs)
-R.ajust <- rbind(R.ajust, data.frame(Model=57, R2=R2[[1]]))
-
-
-
-##### Model 58 #####
-# -----------------
-
-Cand.mod[[58]] <- glmmTMB::glmmTMB(formula = lreg_edges~log2(trench_depth+1) + obstacles + geomem
-                                   + (1|manager_id), data = redges, family = stats::binomial(link = "logit"),
-                                   REML = FALSE)
-
-
-# ### Model diagnostics:
-# # Simulation-based scaled residuals (DHARMa method):
-# simu.resid <- DHARMa::simulateResiduals(fittedModel = Cand.mod[[58]], n = 1000, plot = FALSE)
-# plot(simu.resid) # Ok-ish!
-# DHARMa::plotResiduals(simu.resid, form = redges$trench_depth) # Ok!
-# DHARMa::plotResiduals(simu.resid, form = redges$obstacles) # Ok!
-# DHARMa::plotResiduals(simu.resid, form = redges$geomem) # Ok-ish!
-# # Testing for overdispersion:
-# DHARMa::testDispersion(simu.resid) # Ok!
-# # Testing for spatial autocorrelation:
-# DHARMa::testSpatialAutocorrelation(simulationOutput = simu.resid,
-#                                    x = redges$longitude, y = redges$latitude, plot = TRUE) # Ok!
-# # Using the 'performance' package:
-# performance::check_distribution(Cand.mod[[58]])
-# performance::check_autocorrelation(Cand.mod[[58]])
-# performance::check_collinearity(Cand.mod[[58]])
-# performance::check_singularity(Cand.mod[[58]]) # Singularity!
-#
-# ### Assessing goodness-of-fit:
-# # Test of Pearson's Chi2 residuals:
-# dat.resid <- sum(stats::resid(Cand.mod[[58]], type = "pearson")^2)
-# 1 - stats::pchisq(dat.resid, stats::df.residual(Cand.mod[[58]])) # Close!
-#
-# ### Exploring the model parameters and test hypotheses:
-# summary(Cand.mod[[58]])
-# # Computing a pseudo-R2:
-1 - (as.numeric(-2 * stats::logLik(Cand.mod[[58]]))/as.numeric(-2 * stats::logLik(
-  update(Cand.mod[[58]], ~1)))) # McFadden's pseudo-R2
-R2 <- performance::r2_nakagawa(Cand.mod[[58]], tolerance = 1e-08) # Nakagawa's (pseudo-R2 for GLMMs)
-R.ajust <- rbind(R.ajust, data.frame(Model=58, R2=R2[[1]]))
 
 
 
@@ -2388,11 +2082,10 @@ R.ajust <- rbind(R.ajust, data.frame(Model=58, R2=R2[[1]]))
 ##### Model selection and averaging #####
 # ------------------------------------- #
 
-Model <- (1:58)
+Model <- (1:50)
 
 Candidate <- c("null",
-               "log2(distance + 1)", "add_control", "obstacles", "pb_fixation", "slope", "log2(stand_surface)",
-               "tarping_duration", "log2(trench_depth + 1)", "log2(distance + 1) + add_control", "log2(distance + 1) + obstacles",
+               "log2(distance + 1) + add_control", "log2(distance + 1) + obstacles",
                "log2(distance + 1) + repairs", "log2(distance + 1) + pb_fixation", "log2(distance + 1) + log2(stand_surface)",
                "log2(distance + 1) + geomem", "log2(distance + 1) + tarping_duration", "log2(distance + 1) + log2(trench_depth + 1)",
                "log2(distance + 1) * log2(trench_depth + 1)", "log2(trench_depth + 1) + add_control", "log2(trench_depth + 1) + obstacles",
