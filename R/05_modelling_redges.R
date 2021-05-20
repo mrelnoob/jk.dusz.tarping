@@ -122,7 +122,7 @@ R.ajust <- rbind(R.ajust, data.frame(Model=1, R2=R2[[1]]))
 ##### Model 2 #####
 # -----------------
 
-Cand.mod[[2]] <- glmmTMB::glmmTMB(formula = lreg_edges~log(distance+1) + (1|manager_id), data = redges,
+Cand.mod[[2]] <- glmmTMB::glmmTMB(formula = lreg_edges~log2(distance+1) + (1|manager_id), data = redges,
                                   family = stats::binomial(link = "logit"), REML = FALSE)
 
 
@@ -313,7 +313,7 @@ R.ajust <- rbind(R.ajust, data.frame(Model=6, R2=R2[[1]]))
 ##### Model 7 #####
 # -----------------
 
-Cand.mod[[7]] <- glmmTMB::glmmTMB(formula = lreg_edges~log(stand_surface) + (1|manager_id), data = redges,
+Cand.mod[[7]] <- glmmTMB::glmmTMB(formula = lreg_edges~log2(stand_surface) + (1|manager_id), data = redges,
                                   family = stats::binomial(link = "logit"), REML = FALSE)
 
 
@@ -389,7 +389,7 @@ R.ajust <- rbind(R.ajust, data.frame(Model=8, R2=R2[[1]]))
 ##### Model 9 #####
 # -----------------
 
-Cand.mod[[9]] <- glmmTMB::glmmTMB(formula = lreg_edges~log(trench_depth+1) + (1|manager_id), data = redges,
+Cand.mod[[9]] <- glmmTMB::glmmTMB(formula = lreg_edges~log2(trench_depth+1) + (1|manager_id), data = redges,
                                   family = stats::binomial(link = "logit"), REML = FALSE)
 
 
@@ -427,7 +427,7 @@ R.ajust <- rbind(R.ajust, data.frame(Model=9, R2=R2[[1]]))
 ##### Model 10 #####
 # -----------------
 
-Cand.mod[[10]] <- glmmTMB::glmmTMB(formula = lreg_edges~log(distance+1) + add_control + (1|manager_id), data = redges,
+Cand.mod[[10]] <- glmmTMB::glmmTMB(formula = lreg_edges~log2(distance+1) + add_control + (1|manager_id), data = redges,
                                   family = stats::binomial(link = "logit"), REML = FALSE)
 
 
@@ -466,7 +466,7 @@ R.ajust <- rbind(R.ajust, data.frame(Model=10, R2=R2[[1]]))
 ##### Model 11 #####
 # -----------------
 
-Cand.mod[[11]] <- glmmTMB::glmmTMB(formula = lreg_edges~log(distance+1) + obstacles + (1|manager_id), data = redges,
+Cand.mod[[11]] <- glmmTMB::glmmTMB(formula = lreg_edges~log2(distance+1) + obstacles + (1|manager_id), data = redges,
                                    family = stats::binomial(link = "logit"), REML = FALSE)
 
 
@@ -505,7 +505,7 @@ R.ajust <- rbind(R.ajust, data.frame(Model=11, R2=R2[[1]]))
 ##### Model 12 #####
 # -----------------
 
-Cand.mod[[12]] <- glmmTMB::glmmTMB(formula = lreg_edges~log(distance+1) + uprootexcav + (1|manager_id), data = redges,
+Cand.mod[[12]] <- glmmTMB::glmmTMB(formula = lreg_edges~log2(distance+1) + repairs + (1|manager_id), data = redges,
                                    family = stats::binomial(link = "logit"), REML = FALSE)
 
 
@@ -513,7 +513,7 @@ Cand.mod[[12]] <- glmmTMB::glmmTMB(formula = lreg_edges~log(distance+1) + uproot
 # # Simulation-based scaled residuals (DHARMa method):
 # simu.resid <- DHARMa::simulateResiduals(fittedModel = Cand.mod[[12]], n = 1000, plot = FALSE)
 # plot(simu.resid) # Ok!
-# DHARMa::plotResiduals(simu.resid, form = redges$uprootexcav) # Ok!
+# DHARMa::plotResiduals(simu.resid, form = redges$repairs) # Ok!
 # DHARMa::plotResiduals(simu.resid, form = redges$distance) # Ok!
 # # Testing for overdispersion:
 # DHARMa::testDispersion(simu.resid) # Ok!
@@ -524,7 +524,7 @@ Cand.mod[[12]] <- glmmTMB::glmmTMB(formula = lreg_edges~log(distance+1) + uproot
 # performance::check_distribution(Cand.mod[[12]])
 # performance::check_autocorrelation(Cand.mod[[12]])
 # performance::check_collinearity(Cand.mod[[12]])
-# performance::check_singularity(Cand.mod[[12]]) # Singularity! Dealt with decreased tolerance for convergence
+# performance::check_singularity(Cand.mod[[12]])
 #
 # ### Assessing goodness-of-fit:
 # # Test of Pearson's Chi2 residuals:
@@ -536,7 +536,7 @@ Cand.mod[[12]] <- glmmTMB::glmmTMB(formula = lreg_edges~log(distance+1) + uproot
 # # Computing a pseudo-R2:
 1 - (as.numeric(-2 * stats::logLik(Cand.mod[[12]]))/as.numeric(-2 * stats::logLik(
   update(Cand.mod[[12]], ~1)))) # McFadden's pseudo-R2
-R2 <- performance::r2_nakagawa(Cand.mod[[12]], tolerance = 1e-08) # Nakagawa's (pseudo-R2 for GLMMs)
+R2 <- performance::r2_nakagawa(Cand.mod[[12]]) # Nakagawa's (pseudo-R2 for GLMMs)
 R.ajust <- rbind(R.ajust, data.frame(Model=12, R2=R2[[1]]))
 
 
@@ -544,7 +544,7 @@ R.ajust <- rbind(R.ajust, data.frame(Model=12, R2=R2[[1]]))
 ##### Model 13 #####
 # -----------------
 
-Cand.mod[[13]] <- glmmTMB::glmmTMB(formula = lreg_edges~log(distance+1) + pb_fixation + (1|manager_id), data = redges,
+Cand.mod[[13]] <- glmmTMB::glmmTMB(formula = lreg_edges~log2(distance+1) + pb_fixation + (1|manager_id), data = redges,
                                    family = stats::binomial(link = "logit"), REML = FALSE)
 
 
@@ -583,7 +583,7 @@ R.ajust <- rbind(R.ajust, data.frame(Model=13, R2=R2[[1]]))
 ##### Model 14 #####
 # -----------------
 
-Cand.mod[[14]] <- glmmTMB::glmmTMB(formula = lreg_edges~log(distance+1) + log(stand_surface) + (1|manager_id), data = redges,
+Cand.mod[[14]] <- glmmTMB::glmmTMB(formula = lreg_edges~log2(distance+1) + log2(stand_surface) + (1|manager_id), data = redges,
                                    family = stats::binomial(link = "logit"), REML = FALSE)
 
 
@@ -623,7 +623,7 @@ R.ajust <- rbind(R.ajust, data.frame(Model=14, R2=R2[[1]]))
 ##### Model 15 #####
 # -----------------
 
-Cand.mod[[15]] <- glmmTMB::glmmTMB(formula = lreg_edges~log(distance+1) + geomem + (1|manager_id), data = redges,
+Cand.mod[[15]] <- glmmTMB::glmmTMB(formula = lreg_edges~log2(distance+1) + geomem + (1|manager_id), data = redges,
                                    family = stats::binomial(link = "logit"), REML = FALSE)
 
 
@@ -662,7 +662,7 @@ R.ajust <- rbind(R.ajust, data.frame(Model=15, R2=R2[[1]]))
 ##### Model 16 #####
 # -----------------
 
-Cand.mod[[16]] <- glmmTMB::glmmTMB(formula = lreg_edges~log(distance+1) + tarping_duration + (1|manager_id), data = redges,
+Cand.mod[[16]] <- glmmTMB::glmmTMB(formula = lreg_edges~log2(distance+1) + tarping_duration + (1|manager_id), data = redges,
                                    family = stats::binomial(link = "logit"), REML = FALSE)
 
 
@@ -701,7 +701,7 @@ R.ajust <- rbind(R.ajust, data.frame(Model=16, R2=R2[[1]]))
 ##### Model 17 #####
 # -----------------
 
-Cand.mod[[17]] <- glmmTMB::glmmTMB(formula = lreg_edges~log(distance+1) + log(trench_depth+1) + (1|manager_id), data = redges,
+Cand.mod[[17]] <- glmmTMB::glmmTMB(formula = lreg_edges~log2(distance+1) + log2(trench_depth+1) + (1|manager_id), data = redges,
                                    family = stats::binomial(link = "logit"), REML = FALSE)
 
 
@@ -740,7 +740,7 @@ R.ajust <- rbind(R.ajust, data.frame(Model=17, R2=R2[[1]]))
 ##### Model 18 #####
 # -----------------
 
-Cand.mod[[18]] <- glmmTMB::glmmTMB(formula = lreg_edges~scale(distance, scale = F) * scale(trench_depth, scale = F) + (1|manager_id), data = redges,
+Cand.mod[[18]] <- glmmTMB::glmmTMB(formula = lreg_edges~log2(distance+1) * log2(trench_depth+1) + (1|manager_id), data = redges,
                                    family = stats::binomial(link = "logit"), REML = FALSE)
 
 
@@ -780,7 +780,7 @@ R.ajust <- rbind(R.ajust, data.frame(Model=18, R2=R2[[1]]))
 ##### Model 19 #####
 # -----------------
 
-Cand.mod[[19]] <- glmmTMB::glmmTMB(formula = lreg_edges~log(trench_depth+1) + add_control + (1|manager_id), data = redges,
+Cand.mod[[19]] <- glmmTMB::glmmTMB(formula = lreg_edges~log2(trench_depth+1) + add_control + (1|manager_id), data = redges,
                                    family = stats::binomial(link = "logit"), REML = FALSE)
 
 
@@ -819,7 +819,7 @@ R.ajust <- rbind(R.ajust, data.frame(Model=19, R2=R2[[1]]))
 ##### Model 20 #####
 # -----------------
 
-Cand.mod[[20]] <- glmmTMB::glmmTMB(formula = lreg_edges~log(trench_depth+1) + obstacles + (1|manager_id), data = redges,
+Cand.mod[[20]] <- glmmTMB::glmmTMB(formula = lreg_edges~log2(trench_depth+1) + obstacles + (1|manager_id), data = redges,
                                    family = stats::binomial(link = "logit"), REML = FALSE)
 
 
@@ -858,7 +858,7 @@ R.ajust <- rbind(R.ajust, data.frame(Model=20, R2=R2[[1]]))
 ##### Model 21 #####
 # -----------------
 
-Cand.mod[[21]] <- glmmTMB::glmmTMB(formula = lreg_edges~log(trench_depth+1) + log(stand_surface) + (1|manager_id), data = redges,
+Cand.mod[[21]] <- glmmTMB::glmmTMB(formula = lreg_edges~log2(trench_depth+1) + log2(stand_surface) + (1|manager_id), data = redges,
                                    family = stats::binomial(link = "logit"), REML = FALSE)
 
 
@@ -897,7 +897,7 @@ R.ajust <- rbind(R.ajust, data.frame(Model=21, R2=R2[[1]]))
 ##### Model 22 #####
 # -----------------
 
-Cand.mod[[22]] <- glmmTMB::glmmTMB(formula = lreg_edges~log(stand_surface) + add_control + (1|manager_id), data = redges,
+Cand.mod[[22]] <- glmmTMB::glmmTMB(formula = lreg_edges~log2(stand_surface) + add_control + (1|manager_id), data = redges,
                                    family = stats::binomial(link = "logit"), REML = FALSE)
 
 
@@ -936,7 +936,7 @@ R.ajust <- rbind(R.ajust, data.frame(Model=22, R2=R2[[1]]))
 ##### Model 23 #####
 # -----------------
 
-Cand.mod[[23]] <- glmmTMB::glmmTMB(formula = lreg_edges~log(stand_surface) + obstacles + (1|manager_id), data = redges,
+Cand.mod[[23]] <- glmmTMB::glmmTMB(formula = lreg_edges~log2(stand_surface) + obstacles + (1|manager_id), data = redges,
                                    family = stats::binomial(link = "logit"), REML = FALSE)
 
 
@@ -975,7 +975,7 @@ R.ajust <- rbind(R.ajust, data.frame(Model=23, R2=R2[[1]]))
 ##### Model 24 #####
 # -----------------
 
-Cand.mod[[24]] <- glmmTMB::glmmTMB(formula = lreg_edges~log(stand_surface) + pb_fixation + (1|manager_id), data = redges,
+Cand.mod[[24]] <- glmmTMB::glmmTMB(formula = lreg_edges~log2(stand_surface) + pb_fixation + (1|manager_id), data = redges,
                                    family = stats::binomial(link = "logit"), REML = FALSE)
 
 
@@ -1017,7 +1017,7 @@ R.ajust <- rbind(R.ajust, data.frame(Model=24, R2=R2[[1]]))
 ##### Model 25 #####
 # -----------------
 
-Cand.mod[[25]] <- glmmTMB::glmmTMB(formula = lreg_edges~log(stand_surface) + tarping_duration + (1|manager_id), data = redges,
+Cand.mod[[25]] <- glmmTMB::glmmTMB(formula = lreg_edges~log2(stand_surface) + tarping_duration + (1|manager_id), data = redges,
                                    family = stats::binomial(link = "logit"), REML = FALSE)
 
 
@@ -1056,7 +1056,7 @@ R.ajust <- rbind(R.ajust, data.frame(Model=25, R2=R2[[1]]))
 ##### Model 26 #####
 # -----------------
 
-Cand.mod[[26]] <- glmmTMB::glmmTMB(formula = lreg_edges~log(trench_depth+1) + uprootexcav + (1|manager_id), data = redges,
+Cand.mod[[26]] <- glmmTMB::glmmTMB(formula = lreg_edges~log2(trench_depth+1) + repairs + (1|manager_id), data = redges,
                                    family = stats::binomial(link = "logit"), REML = FALSE)
 
 
@@ -1065,7 +1065,7 @@ Cand.mod[[26]] <- glmmTMB::glmmTMB(formula = lreg_edges~log(trench_depth+1) + up
 # simu.resid <- DHARMa::simulateResiduals(fittedModel = Cand.mod[[26]], n = 1000, plot = FALSE)
 # plot(simu.resid) # Ok-ish!
 # DHARMa::plotResiduals(simu.resid, form = redges$trench_depth) # Ok!
-# DHARMa::plotResiduals(simu.resid, form = redges$uprootexcav) # Ok!
+# DHARMa::plotResiduals(simu.resid, form = redges$repairs) # Ok!
 # # Testing for overdispersion:
 # DHARMa::testDispersion(simu.resid) # Ok!
 # # Testing for spatial autocorrelation:
@@ -1095,7 +1095,7 @@ R.ajust <- rbind(R.ajust, data.frame(Model=26, R2=R2[[1]]))
 ##### Model 27 #####
 # -----------------
 
-Cand.mod[[27]] <- glmmTMB::glmmTMB(formula = lreg_edges~log(trench_depth+1) + geomem + (1|manager_id), data = redges,
+Cand.mod[[27]] <- glmmTMB::glmmTMB(formula = lreg_edges~log2(trench_depth+1) + slope + (1|manager_id), data = redges,
                                    family = stats::binomial(link = "logit"), REML = FALSE)
 
 
@@ -1104,7 +1104,7 @@ Cand.mod[[27]] <- glmmTMB::glmmTMB(formula = lreg_edges~log(trench_depth+1) + ge
 # simu.resid <- DHARMa::simulateResiduals(fittedModel = Cand.mod[[27]], n = 1000, plot = FALSE)
 # plot(simu.resid) # Ok-ish!
 # DHARMa::plotResiduals(simu.resid, form = redges$trench_depth) # Ok!
-# DHARMa::plotResiduals(simu.resid, form = redges$geomem) # Ok-ish!
+# DHARMa::plotResiduals(simu.resid, form = redges$slope) # Ok-ish!
 # # Testing for overdispersion:
 # DHARMa::testDispersion(simu.resid) # Ok!
 # # Testing for spatial autocorrelation:
@@ -1368,16 +1368,16 @@ R.ajust <- rbind(R.ajust, data.frame(Model=33, R2=R2[[1]]))
 ##### Model 34 #####
 # -----------------
 
-Cand.mod[[34]] <- glmmTMB::glmmTMB(formula = lreg_edges~obstacles + uprootexcav + (1|manager_id), data = redges,
+Cand.mod[[34]] <- glmmTMB::glmmTMB(formula = lreg_edges~obstacles + repairs + (1|manager_id), data = redges,
                                    family = stats::binomial(link = "logit"), REML = FALSE)
 
 
 # ### Model diagnostics:
 # # Simulation-based scaled residuals (DHARMa method):
 # simu.resid <- DHARMa::simulateResiduals(fittedModel = Cand.mod[[34]], n = 1000, plot = FALSE)
-# plot(simu.resid) # Ok-ish!
+# plot(simu.resid) # Ok!
 # DHARMa::plotResiduals(simu.resid, form = redges$obstacles) # Ok!
-# DHARMa::plotResiduals(simu.resid, form = redges$pb_fixation) # Ok!
+# DHARMa::plotResiduals(simu.resid, form = redges$repairs) # Ok-ish!
 # # Testing for overdispersion:
 # DHARMa::testDispersion(simu.resid) # Ok!
 # # Testing for spatial autocorrelation:
@@ -1524,7 +1524,7 @@ R.ajust <- rbind(R.ajust, data.frame(Model=37, R2=R2[[1]]))
 ##### Model 38 #####
 # -----------------
 
-Cand.mod[[38]] <- glmmTMB::glmmTMB(formula = lreg_edges~log(distance+1) + log(trench_depth+1) + add_control
+Cand.mod[[38]] <- glmmTMB::glmmTMB(formula = lreg_edges~log2(distance+1) + log2(trench_depth+1) + add_control
                                    + (1|manager_id), data = redges, family = stats::binomial(link = "logit"),
                                    REML = FALSE)
 
@@ -1565,7 +1565,7 @@ R.ajust <- rbind(R.ajust, data.frame(Model=38, R2=R2[[1]]))
 ##### Model 39 #####
 # -----------------
 
-Cand.mod[[39]] <- glmmTMB::glmmTMB(formula = lreg_edges~log(distance+1) + log(trench_depth+1) + obstacles
+Cand.mod[[39]] <- glmmTMB::glmmTMB(formula = lreg_edges~log2(distance+1) + log2(trench_depth+1) + obstacles
                                    + (1|manager_id), data = redges, family = stats::binomial(link = "logit"),
                                    REML = FALSE)
 
@@ -1606,7 +1606,7 @@ R.ajust <- rbind(R.ajust, data.frame(Model=39, R2=R2[[1]]))
 ##### Model 40 #####
 # -----------------
 
-Cand.mod[[40]] <- glmmTMB::glmmTMB(formula = lreg_edges~log(distance+1) + log(trench_depth+1) + geomem
+Cand.mod[[40]] <- glmmTMB::glmmTMB(formula = lreg_edges~log2(distance+1) + log2(trench_depth+1) + geomem
                                    + (1|manager_id), data = redges, family = stats::binomial(link = "logit"),
                                    REML = FALSE)
 
@@ -1647,7 +1647,7 @@ R.ajust <- rbind(R.ajust, data.frame(Model=40, R2=R2[[1]]))
 ##### Model 41 #####
 # -----------------
 
-Cand.mod[[41]] <- glmmTMB::glmmTMB(formula = lreg_edges~log(distance+1) + log(trench_depth+1) + log(stand_surface)
+Cand.mod[[41]] <- glmmTMB::glmmTMB(formula = lreg_edges~log2(distance+1) + log2(trench_depth+1) + log2(stand_surface)
                                    + (1|manager_id), data = redges, family = stats::binomial(link = "logit"),
                                    REML = FALSE)
 
@@ -1688,7 +1688,7 @@ R.ajust <- rbind(R.ajust, data.frame(Model=41, R2=R2[[1]]))
 ##### Model 42 #####
 # -----------------
 
-Cand.mod[[42]] <- glmmTMB::glmmTMB(formula = lreg_edges~log(distance+1) + log(trench_depth+1) + tarping_duration
+Cand.mod[[42]] <- glmmTMB::glmmTMB(formula = lreg_edges~log2(distance+1) + log2(trench_depth+1) + slope
                                    + (1|manager_id), data = redges, family = stats::binomial(link = "logit"),
                                    REML = FALSE)
 
@@ -1699,7 +1699,7 @@ Cand.mod[[42]] <- glmmTMB::glmmTMB(formula = lreg_edges~log(distance+1) + log(tr
 # plot(simu.resid) # Ok-ish!
 # DHARMa::plotResiduals(simu.resid, form = redges$distance) # Ok!
 # DHARMa::plotResiduals(simu.resid, form = redges$trench_depth) # Ok!
-# DHARMa::plotResiduals(simu.resid, form = redges$tarping_duration) # Ok!
+# DHARMa::plotResiduals(simu.resid, form = redges$slope) # Ok!
 # # Testing for overdispersion:
 # DHARMa::testDispersion(simu.resid) # Ok!
 # # Testing for spatial autocorrelation:
@@ -1729,7 +1729,7 @@ R.ajust <- rbind(R.ajust, data.frame(Model=42, R2=R2[[1]]))
 ##### Model 43 #####
 # -----------------
 
-Cand.mod[[43]] <- glmmTMB::glmmTMB(formula = lreg_edges~log(distance+1) + log(stand_surface) + add_control
+Cand.mod[[43]] <- glmmTMB::glmmTMB(formula = lreg_edges~log2(distance+1) + log2(stand_surface) + add_control
                                    + (1|manager_id), data = redges, family = stats::binomial(link = "logit"),
                                    REML = FALSE)
 
@@ -1770,7 +1770,7 @@ R.ajust <- rbind(R.ajust, data.frame(Model=43, R2=R2[[1]]))
 ##### Model 44 #####
 # -----------------
 
-Cand.mod[[44]] <- glmmTMB::glmmTMB(formula = lreg_edges~log(distance+1) + log(stand_surface) + obstacles
+Cand.mod[[44]] <- glmmTMB::glmmTMB(formula = lreg_edges~log2(distance+1) + log2(stand_surface) + obstacles
                                    + (1|manager_id), data = redges, family = stats::binomial(link = "logit"),
                                    REML = FALSE)
 
@@ -1811,7 +1811,7 @@ R.ajust <- rbind(R.ajust, data.frame(Model=44, R2=R2[[1]]))
 ##### Model 45 #####
 # -----------------
 
-Cand.mod[[45]] <- glmmTMB::glmmTMB(formula = lreg_edges~log(distance+1) + log(stand_surface) + pb_fixation
+Cand.mod[[45]] <- glmmTMB::glmmTMB(formula = lreg_edges~log2(distance+1) + log2(stand_surface) + pb_fixation
                                    + (1|manager_id), data = redges, family = stats::binomial(link = "logit"),
                                    REML = FALSE)
 
@@ -1852,7 +1852,7 @@ R.ajust <- rbind(R.ajust, data.frame(Model=45, R2=R2[[1]]))
 ##### Model 46 #####
 # -----------------
 
-Cand.mod[[46]] <- glmmTMB::glmmTMB(formula = lreg_edges~log(distance+1) + geomem + tarping_duration
+Cand.mod[[46]] <- glmmTMB::glmmTMB(formula = lreg_edges~log2(distance+1) + geomem + tarping_duration
                                    + (1|manager_id), data = redges, family = stats::binomial(link = "logit"),
                                    REML = FALSE)
 
@@ -1893,7 +1893,7 @@ R.ajust <- rbind(R.ajust, data.frame(Model=46, R2=R2[[1]]))
 ##### Model 47 #####
 # ------------------
 
-Cand.mod[[47]] <- glmmTMB::glmmTMB(formula = lreg_edges~log(stand_surface) + log(trench_depth+1) + obstacles
+Cand.mod[[47]] <- glmmTMB::glmmTMB(formula = lreg_edges~log2(stand_surface) + log2(trench_depth+1) + obstacles
                                    + (1|manager_id), data = redges, family = stats::binomial(link = "logit"),
                                    REML = FALSE)
 
@@ -1934,7 +1934,7 @@ R.ajust <- rbind(R.ajust, data.frame(Model=47, R2=R2[[1]]))
 ##### Model 48 #####
 # -----------------
 
-Cand.mod[[48]] <- glmmTMB::glmmTMB(formula = lreg_edges~log(stand_surface) + log(trench_depth+1) + pb_fixation
+Cand.mod[[48]] <- glmmTMB::glmmTMB(formula = lreg_edges~log2(stand_surface) + log2(trench_depth+1) + slope
                                    + (1|manager_id), data = redges, family = stats::binomial(link = "logit"),
                                    REML = FALSE)
 
@@ -1945,7 +1945,7 @@ Cand.mod[[48]] <- glmmTMB::glmmTMB(formula = lreg_edges~log(stand_surface) + log
 # plot(simu.resid) # Nope! Same as for model #24!
 # DHARMa::plotResiduals(simu.resid, form = redges$trench_depth) # Ok!
 # DHARMa::plotResiduals(simu.resid, form = redges$stand_surface) # Ok-ish!
-# DHARMa::plotResiduals(simu.resid, form = redges$pb_fixation) # Nope!
+# DHARMa::plotResiduals(simu.resid, form = redges$slope) # Nope!
 # # Testing for overdispersion:
 # DHARMa::testDispersion(simu.resid) # Ok!
 # # Testing for spatial autocorrelation:
@@ -1975,7 +1975,7 @@ R.ajust <- rbind(R.ajust, data.frame(Model=48, R2=R2[[1]]))
 ##### Model 49 #####
 # -----------------
 
-Cand.mod[[49]] <- glmmTMB::glmmTMB(formula = lreg_edges~log(distance+1) + tarping_duration + add_control
+Cand.mod[[49]] <- glmmTMB::glmmTMB(formula = lreg_edges~log2(distance+1) + tarping_duration + add_control
                                    + (1|manager_id), data = redges, family = stats::binomial(link = "logit"),
                                    REML = FALSE)
 
@@ -2016,7 +2016,7 @@ R.ajust <- rbind(R.ajust, data.frame(Model=49, R2=R2[[1]]))
 ##### Model 50 #####
 # -----------------
 
-Cand.mod[[50]] <- glmmTMB::glmmTMB(formula = lreg_edges~obstacles + log(distance+1) + add_control
+Cand.mod[[50]] <- glmmTMB::glmmTMB(formula = lreg_edges~obstacles + repairs + add_control
                                    + (1|manager_id), data = redges, family = stats::binomial(link = "logit"),
                                    REML = FALSE)
 
@@ -2026,8 +2026,8 @@ Cand.mod[[50]] <- glmmTMB::glmmTMB(formula = lreg_edges~obstacles + log(distance
 # simu.resid <- DHARMa::simulateResiduals(fittedModel = Cand.mod[[50]], n = 1000, plot = FALSE)
 # plot(simu.resid) # Ok-ish!
 # DHARMa::plotResiduals(simu.resid, form = redges$obstacles) # Ok!
-# DHARMa::plotResiduals(simu.resid, form = redges$distance) # Ok!
-# DHARMa::plotResiduals(simu.resid, form = redges$followups) # Ok!
+# DHARMa::plotResiduals(simu.resid, form = redges$repairs) # Ok-ish!
+# DHARMa::plotResiduals(simu.resid, form = redges$add_control) # Ok-ish!
 # # Testing for overdispersion:
 # DHARMa::testDispersion(simu.resid) # Ok!
 # # Testing for spatial autocorrelation:
@@ -2057,7 +2057,7 @@ R.ajust <- rbind(R.ajust, data.frame(Model=50, R2=R2[[1]]))
 ##### Model 51 #####
 # -----------------
 
-Cand.mod[[51]] <- glmmTMB::glmmTMB(formula = lreg_edges~obstacles + log(distance+1) + geomem
+Cand.mod[[51]] <- glmmTMB::glmmTMB(formula = lreg_edges~obstacles + add_control + geomem
                                    + (1|manager_id), data = redges, family = stats::binomial(link = "logit"),
                                    REML = FALSE)
 
@@ -2067,7 +2067,7 @@ Cand.mod[[51]] <- glmmTMB::glmmTMB(formula = lreg_edges~obstacles + log(distance
 # simu.resid <- DHARMa::simulateResiduals(fittedModel = Cand.mod[[51]], n = 1000, plot = FALSE)
 # plot(simu.resid) # Ok-ish!
 # DHARMa::plotResiduals(simu.resid, form = redges$obstacles) # Ok!
-# DHARMa::plotResiduals(simu.resid, form = redges$distance) # Ok!
+# DHARMa::plotResiduals(simu.resid, form = redges$add_control) # Ok!
 # DHARMa::plotResiduals(simu.resid, form = redges$geomem) # Ok-ish!
 # # Testing for overdispersion:
 # DHARMa::testDispersion(simu.resid) # Ok!
@@ -2078,7 +2078,7 @@ Cand.mod[[51]] <- glmmTMB::glmmTMB(formula = lreg_edges~obstacles + log(distance
 # performance::check_distribution(Cand.mod[[51]])
 # performance::check_autocorrelation(Cand.mod[[51]])
 # performance::check_collinearity(Cand.mod[[51]])
-# performance::check_singularity(Cand.mod[[51]])
+# performance::check_singularity(Cand.mod[[51]]) # Singularity!
 #
 # ### Assessing goodness-of-fit:
 # # Test of Pearson's Chi2 residuals:
@@ -2090,7 +2090,7 @@ Cand.mod[[51]] <- glmmTMB::glmmTMB(formula = lreg_edges~obstacles + log(distance
 # # Computing a pseudo-R2:
 1 - (as.numeric(-2 * stats::logLik(Cand.mod[[51]]))/as.numeric(-2 * stats::logLik(
   update(Cand.mod[[51]], ~1)))) # McFadden's pseudo-R2
-R2 <- performance::r2_nakagawa(Cand.mod[[51]]) # Nakagawa's (pseudo-R2 for GLMMs)
+R2 <- performance::r2_nakagawa(Cand.mod[[51]], tolerance = 1e-08) # Nakagawa's (pseudo-R2 for GLMMs)
 R.ajust <- rbind(R.ajust, data.frame(Model=51, R2=R2[[1]]))
 
 
@@ -2098,7 +2098,7 @@ R.ajust <- rbind(R.ajust, data.frame(Model=51, R2=R2[[1]]))
 ##### Model 52 #####
 # -----------------
 
-Cand.mod[[52]] <- glmmTMB::glmmTMB(formula = lreg_edges~obstacles + log(distance+1) + slope
+Cand.mod[[52]] <- glmmTMB::glmmTMB(formula = lreg_edges~obstacles + add_control + tarping_duration
                                    + (1|manager_id), data = redges, family = stats::binomial(link = "logit"),
                                    REML = FALSE)
 
@@ -2108,8 +2108,8 @@ Cand.mod[[52]] <- glmmTMB::glmmTMB(formula = lreg_edges~obstacles + log(distance
 # simu.resid <- DHARMa::simulateResiduals(fittedModel = Cand.mod[[52]], n = 1000, plot = FALSE)
 # plot(simu.resid) # Ok-ish!
 # DHARMa::plotResiduals(simu.resid, form = redges$obstacles) # Ok!
-# DHARMa::plotResiduals(simu.resid, form = redges$distance) # Ok!
-# DHARMa::plotResiduals(simu.resid, form = redges$slope) # Ok!
+# DHARMa::plotResiduals(simu.resid, form = redges$add_control) # Ok-ish!
+# DHARMa::plotResiduals(simu.resid, form = redges$tarping_duration) # Ok!
 # # Testing for overdispersion:
 # DHARMa::testDispersion(simu.resid) # Ok!
 # # Testing for spatial autocorrelation:
@@ -2139,7 +2139,7 @@ R.ajust <- rbind(R.ajust, data.frame(Model=52, R2=R2[[1]]))
 ##### Model 53 #####
 # -----------------
 
-Cand.mod[[53]] <- glmmTMB::glmmTMB(formula = lreg_edges~obstacles + add_control + log(trench_depth+1)
+Cand.mod[[53]] <- glmmTMB::glmmTMB(formula = lreg_edges~obstacles + add_control + log2(trench_depth+1)
                                    + (1|manager_id), data = redges, family = stats::binomial(link = "logit"),
                                    REML = FALSE)
 
@@ -2180,7 +2180,7 @@ R.ajust <- rbind(R.ajust, data.frame(Model=53, R2=R2[[1]]))
 ##### Model 54 #####
 # -----------------
 
-Cand.mod[[54]] <- glmmTMB::glmmTMB(formula = lreg_edges~obstacles + add_control + log(stand_surface)
+Cand.mod[[54]] <- glmmTMB::glmmTMB(formula = lreg_edges~obstacles + add_control + log2(stand_surface)
                                    + (1|manager_id), data = redges, family = stats::binomial(link = "logit"),
                                    REML = FALSE)
 
@@ -2262,7 +2262,7 @@ R.ajust <- rbind(R.ajust, data.frame(Model=55, R2=R2[[1]]))
 ##### Model 56 #####
 # -----------------
 
-Cand.mod[[56]] <- glmmTMB::glmmTMB(formula = lreg_edges~log(trench_depth+1) + log(distance+1) + uprootexcav
+Cand.mod[[56]] <- glmmTMB::glmmTMB(formula = lreg_edges~log2(trench_depth+1) + log2(distance+1) + repairs
                                    + (1|manager_id), data = redges, family = stats::binomial(link = "logit"),
                                    REML = FALSE)
 
@@ -2273,7 +2273,7 @@ Cand.mod[[56]] <- glmmTMB::glmmTMB(formula = lreg_edges~log(trench_depth+1) + lo
 # plot(simu.resid) # Ok-ish!
 # DHARMa::plotResiduals(simu.resid, form = redges$trench_depth) # Ok!
 # DHARMa::plotResiduals(simu.resid, form = redges$distance) # Ok!
-# DHARMa::plotResiduals(simu.resid, form = redges$uprootexcav) # Ok-ish!
+# DHARMa::plotResiduals(simu.resid, form = redges$repairs) # Ok-ish!
 # # Testing for overdispersion:
 # DHARMa::testDispersion(simu.resid) # Ok!
 # # Testing for spatial autocorrelation:
@@ -2303,7 +2303,7 @@ R.ajust <- rbind(R.ajust, data.frame(Model=56, R2=R2[[1]]))
 ##### Model 57 #####
 # -----------------
 
-Cand.mod[[57]] <- glmmTMB::glmmTMB(formula = lreg_edges~log(trench_depth+1) + obstacles + uprootexcav
+Cand.mod[[57]] <- glmmTMB::glmmTMB(formula = lreg_edges~log2(trench_depth+1) + obstacles + repairs
                                    + (1|manager_id), data = redges, family = stats::binomial(link = "logit"),
                                    REML = FALSE)
 
@@ -2314,7 +2314,7 @@ Cand.mod[[57]] <- glmmTMB::glmmTMB(formula = lreg_edges~log(trench_depth+1) + ob
 # plot(simu.resid) # Ok-ish!
 # DHARMa::plotResiduals(simu.resid, form = redges$trench_depth) # Ok!
 # DHARMa::plotResiduals(simu.resid, form = redges$obstacles) # Ok!
-# DHARMa::plotResiduals(simu.resid, form = redges$uprootexcav) # Ok!
+# DHARMa::plotResiduals(simu.resid, form = redges$repairs) # Ok-ish!
 # # Testing for overdispersion:
 # DHARMa::testDispersion(simu.resid) # Ok!
 # # Testing for spatial autocorrelation:
@@ -2344,7 +2344,7 @@ R.ajust <- rbind(R.ajust, data.frame(Model=57, R2=R2[[1]]))
 ##### Model 58 #####
 # -----------------
 
-Cand.mod[[58]] <- glmmTMB::glmmTMB(formula = lreg_edges~log(trench_depth+1) + obstacles + geomem
+Cand.mod[[58]] <- glmmTMB::glmmTMB(formula = lreg_edges~log2(trench_depth+1) + obstacles + geomem
                                    + (1|manager_id), data = redges, family = stats::binomial(link = "logit"),
                                    REML = FALSE)
 
@@ -2391,27 +2391,27 @@ R.ajust <- rbind(R.ajust, data.frame(Model=58, R2=R2[[1]]))
 Model <- (1:58)
 
 Candidate <- c("null",
-               "log(distance + 1)", "add_control", "obstacles", "pb_fixation", "slope", "log(stand_surface)",
-               "tarping_duration", "log(trench_depth + 1)", "log(distance + 1) + add_control", "log(distance + 1) + obstacles",
-               "log(distance + 1) + uprootexcav", "log(distance + 1) + pb_fixation", "log(distance + 1) + log(stand_surface)",
-               "log(distance + 1) + geomem", "log(distance + 1) + tarping_duration", "log(distance + 1) + log(trench_depth + 1)",
-               "log(distance + 1) * log(trench_depth + 1)", "log(trench_depth + 1) + add_control", "log(trench_depth + 1) + obstacles",
-               "log(trench_depth + 1) + log(stand_surface)", "log(stand_surface) + add_control", "log(stand_surface) + obstacles",
-               "log(stand_surface) + pb_fixation", "log(stand_surface) + tarping_duration",
-               "log(trench_depth + 1) + uprootexcav", "log(trench_depth + 1) + geomem", "add_control + obstacles",
-               "add_control + pb_fixation", "add_control + slope", "add_control + tarping_duration",
-               "obstacles + pb_fixation", "obstacles + geomem", "obstacles + uprootexcav", "slope + geomem",
-               "slope + pb_fixation", "slope + tarping_duration", "log(distance + 1) + log(trench_depth + 1) + add_control",
-               "log(distance + 1) + log(trench_depth + 1) + obstacles", "log(distance + 1) + log(trench_depth + 1) + geomem",
-               "log(distance + 1) + log(trench_depth + 1) + log(stand_surface)", "log(distance + 1) + log(trench_depth + 1) + tarping_duration",
-               "log(distance + 1) + log(stand_surface) + add_control", "log(distance + 1) + log(stand_surface) + obstacles",
-               "log(distance + 1) + log(stand_surface) + pb_fixation", "log(distance + 1) + geomem + tarping_duration",
-               "log(stand_surface) + log(trench_depth + 1) + obstacles", "log(stand_surface) + log(trench_depth + 1) + pb_fixation",
-               "tarping_duration + log(distance + 1) + add_control", "obstacles + log(distance + 1) + add_control",
-               "obstacles + log(distance + 1) + geomem", "obstacles + log(distance + 1) + slope",
-               "obstacles + add_control + log(trench_depth + 1)", "obstacles + add_control + log(stand_surface)",
-               "obstacles + add_control + slope", "log(trench_depth + 1) + log(distance + 1) + uprootexcav",
-               "log(trench_depth + 1) + obstacles + uprootexcav", "log(trench_depth + 1) + obstacles + geomem")
+               "log2(distance + 1)", "add_control", "obstacles", "pb_fixation", "slope", "log2(stand_surface)",
+               "tarping_duration", "log2(trench_depth + 1)", "log2(distance + 1) + add_control", "log2(distance + 1) + obstacles",
+               "log2(distance + 1) + repairs", "log2(distance + 1) + pb_fixation", "log2(distance + 1) + log2(stand_surface)",
+               "log2(distance + 1) + geomem", "log2(distance + 1) + tarping_duration", "log2(distance + 1) + log2(trench_depth + 1)",
+               "log2(distance + 1) * log2(trench_depth + 1)", "log2(trench_depth + 1) + add_control", "log2(trench_depth + 1) + obstacles",
+               "log2(trench_depth + 1) + log2(stand_surface)", "log2(stand_surface) + add_control", "log2(stand_surface) + obstacles",
+               "log2(stand_surface) + pb_fixation", "log2(stand_surface) + tarping_duration", "log2(trench_depth + 1) + repairs",
+               "log2(trench_depth + 1) + slope", "add_control + obstacles", "add_control + pb_fixation",
+               "add_control + slope", "add_control + tarping_duration", "obstacles + pb_fixation",
+               "obstacles + geomem", "obstacles + repairs", "slope + geomem", "slope + pb_fixation",
+               "slope + tarping_duration", "log2(distance + 1) + log2(trench_depth + 1) + add_control",
+               "log2(distance + 1) + log2(trench_depth + 1) + obstacles", "log2(distance + 1) + log2(trench_depth + 1) + geomem",
+               "log2(distance + 1) + log2(trench_depth + 1) + log2(stand_surface)", "log2(distance + 1) + log2(trench_depth + 1) + slope",
+               "log2(distance + 1) + log2(stand_surface) + add_control", "log2(distance + 1) + log2(stand_surface) + obstacles",
+               "log2(distance + 1) + log2(stand_surface) + pb_fixation", "log2(distance + 1) + geomem + tarping_duration",
+               "log2(stand_surface) + log2(trench_depth + 1) + obstacles", "log2(stand_surface) + log2(trench_depth + 1) + slope",
+               "tarping_duration + log2(distance + 1) + add_control", "obstacles + repairs + add_control",
+               "obstacles + add_control + geomem", "obstacles + add_control + tarping_duration",
+               "obstacles + add_control + log2(trench_depth + 1)", "obstacles + add_control + log2(stand_surface)",
+               "obstacles + add_control + slope", "log2(trench_depth + 1) + log2(distance + 1) + repairs",
+               "log2(trench_depth + 1) + obstacles + repairs", "log2(trench_depth + 1) + obstacles + geomem")
 
 Cand.model <- data.frame(Model, Candidate)
 
@@ -2456,22 +2456,24 @@ readr::write_csv2(x = AICc.model, file = here::here("output", "tables", "Models_
 ##### Multimodel Inference (averaging) #####
 # ------------------------------------------
 
-Parameters <- c("Intercept", "log(distance + 1)", "followups", "fully_tarped", "geomem", "obstacles",
-                "plantation", "pb_fixation", "log(sedicover_height + 1)", "slope", "log(stand_surface)",
-                "tarping_duration", "uprootexcav")
-Var <- c("cond((Int))", "cond(log(distance + 1))", "cond(followups)", "cond(fully_tarped1)", "cond(geomem1)",
-         "cond(obstacles)", "cond(plantation1)", "cond(pb_fixation1)", "cond(log(sedicover_height + 1))",
-         "cond(slope)", "cond(log(stand_surface))", "cond(log(tarping_duration))", "cond(uprootexcav1)")
-Var.Imp <- c("cond((Int))", "cond(log(distance + 1))", "cond(followups)", "cond(fully_tarped)", "cond(geomem)",
-             "cond(obstacles)", "cond(plantation)", "cond(pb_fixation)", "cond(log(sedicover_height + 1))",
-             "cond(slope)", "cond(log(stand_surface))", "cond(log(tarping_duration))", "cond(uprootexcav)")
+Parameters <- c("Intercept", "add_control", "log2(distance + 1)", "geomem", "obstacles",
+                "pb_fixation", "slope", "log2(stand_surface)", "tarping_duration",
+                "log2(trench_depth + 1)", "repairs")
+Var <- c("cond((Int))", "cond(add_control1)", "cond(log2(distance + 1))", "cond(geomem1)",
+         "cond(obstacles)", "cond(pb_fixation1)", "cond(slope)", "cond(log2(stand_surface))",
+         "cond(tarping_duration)", "cond(log2(trench_depth + 1))","cond(repairs1)")
+Var.Imp <- c("cond((Int))", "cond(add_control)", "cond(log2(distance + 1))", "cond(geomem)",
+             "cond(obstacles)", "cond(pb_fixation)", "cond(slope)", "cond(log2(stand_surface))",
+             "cond(tarping_duration)", "cond(log2(trench_depth + 1))","cond(repairs)")
 
 Para.model <- data.frame(Parameters, Var, Var.Imp)
 
 ### Select the top models:
-#top.models <- MuMIn::get.models(AICc, cumsum(weight) <= 0.95) # To take those with a cumulated sum of
+# Removing the model including an interaction before averaging:
+AICc.2 <- AICc[-1,]
+#top.models <- MuMIn::get.models(AICc.2, cumsum(weight) <= 0.95) # To take those with a cumulated sum of
 # AICc weights <= 0.95
-top.models <- MuMIn::get.models(AICc, cumsum(weight) <= 1) # To take them all
+top.models <- MuMIn::get.models(AICc.2, cumsum(weight) <= 1) # To take them all
 # We could also select models according to their delta AICc (see Burnham & Anderson, 2002)!
 
 ### Actual model parameters averaging:
