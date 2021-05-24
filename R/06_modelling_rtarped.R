@@ -763,16 +763,16 @@ R.ajust <- rbind(R.ajust, data.frame(Model=16, R2=R2[[1]]))
 ##### Model 17 #####
 # -----------------
 
-Cand.mod[[17]] <- glmmTMB::glmmTMB(formula = lreg_tarpedarea~woven_geotex + tarpfix_pierced
+Cand.mod[[17]] <- glmmTMB::glmmTMB(formula = lreg_tarpedarea~woven_geotex + slope
                                    + (1|xp_id), data = rtarped,
                                    family = stats::binomial(link = "logit"), REML = FALSE)
 
 # ### Model diagnostics:
 # # Simulation-based scaled residuals (DHARMa method):
 # simu.resid <- DHARMa::simulateResiduals(fittedModel = Cand.mod[[17]], n = 1000, plot = FALSE)
-# plot(simu.resid) # Ok-ish!
+# plot(simu.resid) # Nope! But acceptable.
 # DHARMa::plotResiduals(simu.resid, form = rtarped$woven_geotex) # Ok-ish!
-# DHARMa::plotResiduals(simu.resid, form = rtarped$tarpfix_pierced) # Ok-ish!
+# DHARMa::plotResiduals(simu.resid, form = rtarped$slope) # Ok-ish!
 # # Testing for overdispersion:
 # DHARMa::testDispersion(simu.resid) # Ok!
 # # Testing for spatial autocorrelation:
@@ -841,16 +841,16 @@ R.ajust <- rbind(R.ajust, data.frame(Model=18, R2=R2[[1]]))
 ##### Model 19 #####
 # -----------------
 
-Cand.mod[[19]] <- glmmTMB::glmmTMB(formula = lreg_tarpedarea~plantation + log2(stand_surface)
+Cand.mod[[19]] <- glmmTMB::glmmTMB(formula = lreg_tarpedarea~plantation + stripsoverlap_ok
                                    + (1|xp_id), data = rtarped,
                                    family = stats::binomial(link = "logit"), REML = FALSE)
 
 # ### Model diagnostics:
 # # Simulation-based scaled residuals (DHARMa method):
 # simu.resid <- DHARMa::simulateResiduals(fittedModel = Cand.mod[[19]], n = 1000, plot = FALSE)
-# plot(simu.resid) # Nope! Same as before.
+# plot(simu.resid) # Ok-ish!
 # DHARMa::plotResiduals(simu.resid, form = rtarped$plantation) # Ok-ish!
-# DHARMa::plotResiduals(simu.resid, form = rtarped$stand_surface) # Ok-ish!
+# DHARMa::plotResiduals(simu.resid, form = rtarped$stripsoverlap_ok) # Ok-ish!
 # # Testing for overdispersion:
 # DHARMa::testDispersion(simu.resid) # Ok!
 # # Testing for spatial autocorrelation:
@@ -1233,16 +1233,16 @@ R.ajust <- rbind(R.ajust, data.frame(Model=28, R2=R2[[1]]))
 ##### Model 29 #####
 # -----------------
 
-Cand.mod[[29]] <- glmmTMB::glmmTMB(formula = lreg_tarpedarea~log2(sedicover_height + 1) + tarping_duration
+Cand.mod[[29]] <- glmmTMB::glmmTMB(formula = lreg_tarpedarea~log2(sedicover_height + 1) + slope
                                    + (1|xp_id), data = rtarped,
                                    family = stats::binomial(link = "logit"), REML = FALSE)
 
 # ### Model diagnostics:
 # # Simulation-based scaled residuals (DHARMa method):
 # simu.resid <- DHARMa::simulateResiduals(fittedModel = Cand.mod[[29]], n = 1000, plot = FALSE)
-# plot(simu.resid) # Ok!
+# plot(simu.resid) # Nope!
 # DHARMa::plotResiduals(simu.resid, form = rtarped$sedicover_height) # Nope!
-# DHARMa::plotResiduals(simu.resid, form = rtarped$tarping_duration) # Nope! Same as before.
+# DHARMa::plotResiduals(simu.resid, form = rtarped$slope) # Nope! Same as before.
 # # Testing for overdispersion:
 # DHARMa::testDispersion(simu.resid) # Ok!
 # # Testing for spatial autocorrelation:
@@ -1590,7 +1590,7 @@ R.ajust <- rbind(R.ajust, data.frame(Model=37, R2=R2[[1]]))
 ##### Model 38 #####
 # -----------------
 
-Cand.mod[[38]] <- glmmTMB::glmmTMB(formula = lreg_tarpedarea~obstacles + woven_geotex + log(stand_surface)
+Cand.mod[[38]] <- glmmTMB::glmmTMB(formula = lreg_tarpedarea~obstacles + woven_geotex + log2(stand_surface)
                                    + (1|xp_id), data = rtarped,
                                    family = stats::binomial(link = "logit"), REML = FALSE)
 
@@ -1630,7 +1630,7 @@ R.ajust <- rbind(R.ajust, data.frame(Model=38, R2=R2[[1]]))
 ##### Model 39 #####
 # ------------------
 
-Cand.mod[[39]] <- glmmTMB::glmmTMB(formula = lreg_tarpedarea~obstacles + woven_geotex + tarpfix_pierced
+Cand.mod[[39]] <- glmmTMB::glmmTMB(formula = lreg_tarpedarea~obstacles + woven_geotex + slope
                                    + (1|xp_id), data = rtarped,
                                    family = stats::binomial(link = "logit"), REML = FALSE)
 
@@ -1640,7 +1640,7 @@ Cand.mod[[39]] <- glmmTMB::glmmTMB(formula = lreg_tarpedarea~obstacles + woven_g
 # plot(simu.resid) # Ok-ish!
 # DHARMa::plotResiduals(simu.resid, form = rtarped$obstacles) # Ok!
 # DHARMa::plotResiduals(simu.resid, form = rtarped$woven_geotex) # Ok-ish!
-# DHARMa::plotResiduals(simu.resid, form = rtarped$tarpfix_pierced) # Ok-ish!
+# DHARMa::plotResiduals(simu.resid, form = rtarped$slope) # Ok-ish!
 # # Testing for overdispersion:
 # DHARMa::testDispersion(simu.resid) # Ok!
 # # Testing for spatial autocorrelation:
@@ -1750,7 +1750,7 @@ R.ajust <- rbind(R.ajust, data.frame(Model=41, R2=R2[[1]]))
 ##### Model 42 #####
 # -----------------
 
-Cand.mod[[42]] <- glmmTMB::glmmTMB(formula = lreg_tarpedarea~obstacles + tarpfix_pierced + levelling
+Cand.mod[[42]] <- glmmTMB::glmmTMB(formula = lreg_tarpedarea~obstacles + tarpfix_pierced + stripsoverlap_ok
                                    + (1|xp_id), data = rtarped,
                                    family = stats::binomial(link = "logit"), REML = FALSE)
 
@@ -1760,7 +1760,7 @@ Cand.mod[[42]] <- glmmTMB::glmmTMB(formula = lreg_tarpedarea~obstacles + tarpfix
 # plot(simu.resid) # Ok!
 # DHARMa::plotResiduals(simu.resid, form = rtarped$obstacles) # Ok!
 # DHARMa::plotResiduals(simu.resid, form = rtarped$tarpfix_pierced) # Ok-ish!
-# DHARMa::plotResiduals(simu.resid, form = rtarped$levelling) # Ok-ish!
+# DHARMa::plotResiduals(simu.resid, form = rtarped$stripsoverlap_ok) # Ok-ish!
 # # Testing for overdispersion:
 # DHARMa::testDispersion(simu.resid) # Ok!
 # # Testing for spatial autocorrelation:
@@ -1990,7 +1990,7 @@ R.ajust <- rbind(R.ajust, data.frame(Model=47, R2=R2[[1]]))
 ##### Model 48 #####
 # -----------------
 
-Cand.mod[[48]] <- glmmTMB::glmmTMB(formula = lreg_tarpedarea~add_control + woven_geotex + log2(stand_surface)
+Cand.mod[[48]] <- glmmTMB::glmmTMB(formula = lreg_tarpedarea~add_control + woven_geotex + levelling
                                    + (1|xp_id), data = rtarped,
                                    family = stats::binomial(link = "logit"), REML = FALSE)
 
@@ -1998,9 +1998,9 @@ Cand.mod[[48]] <- glmmTMB::glmmTMB(formula = lreg_tarpedarea~add_control + woven
 # # Simulation-based scaled residuals (DHARMa method):
 # simu.resid <- DHARMa::simulateResiduals(fittedModel = Cand.mod[[48]], n = 1000, plot = FALSE)
 # plot(simu.resid) # Ok-ish!
-# DHARMa::plotResiduals(simu.resid, form = rtarped$add_control) # Nope!
+# DHARMa::plotResiduals(simu.resid, form = rtarped$add_control) # Ok-ish!
 # DHARMa::plotResiduals(simu.resid, form = rtarped$woven_geotex) # Ok-ish!
-# DHARMa::plotResiduals(simu.resid, form = rtarped$stand_surface) # Nope! Same as before!
+# DHARMa::plotResiduals(simu.resid, form = rtarped$levelling) # Ok-ish!
 # # Testing for overdispersion:
 # DHARMa::testDispersion(simu.resid) # Ok!
 # # Testing for spatial autocorrelation:
@@ -2008,7 +2008,7 @@ Cand.mod[[48]] <- glmmTMB::glmmTMB(formula = lreg_tarpedarea~add_control + woven
 #                                    x = rtarped$longitude, y = rtarped$latitude, plot = TRUE) # Ok!
 # # Using the 'performance' package:
 # performance::check_distribution(Cand.mod[[48]])
-# performance::check_autocorrelation(Cand.mod[[48]]) # Close!
+# performance::check_autocorrelation(Cand.mod[[48]]) # Nope! But tolerable.
 # performance::check_collinearity(Cand.mod[[48]])
 # performance::check_singularity(Cand.mod[[48]])
 #
@@ -2070,17 +2070,17 @@ R.ajust <- rbind(R.ajust, data.frame(Model=49, R2=R2[[1]]))
 ##### Model 50 #####
 # -----------------
 
-Cand.mod[[50]] <- glmmTMB::glmmTMB(formula = lreg_tarpedarea~add_control + woven_geotex + tarping_duration
+Cand.mod[[50]] <- glmmTMB::glmmTMB(formula = lreg_tarpedarea~add_control + woven_geotex + pb_fixation
                                    + (1|xp_id), data = rtarped,
                                    family = stats::binomial(link = "logit"), REML = FALSE)
 
 # ### Model diagnostics:
 # # Simulation-based scaled residuals (DHARMa method):
 # simu.resid <- DHARMa::simulateResiduals(fittedModel = Cand.mod[[50]], n = 1000, plot = FALSE)
-# plot(simu.resid) # Nope!
-# DHARMa::plotResiduals(simu.resid, form = rtarped$add_control) # Nope! Same as before.
+# plot(simu.resid) # Ok-ish!
+# DHARMa::plotResiduals(simu.resid, form = rtarped$add_control) # Ok-ish!
 # DHARMa::plotResiduals(simu.resid, form = rtarped$woven_geotex) # Ok-ish!
-# DHARMa::plotResiduals(simu.resid, form = rtarped$tarping_duration) # Nope!
+# DHARMa::plotResiduals(simu.resid, form = rtarped$pb_fixation) # Nope!
 # # Testing for overdispersion:
 # DHARMa::testDispersion(simu.resid) # Ok!
 # # Testing for spatial autocorrelation:
@@ -2088,7 +2088,7 @@ Cand.mod[[50]] <- glmmTMB::glmmTMB(formula = lreg_tarpedarea~add_control + woven
 #                                    x = rtarped$longitude, y = rtarped$latitude, plot = TRUE) # Ok!
 # # Using the 'performance' package:
 # performance::check_distribution(Cand.mod[[50]])
-# performance::check_autocorrelation(Cand.mod[[50]]) # Nope!
+# performance::check_autocorrelation(Cand.mod[[50]]) # Nope! But tolerable.
 # performance::check_collinearity(Cand.mod[[50]])
 # performance::check_singularity(Cand.mod[[50]])
 #
@@ -2150,7 +2150,7 @@ R.ajust <- rbind(R.ajust, data.frame(Model=51, R2=R2[[1]]))
 ##### Model 52 #####
 # -----------------
 
-Cand.mod[[52]] <- glmmTMB::glmmTMB(formula = lreg_tarpedarea~add_control + tarpfix_pierced + log2(stand_surface)
+Cand.mod[[52]] <- glmmTMB::glmmTMB(formula = lreg_tarpedarea~add_control + tarpfix_pierced + levelling
                                    + (1|xp_id), data = rtarped,
                                    family = stats::binomial(link = "logit"), REML = FALSE)
 
@@ -2158,9 +2158,9 @@ Cand.mod[[52]] <- glmmTMB::glmmTMB(formula = lreg_tarpedarea~add_control + tarpf
 # # Simulation-based scaled residuals (DHARMa method):
 # simu.resid <- DHARMa::simulateResiduals(fittedModel = Cand.mod[[52]], n = 1000, plot = FALSE)
 # plot(simu.resid) # Ok-ish!
-# DHARMa::plotResiduals(simu.resid, form = rtarped$add_control) # Nope! Same as before.
+# DHARMa::plotResiduals(simu.resid, form = rtarped$add_control) # Ok-ish!
 # DHARMa::plotResiduals(simu.resid, form = rtarped$tarpfix_pierced) # Ok-ish!
-# DHARMa::plotResiduals(simu.resid, form = rtarped$stand_surface) # Ok-ish!
+# DHARMa::plotResiduals(simu.resid, form = rtarped$levelling) # Ok-ish!
 # # Testing for overdispersion:
 # DHARMa::testDispersion(simu.resid) # Ok!
 # # Testing for spatial autocorrelation:
@@ -2168,7 +2168,7 @@ Cand.mod[[52]] <- glmmTMB::glmmTMB(formula = lreg_tarpedarea~add_control + tarpf
 #                                    x = rtarped$longitude, y = rtarped$latitude, plot = TRUE) # Ok!
 # # Using the 'performance' package:
 # performance::check_distribution(Cand.mod[[52]])
-# performance::check_autocorrelation(Cand.mod[[52]]) # Close!
+# performance::check_autocorrelation(Cand.mod[[52]]) # Nope! But tolerable.
 # performance::check_collinearity(Cand.mod[[52]])
 # performance::check_singularity(Cand.mod[[52]])
 #
@@ -2230,17 +2230,17 @@ R.ajust <- rbind(R.ajust, data.frame(Model=53, R2=R2[[1]]))
 ##### Model 54 #####
 # -----------------
 
-Cand.mod[[54]] <- glmmTMB::glmmTMB(formula = lreg_tarpedarea~add_control + tarpfix_pierced + tarping_duration
+Cand.mod[[54]] <- glmmTMB::glmmTMB(formula = lreg_tarpedarea~add_control + tarpfix_pierced + slope
                                    + (1|xp_id), data = rtarped,
                                    family = stats::binomial(link = "logit"), REML = FALSE)
 
 # ### Model diagnostics:
 # # Simulation-based scaled residuals (DHARMa method):
 # simu.resid <- DHARMa::simulateResiduals(fittedModel = Cand.mod[[54]], n = 1000, plot = FALSE)
-# plot(simu.resid) # Nope!
-# DHARMa::plotResiduals(simu.resid, form = rtarped$add_control) # Nope! Same as before.
+# plot(simu.resid) # Nope! Same as before.
+# DHARMa::plotResiduals(simu.resid, form = rtarped$add_control) # Ok-ish!
 # DHARMa::plotResiduals(simu.resid, form = rtarped$tarpfix_pierced) # Ok-ish!
-# DHARMa::plotResiduals(simu.resid, form = rtarped$tarping_duration) # Nope!
+# DHARMa::plotResiduals(simu.resid, form = rtarped$slope) # Ok-ish!
 # # Testing for overdispersion:
 # DHARMa::testDispersion(simu.resid) # Ok!
 # # Testing for spatial autocorrelation:
@@ -2270,17 +2270,17 @@ R.ajust <- rbind(R.ajust, data.frame(Model=54, R2=R2[[1]]))
 ##### Model 55 #####
 # -----------------
 
-Cand.mod[[55]] <- glmmTMB::glmmTMB(formula = lreg_tarpedarea~add_control + plantation + log2(stand_surface)
+Cand.mod[[55]] <- glmmTMB::glmmTMB(formula = lreg_tarpedarea~add_control + plantation + stripsoverlap_ok
                                    + (1|xp_id), data = rtarped,
                                    family = stats::binomial(link = "logit"), REML = FALSE)
 
 # ### Model diagnostics:
 # # Simulation-based scaled residuals (DHARMa method):
 # simu.resid <- DHARMa::simulateResiduals(fittedModel = Cand.mod[[55]], n = 1000, plot = FALSE)
-# plot(simu.resid) # Nope!
-# DHARMa::plotResiduals(simu.resid, form = rtarped$add_control) # Nope! Same as before.
-# DHARMa::plotResiduals(simu.resid, form = rtarped$plantation) # Ok-ish!
-# DHARMa::plotResiduals(simu.resid, form = rtarped$stand_surface) # Nope!
+# plot(simu.resid) # Ok-ish!
+# DHARMa::plotResiduals(simu.resid, form = rtarped$add_control) # Ok-ish!
+# DHARMa::plotResiduals(simu.resid, form = rtarped$plantation) # Ok!
+# DHARMa::plotResiduals(simu.resid, form = rtarped$stripsoverlap_ok) # Ok-ish!
 # # Testing for overdispersion:
 # DHARMa::testDispersion(simu.resid) # Ok!
 # # Testing for spatial autocorrelation:
@@ -2288,7 +2288,7 @@ Cand.mod[[55]] <- glmmTMB::glmmTMB(formula = lreg_tarpedarea~add_control + plant
 #                                    x = rtarped$longitude, y = rtarped$latitude, plot = TRUE) # Ok!
 # # Using the 'performance' package:
 # performance::check_distribution(Cand.mod[[55]])
-# performance::check_autocorrelation(Cand.mod[[55]]) # Close!
+# performance::check_autocorrelation(Cand.mod[[55]])
 # performance::check_collinearity(Cand.mod[[55]])
 # performance::check_singularity(Cand.mod[[55]])
 #
@@ -2430,17 +2430,17 @@ R.ajust <- rbind(R.ajust, data.frame(Model=58, R2=R2[[1]]))
 ##### Model 59 #####
 # -----------------
 
-Cand.mod[[59]] <- glmmTMB::glmmTMB(formula = lreg_tarpedarea~add_control + log2(stand_surface) + tarping_duration
+Cand.mod[[59]] <- glmmTMB::glmmTMB(formula = lreg_tarpedarea~add_control + log2(stand_surface) + slope
                                    + (1|xp_id), data = rtarped,
                                    family = stats::binomial(link = "logit"), REML = FALSE)
 
 # ### Model diagnostics:
 # # Simulation-based scaled residuals (DHARMa method):
 # simu.resid <- DHARMa::simulateResiduals(fittedModel = Cand.mod[[59]], n = 1000, plot = FALSE)
-# plot(simu.resid) # Nope!
-# DHARMa::plotResiduals(simu.resid, form = rtarped$add_control) # Nope! Same as before.
-# DHARMa::plotResiduals(simu.resid, form = rtarped$stand_surface) # Nope!
-# DHARMa::plotResiduals(simu.resid, form = rtarped$tarping_duration) # Ok-ish!
+# plot(simu.resid) # Ok-ish!
+# DHARMa::plotResiduals(simu.resid, form = rtarped$add_control) # Ok-ish!
+# DHARMa::plotResiduals(simu.resid, form = rtarped$stand_surface) # Nope! Same as before.
+# DHARMa::plotResiduals(simu.resid, form = rtarped$slope) # Ok-ish!
 # # Testing for overdispersion:
 # DHARMa::testDispersion(simu.resid) # Ok!
 # # Testing for spatial autocorrelation:
@@ -2507,20 +2507,20 @@ R.ajust <- rbind(R.ajust, data.frame(Model=60, R2=R2[[1]]))
 
 
 
-##### Model 60 #####
+##### Model 61 #####
 # -----------------
 
-Cand.mod[[61]] <- glmmTMB::glmmTMB(formula = lreg_tarpedarea~woven_geotex + tarpfix_pierced + tarping_duration
+Cand.mod[[61]] <- glmmTMB::glmmTMB(formula = lreg_tarpedarea~woven_geotex + tarpfix_pierced + slope
                                    + (1|xp_id), data = rtarped,
                                    family = stats::binomial(link = "logit"), REML = FALSE)
 
 # ### Model diagnostics:
 # # Simulation-based scaled residuals (DHARMa method):
 # simu.resid <- DHARMa::simulateResiduals(fittedModel = Cand.mod[[61]], n = 1000, plot = FALSE)
-# plot(simu.resid) # Ok-ish!
+# plot(simu.resid) # Nope!
 # DHARMa::plotResiduals(simu.resid, form = rtarped$woven_geotex) # Ok-ish!
 # DHARMa::plotResiduals(simu.resid, form = rtarped$tarpfix_pierced) # Ok-ish!
-# DHARMa::plotResiduals(simu.resid, form = rtarped$stand_surface) # Nope! Same as before.
+# DHARMa::plotResiduals(simu.resid, form = rtarped$slope) # Nope! Same as before.
 # # Testing for overdispersion:
 # DHARMa::testDispersion(simu.resid) # Ok!
 # # Testing for spatial autocorrelation:
@@ -2550,17 +2550,17 @@ R.ajust <- rbind(R.ajust, data.frame(Model=61, R2=R2[[1]]))
 ##### Model 62 #####
 # -----------------
 
-Cand.mod[[62]] <- glmmTMB::glmmTMB(formula = lreg_tarpedarea~log2(stand_surface) + tarpfix_pierced + plantation
+Cand.mod[[62]] <- glmmTMB::glmmTMB(formula = lreg_tarpedarea~log2(stand_surface) + tarpfix_pierced + stripsoverlap_ok
                                    + (1|xp_id), data = rtarped,
                                    family = stats::binomial(link = "logit"), REML = FALSE)
 
 # ### Model diagnostics:
 # # Simulation-based scaled residuals (DHARMa method):
 # simu.resid <- DHARMa::simulateResiduals(fittedModel = Cand.mod[[62]], n = 1000, plot = FALSE)
-# plot(simu.resid) # Nope!
+# plot(simu.resid) # Ok-ish!
 # DHARMa::plotResiduals(simu.resid, form = rtarped$stand_surface) # Nope! Same as before.
 # DHARMa::plotResiduals(simu.resid, form = rtarped$tarpfix_pierced) # Ok-ish!
-# DHARMa::plotResiduals(simu.resid, form = rtarped$plantation) # Ok-ish!
+# DHARMa::plotResiduals(simu.resid, form = rtarped$stripsoverlap_ok) # Ok-ish!
 # # Testing for overdispersion:
 # DHARMa::testDispersion(simu.resid) # Ok!
 # # Testing for spatial autocorrelation:
@@ -2568,7 +2568,7 @@ Cand.mod[[62]] <- glmmTMB::glmmTMB(formula = lreg_tarpedarea~log2(stand_surface)
 #                                    x = rtarped$longitude, y = rtarped$latitude, plot = TRUE) # Ok!
 # # Using the 'performance' package:
 # performance::check_distribution(Cand.mod[[62]])
-# performance::check_autocorrelation(Cand.mod[[62]]) # Close!
+# performance::check_autocorrelation(Cand.mod[[62]])
 # performance::check_collinearity(Cand.mod[[62]])
 # performance::check_singularity(Cand.mod[[62]])
 #
@@ -2590,17 +2590,17 @@ R.ajust <- rbind(R.ajust, data.frame(Model=62, R2=R2[[1]]))
 ##### Model 63 #####
 # -----------------
 
-Cand.mod[[63]] <- glmmTMB::glmmTMB(formula = lreg_tarpedarea~log2(stand_surface) + tarpfix_pierced + stripsoverlap_ok
+Cand.mod[[63]] <- glmmTMB::glmmTMB(formula = lreg_tarpedarea~woven_geotex + log2(sedicover_height + 1) + log2(stand_surface)
                                    + (1|xp_id), data = rtarped,
                                    family = stats::binomial(link = "logit"), REML = FALSE)
 
 # ### Model diagnostics:
 # # Simulation-based scaled residuals (DHARMa method):
 # simu.resid <- DHARMa::simulateResiduals(fittedModel = Cand.mod[[63]], n = 1000, plot = FALSE)
-# plot(simu.resid) # Ok-ish!
-# DHARMa::plotResiduals(simu.resid, form = rtarped$stand_surface) # Nope! Same as before.
-# DHARMa::plotResiduals(simu.resid, form = rtarped$tarpfix_pierced) # Ok-ish!
-# DHARMa::plotResiduals(simu.resid, form = rtarped$stripsoverlap_ok) # Ok-ish!
+# plot(simu.resid) # Nope!
+# DHARMa::plotResiduals(simu.resid, form = rtarped$woven_geotex) # Ok!
+# DHARMa::plotResiduals(simu.resid, form = rtarped$sedicover_height) # Nope! Same as before.
+# DHARMa::plotResiduals(simu.resid, form = rtarped$stand_surface) # Ok-ish!
 # # Testing for overdispersion:
 # DHARMa::testDispersion(simu.resid) # Ok!
 # # Testing for spatial autocorrelation:
@@ -2608,7 +2608,7 @@ Cand.mod[[63]] <- glmmTMB::glmmTMB(formula = lreg_tarpedarea~log2(stand_surface)
 #                                    x = rtarped$longitude, y = rtarped$latitude, plot = TRUE) # Ok!
 # # Using the 'performance' package:
 # performance::check_distribution(Cand.mod[[63]])
-# performance::check_autocorrelation(Cand.mod[[63]])
+# performance::check_autocorrelation(Cand.mod[[63]]) # Close!
 # performance::check_collinearity(Cand.mod[[63]])
 # performance::check_singularity(Cand.mod[[63]])
 #
@@ -2630,17 +2630,17 @@ R.ajust <- rbind(R.ajust, data.frame(Model=63, R2=R2[[1]]))
 ##### Model 64 #####
 # -----------------
 
-Cand.mod[[64]] <- glmmTMB::glmmTMB(formula = lreg_tarpedarea~log2(stand_surface) + tarpfix_pierced + tarping_duration
+Cand.mod[[64]] <- glmmTMB::glmmTMB(formula = lreg_tarpedarea~woven_geotex + log2(sedicover_height + 1) + stripsoverlap_ok
                                    + (1|xp_id), data = rtarped,
                                    family = stats::binomial(link = "logit"), REML = FALSE)
 
 # ### Model diagnostics:
 # # Simulation-based scaled residuals (DHARMa method):
 # simu.resid <- DHARMa::simulateResiduals(fittedModel = Cand.mod[[64]], n = 1000, plot = FALSE)
-# plot(simu.resid) # Nope!
-# DHARMa::plotResiduals(simu.resid, form = rtarped$stand_surface) # Nope! Same as before.
-# DHARMa::plotResiduals(simu.resid, form = rtarped$tarpfix_pierced) # Ok-ish!
-# DHARMa::plotResiduals(simu.resid, form = rtarped$tarping_duration) # Ok-ish!
+# plot(simu.resid) # Ok!
+# DHARMa::plotResiduals(simu.resid, form = rtarped$woven_geotex) # Ok!
+# DHARMa::plotResiduals(simu.resid, form = rtarped$sedicover_height) # Ok-ish!
+# DHARMa::plotResiduals(simu.resid, form = rtarped$stripsoverlap_ok) # Ok-ish!
 # # Testing for overdispersion:
 # DHARMa::testDispersion(simu.resid) # Ok!
 # # Testing for spatial autocorrelation:
@@ -2648,7 +2648,7 @@ Cand.mod[[64]] <- glmmTMB::glmmTMB(formula = lreg_tarpedarea~log2(stand_surface)
 #                                    x = rtarped$longitude, y = rtarped$latitude, plot = TRUE) # Ok!
 # # Using the 'performance' package:
 # performance::check_distribution(Cand.mod[[64]])
-# performance::check_autocorrelation(Cand.mod[[64]]) # Close!
+# performance::check_autocorrelation(Cand.mod[[64]])
 # performance::check_collinearity(Cand.mod[[64]])
 # performance::check_singularity(Cand.mod[[64]])
 #
@@ -2667,218 +2667,43 @@ R.ajust <- rbind(R.ajust, data.frame(Model=64, R2=R2[[1]]))
 
 
 
-##### Model 65 #####
-# -----------------
-
-Cand.mod[[65]] <- glmmTMB::glmmTMB(formula = lreg_tarpedarea~woven_geotex + log2(sedicover_height + 1) + log2(stand_surface)
-                                   + (1|xp_id), data = rtarped,
-                                   family = stats::binomial(link = "logit"), REML = FALSE)
-
-# ### Model diagnostics:
-# # Simulation-based scaled residuals (DHARMa method):
-# simu.resid <- DHARMa::simulateResiduals(fittedModel = Cand.mod[[65]], n = 1000, plot = FALSE)
-# plot(simu.resid) # Nope!
-# DHARMa::plotResiduals(simu.resid, form = rtarped$woven_geotex) # Ok!
-# DHARMa::plotResiduals(simu.resid, form = rtarped$sedicover_height) # Nope! Same as before.
-# DHARMa::plotResiduals(simu.resid, form = rtarped$stand_surface) # Ok-ish!
-# # Testing for overdispersion:
-# DHARMa::testDispersion(simu.resid) # Ok!
-# # Testing for spatial autocorrelation:
-# DHARMa::testSpatialAutocorrelation(simulationOutput = simu.resid,
-#                                    x = rtarped$longitude, y = rtarped$latitude, plot = TRUE) # Ok!
-# # Using the 'performance' package:
-# performance::check_distribution(Cand.mod[[65]])
-# performance::check_autocorrelation(Cand.mod[[65]]) # Close!
-# performance::check_collinearity(Cand.mod[[65]])
-# performance::check_singularity(Cand.mod[[65]])
-#
-# ### Assessing goodness-of-fit:
-# # Test of Pearson's Chi2 residuals:
-# dat.resid <- sum(stats::resid(Cand.mod[[65]], type = "pearson")^2)
-# 1 - stats::pchisq(dat.resid, stats::df.residual(Cand.mod[[65]])) # Ok!
-#
-# ### Exploring the model parameters and test hypotheses:
-# summary(Cand.mod[[65]])
-# # Computing a pseudo-R2:
-1 - (as.numeric(-2 * stats::logLik(Cand.mod[[65]]))/as.numeric(-2 * stats::logLik(
-  update(Cand.mod[[65]], ~1)))) # McFadden's pseudo-R2
-R2 <- performance::r2_nakagawa(Cand.mod[[65]]) # Nakagawa's (pseudo-R2 for GLMMs)
-R.ajust <- rbind(R.ajust, data.frame(Model=65, R2=R2[[1]]))
-
-
-
-##### Model 66 #####
-# -----------------
-
-Cand.mod[[66]] <- glmmTMB::glmmTMB(formula = lreg_tarpedarea~woven_geotex + log2(sedicover_height + 1) + stripsoverlap_ok
-                                   + (1|xp_id), data = rtarped,
-                                   family = stats::binomial(link = "logit"), REML = FALSE)
-
-# ### Model diagnostics:
-# # Simulation-based scaled residuals (DHARMa method):
-# simu.resid <- DHARMa::simulateResiduals(fittedModel = Cand.mod[[66]], n = 1000, plot = FALSE)
-# plot(simu.resid) # Ok!
-# DHARMa::plotResiduals(simu.resid, form = rtarped$woven_geotex) # Ok!
-# DHARMa::plotResiduals(simu.resid, form = rtarped$sedicover_height) # Ok-ish!
-# DHARMa::plotResiduals(simu.resid, form = rtarped$stripsoverlap_ok) # Ok-ish!
-# # Testing for overdispersion:
-# DHARMa::testDispersion(simu.resid) # Ok!
-# # Testing for spatial autocorrelation:
-# DHARMa::testSpatialAutocorrelation(simulationOutput = simu.resid,
-#                                    x = rtarped$longitude, y = rtarped$latitude, plot = TRUE) # Ok!
-# # Using the 'performance' package:
-# performance::check_distribution(Cand.mod[[66]])
-# performance::check_autocorrelation(Cand.mod[[66]])
-# performance::check_collinearity(Cand.mod[[66]])
-# performance::check_singularity(Cand.mod[[66]])
-#
-# ### Assessing goodness-of-fit:
-# # Test of Pearson's Chi2 residuals:
-# dat.resid <- sum(stats::resid(Cand.mod[[66]], type = "pearson")^2)
-# 1 - stats::pchisq(dat.resid, stats::df.residual(Cand.mod[[66]])) # Ok!
-#
-# ### Exploring the model parameters and test hypotheses:
-# summary(Cand.mod[[66]])
-# # Computing a pseudo-R2:
-1 - (as.numeric(-2 * stats::logLik(Cand.mod[[66]]))/as.numeric(-2 * stats::logLik(
-  update(Cand.mod[[66]], ~1)))) # McFadden's pseudo-R2
-R2 <- performance::r2_nakagawa(Cand.mod[[66]]) # Nakagawa's (pseudo-R2 for GLMMs)
-R.ajust <- rbind(R.ajust, data.frame(Model=66, R2=R2[[1]]))
-
-
-
-##### Model 67 #####
-# -----------------
-
-Cand.mod[[67]] <- glmmTMB::glmmTMB(formula = lreg_tarpedarea~woven_geotex + log2(sedicover_height + 1) + tarping_duration
-                                   + (1|xp_id), data = rtarped,
-                                   family = stats::binomial(link = "logit"), REML = FALSE)
-
-# ### Model diagnostics:
-# # Simulation-based scaled residuals (DHARMa method):
-# simu.resid <- DHARMa::simulateResiduals(fittedModel = Cand.mod[[67]], n = 1000, plot = FALSE)
-# plot(simu.resid) # Nope!
-# DHARMa::plotResiduals(simu.resid, form = rtarped$woven_geotex) # Ok!
-# DHARMa::plotResiduals(simu.resid, form = rtarped$sedicover_height) # Nope!
-# DHARMa::plotResiduals(simu.resid, form = rtarped$tarping_duration) # Nope! Same as before.
-# # Testing for overdispersion:
-# DHARMa::testDispersion(simu.resid) # Ok!
-# # Testing for spatial autocorrelation:
-# DHARMa::testSpatialAutocorrelation(simulationOutput = simu.resid,
-#                                    x = rtarped$longitude, y = rtarped$latitude, plot = TRUE) # Ok!
-# # Using the 'performance' package:
-# performance::check_distribution(Cand.mod[[67]])
-# performance::check_autocorrelation(Cand.mod[[67]])
-# performance::check_collinearity(Cand.mod[[67]])
-# performance::check_singularity(Cand.mod[[67]])
-#
-# ### Assessing goodness-of-fit:
-# # Test of Pearson's Chi2 residuals:
-# dat.resid <- sum(stats::resid(Cand.mod[[67]], type = "pearson")^2)
-# 1 - stats::pchisq(dat.resid, stats::df.residual(Cand.mod[[67]])) # Ok!
-#
-# ### Exploring the model parameters and test hypotheses:
-# summary(Cand.mod[[67]])
-# # Computing a pseudo-R2:
-1 - (as.numeric(-2 * stats::logLik(Cand.mod[[67]]))/as.numeric(-2 * stats::logLik(
-  update(Cand.mod[[67]], ~1)))) # McFadden's pseudo-R2
-R2 <- performance::r2_nakagawa(Cand.mod[[67]]) # Nakagawa's (pseudo-R2 for GLMMs)
-R.ajust <- rbind(R.ajust, data.frame(Model=67, R2=R2[[1]]))
-
-
-
-##### Model 68 #####
-# -----------------
-
-Cand.mod[[68]] <- glmmTMB::glmmTMB(formula = lreg_tarpedarea~log2(sedicover_height + 1) + tarping_duration + geomem
-                                   + (1|xp_id), data = rtarped,
-                                   family = stats::binomial(link = "logit"), REML = FALSE)
-
-# ### Model diagnostics:
-# # Simulation-based scaled residuals (DHARMa method):
-# simu.resid <- DHARMa::simulateResiduals(fittedModel = Cand.mod[[68]], n = 1000, plot = FALSE)
-# plot(simu.resid) # Nope!
-# DHARMa::plotResiduals(simu.resid, form = rtarped$woven_geotex) # Ok-ish!
-# DHARMa::plotResiduals(simu.resid, form = rtarped$tarping_duration) # Nope!
-# DHARMa::plotResiduals(simu.resid, form = rtarped$geomem) # Ok-ish!
-# # Testing for overdispersion:
-# DHARMa::testDispersion(simu.resid) # Ok!
-# # Testing for spatial autocorrelation:
-# DHARMa::testSpatialAutocorrelation(simulationOutput = simu.resid,
-#                                    x = rtarped$longitude, y = rtarped$latitude, plot = TRUE) # Ok!
-# # Using the 'performance' package:
-# performance::check_distribution(Cand.mod[[68]])
-# performance::check_autocorrelation(Cand.mod[[68]]) # Close!
-# performance::check_collinearity(Cand.mod[[68]])
-# performance::check_singularity(Cand.mod[[68]])
-#
-# ### Assessing goodness-of-fit:
-# # Test of Pearson's Chi2 residuals:
-# dat.resid <- sum(stats::resid(Cand.mod[[68]], type = "pearson")^2)
-# 1 - stats::pchisq(dat.resid, stats::df.residual(Cand.mod[[68]])) # Ok!
-#
-# ### Exploring the model parameters and test hypotheses:
-# summary(Cand.mod[[68]])
-# # Computing a pseudo-R2:
-1 - (as.numeric(-2 * stats::logLik(Cand.mod[[68]]))/as.numeric(-2 * stats::logLik(
-  update(Cand.mod[[68]], ~1)))) # McFadden's pseudo-R2
-R2 <- performance::r2_nakagawa(Cand.mod[[68]]) # Nakagawa's (pseudo-R2 for GLMMs)
-R.ajust <- rbind(R.ajust, data.frame(Model=68, R2=R2[[1]]))
-
-
-
-
-###### hahahahahahahahaha #######
-
-
-# Variations de 41
-rrr <- glmmTMB::glmmTMB(formula = lreg_tarpedarea~stripsoverlap_ok + tarpfix_multimethod + slope
-                                   + (1|xp_id), data = rtarped,
-                                   family = stats::binomial(link = "logit"), REML = FALSE)
-summary(rrr)
-summary(Cand.mod[[51]])
-
-
-"levelling"  "obstacles" "pb_durability"  "pb_fixation"   "repairs"
-"slope"  "stripsoverlap_ok"
-[25] "tarpfix_multimethod"
- "woven_geotex"
-
-###################################
-###################################
-###################################
-###################################
-
-
 
 
 # ------------------------------------- #
 ##### Model selection and averaging #####
 # ------------------------------------- #
 
-Model <- (1:50)
+Model <- (1:64)
 
 Candidate <- c("null",
-               "log2(distance + 1) + add_control", "log2(distance + 1) + obstacles",
-               "log2(distance + 1) + repairs", "log2(distance + 1) + pb_fixation", "log2(distance + 1) + log2(stand_surface)",
-               "log2(distance + 1) + geomem", "log2(distance + 1) + tarping_duration", "log2(distance + 1) + log2(trench_depth + 1)",
-               "log2(distance + 1) * log2(trench_depth + 1)", "log2(trench_depth + 1) + add_control", "log2(trench_depth + 1) + obstacles",
-               "log2(trench_depth + 1) + log2(stand_surface)", "log2(stand_surface) + add_control", "log2(stand_surface) + obstacles",
-               "log2(stand_surface) + pb_fixation", "log2(stand_surface) + tarping_duration", "log2(trench_depth + 1) + repairs",
-               "log2(trench_depth + 1) + slope", "add_control + obstacles", "add_control + pb_fixation",
-               "add_control + slope", "add_control + tarping_duration", "obstacles + pb_fixation",
-               "obstacles + geomem", "obstacles + repairs", "slope + geomem", "slope + pb_fixation",
-               "slope + tarping_duration", "log2(distance + 1) + log2(trench_depth + 1) + add_control",
-               "log2(distance + 1) + log2(trench_depth + 1) + obstacles", "log2(distance + 1) + log2(trench_depth + 1) + geomem",
-               "log2(distance + 1) + log2(trench_depth + 1) + log2(stand_surface)", "log2(distance + 1) + log2(trench_depth + 1) + slope",
-               "log2(distance + 1) + log2(stand_surface) + add_control", "log2(distance + 1) + log2(stand_surface) + obstacles",
-               "log2(distance + 1) + log2(stand_surface) + pb_fixation", "log2(distance + 1) + geomem + tarping_duration",
-               "log2(stand_surface) + log2(trench_depth + 1) + obstacles", "log2(stand_surface) + log2(trench_depth + 1) + slope",
-               "tarping_duration + log2(distance + 1) + add_control", "obstacles + repairs + add_control",
-               "obstacles + add_control + geomem", "obstacles + add_control + tarping_duration",
-               "obstacles + add_control + log2(trench_depth + 1)", "obstacles + add_control + log2(stand_surface)",
-               "obstacles + add_control + slope", "log2(trench_depth + 1) + log2(distance + 1) + repairs",
-               "log2(trench_depth + 1) + obstacles + repairs", "log2(trench_depth + 1) + obstacles + geomem")
+               "obstacles + add_control", "obstacles + geomem", "obstacles + levelling",
+               "obstacles + log2(stand_surface)", "obstacles + stripsoverlap_ok", "obstacles + pb_fixation",
+               "obstacles + tarpfix_pierced", "obstacles + woven_geotex", "add_control + plantation",
+               "add_control + tarpfix_pierced", "add_control + tarping_duration", "add_control + woven_geotex",
+               "woven_geotex + levelling", "woven_geotex + log2(sedicover_height + 1)", "woven_geotex + pb_fixation",
+               "woven_geotex + slope", "woven_geotex + tarping_duration", "plantation + stripsoverlap_ok",
+               "plantation + tarping_duration", "tarpfix_pierced + geomem", "tarpfix_pierced + levelling",
+               "tarpfix_pierced + log2(stand_surface)", "tarpfix_pierced + stripsoverlap_ok",
+               "tarpfix_pierced + pb_fixation", "tarpfix_pierced + tarping_duration",
+               "log2(sedicover_height + 1) + geomem", "log2(sedicover_height + 1) + stripsoverlap_ok",
+               "log2(sedicover_height + 1) + slope", "stripsoverlap_ok + geomem", "stripsoverlap_ok + log2(stand_surface)",
+               "obstacles + add_control + geomem", "obstacles + add_control + log2(stand_surface)",
+               "obstacles + add_control + tarpfix_pierced", "obstacles + add_control + tarping_duration",
+               "obstacles + add_control + woven_geotex", "obstacles + woven_geotex + levelling",
+               "obstacles + woven_geotex + log2(stand_surface)", "obstacles + woven_geotex + slope",
+               "obstacles + woven_geotex + tarping_duration", "obstacles + tarpfix_pierced + geomem",
+               "obstacles + tarpfix_pierced + stripsoverlap_ok", "obstacles + tarpfix_pierced + log2(stand_surface)",
+               "obstacles + tarpfix_pierced + pb_fixation", "obstacles + stripsoverlap_ok + geomem",
+               "obstacles + stripsoverlap_ok + tarping_duration", "obstacles + log2(sedicover_height + 1) + geomem",
+               "add_control + woven_geotex + levelling", "add_control + woven_geotex + tarpfix_pierced",
+               "add_control + woven_geotex + pb_fixation", "add_control + tarpfix_pierced + geomem",
+               "add_control + tarpfix_pierced + levelling", "add_control + tarpfix_pierced + pb_fixation",
+               "add_control + tarpfix_pierced + slope", "add_control + plantation + stripsoverlap_ok",
+               "add_control + plantation + tarping_duration", "add_control + log2(stand_surface) + geomem",
+               "add_control + log2(stand_surface) + pb_fixation", "add_control + log2(stand_surface) + slope",
+               "woven_geotex + tarpfix_pierced + log2(stand_surface)", "woven_geotex + tarpfix_pierced + slope",
+               "log2(stand_surface) + tarpfix_pierced + stripsoverlap_ok", "woven_geotex + log2(sedicover_height + 1) + log2(stand_surface)",
+               "woven_geotex + log2(sedicover_height + 1) + stripsoverlap_ok")
 
 Cand.model <- data.frame(Model, Candidate)
 
@@ -2923,24 +2748,25 @@ readr::write_csv2(x = AICc.model, file = here::here("output", "tables", "Models_
 ##### Multimodel Inference (averaging) #####
 # ------------------------------------------
 
-Parameters <- c("Intercept", "add_control", "log2(distance + 1)", "geomem", "obstacles",
-                "pb_fixation", "slope", "log2(stand_surface)", "tarping_duration",
-                "log2(trench_depth + 1)", "repairs")
-Var <- c("cond((Int))", "cond(add_control1)", "cond(log2(distance + 1))", "cond(geomem1)",
-         "cond(obstacles)", "cond(pb_fixation1)", "cond(slope)", "cond(log2(stand_surface))",
-         "cond(tarping_duration)", "cond(log2(trench_depth + 1))","cond(repairs1)")
-Var.Imp <- c("cond((Int))", "cond(add_control)", "cond(log2(distance + 1))", "cond(geomem)",
-             "cond(obstacles)", "cond(pb_fixation)", "cond(slope)", "cond(log2(stand_surface))",
-             "cond(tarping_duration)", "cond(log2(trench_depth + 1))","cond(repairs)")
+Parameters <- c("Intercept", "add_control", "geomem", "obstacles", "levelling", "plantation",
+                "pb_fixation", "slope", "log2(sedicover_height + 1)", "log2(stand_surface)",
+                "stripsoverlap_ok", "tarpfix_pierced", "tarping_duration",
+                "woven_geotex")
+Var <- c("cond((Int))", "cond(add_control1)", "cond(geomem1)", "cond(obstacles)", "cond(levelling1)",
+         "cond(plantation1)", "cond(pb_fixation1)", "cond(slope)", "cond(log2(sedicover_height + 1))",
+         "cond(log2(stand_surface))", "cond(stripsoverlap_ok1)", "cond(tarpfix_pierced1)",
+         "cond(tarping_duration)", "cond(woven_geotex1)")
+Var.Imp <- c("cond((Int))", "cond(add_control)", "cond(geomem)", "cond(obstacles)", "cond(levelling)",
+             "cond(plantation)", "cond(pb_fixation)", "cond(slope)", "cond(log2(sedicover_height + 1))",
+             "cond(log2(stand_surface))", "cond(stripsoverlap_ok)", "cond(tarpfix_pierced)",
+             "cond(tarping_duration)", "cond(woven_geotex)")
 
 Para.model <- data.frame(Parameters, Var, Var.Imp)
 
 ### Select the top models:
-# Removing the model including an interaction before averaging:
-AICc.2 <- AICc[-1,]
-#top.models <- MuMIn::get.models(AICc.2, cumsum(weight) <= 0.95) # To take those with a cumulated sum of
+#top.models <- MuMIn::get.models(AICc, cumsum(weight) <= 0.95) # To take those with a cumulated sum of
 # AICc weights <= 0.95
-top.models <- MuMIn::get.models(AICc.2, cumsum(weight) <= 1) # To take them all
+top.models <- MuMIn::get.models(AICc, cumsum(weight) <= 1) # To take them all
 # We could also select models according to their delta AICc (see Burnham & Anderson, 2002)!
 
 ### Actual model parameters averaging:
