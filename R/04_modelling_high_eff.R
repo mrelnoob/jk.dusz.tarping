@@ -52,21 +52,65 @@ summary(eff)
 
 
 
-##### Final pre-modelling assumption checks #####
+##### Final pre-modelling assumption checks ##### (run only when required)
 # --------------------------------------------- #
 
-### Testing the relevance of the random effect structure:
-# m0.glm <- stats::glm(high_eff ~ log(distance+1), data = eff, family = binomial)
-# m0.glmer <- lme4::glmer(high_eff ~ log(distance+1) + (1|manager_id), data = eff, family = binomial, nAGQ = 10)
+# ### Testing the relevance of the random effect structure:
+# m0.glm <- stats::glm(reg_stripsoverlap ~ sqrt(strips_overlap), data = roverlaps, family = binomial)
+# m0.glmer <- lme4::glmer(reg_stripsoverlap ~ sqrt(strips_overlap) + (1|manager_id), data = roverlaps, family = binomial)
+# m0.glmer2 <- lme4::glmer(reg_stripsoverlap ~ sqrt(strips_overlap) + (1|manager_id) + (1|xp_id), data = roverlaps, family = binomial)
 # aic.glm <- AIC(logLik(m0.glm))
 # aic.glmer <- AIC(logLik(m0.glmer))
+# aic.glmer2 <- AIC(logLik(m0.glmer2))
 #
 # # Likelihood Ratio Test:
 # null.id <- -2 * logLik(m0.glm) + 2 * logLik(m0.glmer)
 # pchisq(as.numeric(null.id), df=1, lower.tail=F)
-# rm(m0.glm, m0.glmer, aic.glm, aic.glmer, null.id)
-# The Likelihood Ratio Test is NOT significant so the use of the random effect structure is not necessary!
+# null.id <- -2 * logLik(m0.glm) + 2 * logLik(m0.glmer2)
+# pchisq(as.numeric(null.id), df=1, lower.tail=F)
+# rm(m0.glm, m0.glmer, m0.glmer2, aic.glm, aic.glmer, aic.glmer2, null.id)
+# The Likelihood Ratio Tests are NOT significant so the use of the random effect structure may not be
+# necessary! However, further tests on the model residuals may indicate otherwise.
 
+
+# IMPORTANT NOTE:
+# We decided to go with a regularization modelling method (i.e. penalized regression) to avoid
+# overfitting so we will likely not use model selection and multimodel inference for this response variable.
+# Consequently, we will assess further logistic regression assumptions using the most parsimonious full model
+# we could think of, i.e. including all the available predictors we thought should be important to explain
+# our outcome (i.e. the presence of knotweed regrowths at tarping strip overlaps) based on our knowledge.
+
+
+# ### (Re-)Assessing the linearity assumption:
+# rov <- roverlaps[,c("reg_stripsoverlap", "fully_tarped", "levelling", "plantation", "obstacles",
+#                     "sedicover_height", "stand_surface", "strips_overlap",
+#                     "stripfix_taped", "tarpfix_multimethod")]
+# model <- glm(reg_stripsoverlap ~., data = rov, family = binomial)
+# # Predict the probability (p) of regrowths at strip overlaps:
+# probabilities <- predict(model, type = "response")
+# # Transforming predictors
+# mydata <- rov %>%
+#   dplyr::select_if(is.numeric) %>%
+#   dplyr::mutate("stand_surface (log)" = log(stand_surface)) %>%
+#   dplyr::mutate("sedicover_height (log+1)" = log(sedicover_height+1)) %>%
+#   dplyr::mutate("strips_overlap (sqrt)" = sqrt(strips_overlap)) # These transformations were made to
+# # linearize the relationships although they may not be necessary for sedicover_height and strips_overlap.
+# predictors <- colnames(mydata)
+# # Bind the logit and tidying the data for plot (ggplot2, so long format)
+# mydata <- mydata %>%
+#   dplyr::mutate(logit = log(probabilities/(1-probabilities))) %>%
+#   tidyr::gather(key = "predictors", value = "predictor.value", -logit)
+# # Create scatterplot
+# ggplot2::ggplot(mydata, ggplot2::aes(y = logit, x = predictor.value))+
+#   ggplot2::geom_point(size = 0.5, alpha = 0.5) +
+#   ggplot2::geom_smooth(method = "loess") +
+#   ggplot2::theme_bw() +
+#   ggplot2::facet_wrap(~predictors, scales = "free_x")
+#
+#
+# ### Assessing multicollinearity:
+# car::vif(mod = model) # There is no signs of multicollinearity as all GVIF value are under 1.65.
+# rm(rov, model, probabilities, predictors, mydata)
 
 
 

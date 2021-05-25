@@ -82,19 +82,19 @@ R.ajust <- data.frame(Model=integer(0), R2=numeric(0)) # Creates an empty data.f
 
 
 
-### Testing the relevance of the random effect structure:
-m0.glm <- glmmTMB::glmmTMB(formula = efficiency~1, data = eff,
-                           family = glmmTMB::beta_family(link = "logit"), REML = FALSE)
-m0.glmer <- glmmTMB::glmmTMB(formula = efficiency~(1|manager_id), data = eff,
-                             family = glmmTMB::beta_family(link = "logit"), REML = FALSE)
-aic.glm <- AIC(logLik(m0.glm))
-aic.glmer <- AIC(logLik(m0.glmer))
-
-# Likelihood Ratio Test:
-null.id <- -2 * logLik(m0.glm) + 2 * logLik(m0.glmer)
-pchisq(as.numeric(null.id), df=1, lower.tail=F) # The Likelihood Ratio Test is NOT significant so
-# the use of the random effect structure is not necessary!
-rm(m0.glm, m0.glmer, aic.glm, aic.glmer, null.id)
+# ### Testing the relevance of the random effect structure:
+# m0.glm <- glmmTMB::glmmTMB(formula = efficiency~1, data = eff,
+#                            family = glmmTMB::beta_family(link = "logit"), REML = FALSE)
+# m0.glmer <- glmmTMB::glmmTMB(formula = efficiency~(1|manager_id), data = eff,
+#                              family = glmmTMB::beta_family(link = "logit"), REML = FALSE)
+# aic.glm <- AIC(logLik(m0.glm))
+# aic.glmer <- AIC(logLik(m0.glmer))
+#
+# # Likelihood Ratio Test:
+# null.id <- -2 * logLik(m0.glm) + 2 * logLik(m0.glmer)
+# pchisq(as.numeric(null.id), df=1, lower.tail=F) # The Likelihood Ratio Test is NOT significant so
+# # the use of the random effect structure is not necessary!
+# rm(m0.glm, m0.glmer, aic.glm, aic.glmer, null.id)
 
 
 
@@ -2443,19 +2443,24 @@ Var.Imp <- c("cond((Int))", "cond(log2(distance + 1))", "cond(followups)", "cond
 Para.model <- data.frame(Parameters, Var, Var.Imp)
 
 ### Select the top models:
-#top.models <- MuMIn::get.models(AICc, cumsum(weight) <= 0.95) # To take those with a cumulated sum of
+#top.models <- MuMIn::get.models(AICc, cumsum(weight) <= 0.95) # To take those with a cumulative sum of
 # AICc weights <= 0.95
-top.models <- MuMIn::get.models(AICc, cumsum(weight) <= 1) # To take them all
+top.models <- MuMIn::get.models(AICc, cumsum(weight) <= 1) # To take them all (we chose this option because
+# it was equally interesting to highlight the explanatory variables whose "importance" was supported
+# by the data and those that were not)!
 # We could also select models according to their delta AICc (see Burnham & Anderson, 2002)!
 
 ### Actual model parameters averaging:
 Parameter <- MuMIn::model.avg(top.models, revised.var=T, adjusted=T, fit=T)
-Parameter.model <- as.data.frame(cbind(MuMIn::coefTable(Parameter), stats::confint(Parameter)))
+Parameter.model <- as.data.frame(cbind(MuMIn::coefTable(Parameter), stats::confint(Parameter))) # Reports
+# the conditional averaged parameters with their 95% confidence interval
 
 ### Improved formating:
 Parameter.model$Var <- row.names(Parameter.model)
 Parameter.model <- merge(Parameter.model, Para.model, by="Var", all=TRUE)
-Imp <- as.data.frame(format(round(MuMIn::importance(Parameter), digits=2)))
+Imp <- as.data.frame(format(round(MuMIn::importance(Parameter), digits=2))) # Gives each predictor a
+# relative "importance" value based on the sum of the model weights of the models in which the variable
+# is included as a predictor
 colnames(Imp) <- "Imp."
 Imp$Var.Imp <- row.names(Imp)
 Parameter.model <- merge(Parameter.model, Imp, by="Var.Imp", all=TRUE)
