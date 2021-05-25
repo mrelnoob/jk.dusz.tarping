@@ -68,24 +68,24 @@ R.ajust <- data.frame(Model=integer(0), R2=numeric(0)) # Creates an empty data.f
 
 
 
-### Testing the relevance of the random effect structure:
-m0.glm <- glmmTMB::glmmTMB(formula = lreg_tarpedarea~1, data = rtarped,
-                           family = stats::binomial(link = "logit"), REML = FALSE)
-m0.glmer <- glmmTMB::glmmTMB(formula = lreg_tarpedarea~(1|manager_id), data = rtarped,
-                             family = stats::binomial(link = "logit"), REML = FALSE)
-m0.glmer1 <- glmmTMB::glmmTMB(formula = lreg_tarpedarea~(1|manager_id) + (1|xp_id), data = rtarped,
-                             family = stats::binomial(link = "logit"), REML = FALSE)
-aic.glm <- AIC(logLik(m0.glm))
-aic.glmer <- AIC(logLik(m0.glmer))
-aic.glmer1 <- AIC(logLik(m0.glmer1))
-
-# Likelihood Ratio Test:
-null.id <- -2 * logLik(m0.glm) + 2 * logLik(m0.glmer1)
-pchisq(as.numeric(null.id), df=1, lower.tail=F) # The Likelihood Ratio Test is NOT significant suggesting
-# that the use of the random effect structure is not necessary! HOWEVER, model diagnostics for subsequent
-# models have shown that failing to include "manager_id" as a random effect leads to model misspecification.
-# Consequently, and as initially planned, we included a random structure within our candiate models.
-rm(m0.glm, m0.glmer, m0.glmer1, aic.glm, aic.glmer, aic.glmer1, null.id)
+# ### Testing the relevance of the random effect structure:
+# m0.glm <- glmmTMB::glmmTMB(formula = lreg_tarpedarea~1, data = rtarped,
+#                            family = stats::binomial(link = "logit"), REML = FALSE)
+# m0.glmer <- glmmTMB::glmmTMB(formula = lreg_tarpedarea~(1|manager_id), data = rtarped,
+#                              family = stats::binomial(link = "logit"), REML = FALSE)
+# m0.glmer1 <- glmmTMB::glmmTMB(formula = lreg_tarpedarea~(1|manager_id) + (1|xp_id), data = rtarped,
+#                              family = stats::binomial(link = "logit"), REML = FALSE)
+# aic.glm <- AIC(logLik(m0.glm))
+# aic.glmer <- AIC(logLik(m0.glmer))
+# aic.glmer1 <- AIC(logLik(m0.glmer1))
+#
+# # Likelihood Ratio Test:
+# null.id <- -2 * logLik(m0.glm) + 2 * logLik(m0.glmer1)
+# pchisq(as.numeric(null.id), df=1, lower.tail=F) # The Likelihood Ratio Test is NOT significant suggesting
+# # that the use of the random effect structure is not necessary! HOWEVER, model diagnostics for subsequent
+# # models have shown that failing to include "manager_id" as a random effect leads to model misspecification.
+# # Consequently, and as initially planned, we included a random structure within our candiate models.
+# rm(m0.glm, m0.glmer, m0.glmer1, aic.glm, aic.glmer, aic.glmer1, null.id)
 
 
 
@@ -95,24 +95,24 @@ rm(m0.glm, m0.glmer, m0.glmer1, aic.glm, aic.glmer, aic.glmer1, null.id)
 ###########################
 ###########################
 
-### Model diagnostics:
-# One plot of residuals (https://www.r-bloggers.com/2011/07/model-validation-interpreting-residual-plots/):
-plot(fitted(Cand.mod[[1]]), residuals(Cand.mod[[1]]),
-     xlab = "Fitted Values", ylab = "Residuals")
-abline(h=0, lty=2)
-lines(smooth.spline(fitted(Cand.mod[[1]]), residuals(Cand.mod[[1]])))
-
-# If mixed model:
-# Check for residual pattern within groups (levels of random factor) and difference between groups
-xyplot(residuals(glmm1) ~ fitted(glmm1) | Count$plot, main = "glmm1 – full model by plot",
-       panel=function(x, y){
-         panel.xyplot(x, y)
-         panel.loess(x, y, span = 0.75)
-         panel.lmline(x, y, lty = 2)  # Least squares broken line
-       })
-
-
-### EN cas de models mixtes, relire la vignette DHARMa, car ça change!
+# ### Model diagnostics:
+# # One plot of residuals (https://www.r-bloggers.com/2011/07/model-validation-interpreting-residual-plots/):
+# plot(fitted(Cand.mod[[1]]), residuals(Cand.mod[[1]]),
+#      xlab = "Fitted Values", ylab = "Residuals")
+# abline(h=0, lty=2)
+# lines(smooth.spline(fitted(Cand.mod[[1]]), residuals(Cand.mod[[1]])))
+#
+# # If mixed model:
+# # Check for residual pattern within groups (levels of random factor) and difference between groups
+# xyplot(residuals(glmm1) ~ fitted(glmm1) | Count$plot, main = "glmm1 – full model by plot",
+#        panel=function(x, y){
+#          panel.xyplot(x, y)
+#          panel.loess(x, y, span = 0.75)
+#          panel.lmline(x, y, lty = 2)  # Least squares broken line
+#        })
+#
+#
+# ### EN cas de models mixtes, relire la vignette DHARMa, car ça change!
 
 ###########################
 ###########################
@@ -155,7 +155,7 @@ Cand.mod[[1]] <- glmmTMB::glmmTMB(formula = lreg_tarpedarea~1 + (1|xp_id), data 
 # # Computing a pseudo-R2:
 1 - (as.numeric(-2 * stats::logLik(Cand.mod[[1]]))/as.numeric(-2 * stats::logLik(
   update(Cand.mod[[1]], ~1)))) # McFadden's pseudo-R2
-R2 <- performance::r2_nakagawa(Cand.mod[[1]]) # Nakagawa's (pseudo-R2 for GLMMs)
+R2 <- performance::r2_tjur(Cand.mod[[1]]) # tjur's (pseudo-R2 for GLMMs)
 R.ajust <- rbind(R.ajust, data.frame(Model=1, R2=R2[[1]]))
 
 
@@ -195,7 +195,7 @@ Cand.mod[[2]] <- glmmTMB::glmmTMB(formula = lreg_tarpedarea~obstacles + add_cont
 # # Computing a pseudo-R2:
 1 - (as.numeric(-2 * stats::logLik(Cand.mod[[2]]))/as.numeric(-2 * stats::logLik(
   update(Cand.mod[[2]], ~1)))) # McFadden's pseudo-R2
-R2 <- performance::r2_nakagawa(Cand.mod[[2]]) # Nakagawa's (pseudo-R2 for GLMMs)
+R2 <- performance::r2_tjur(Cand.mod[[2]]) # tjur's (pseudo-R2 for GLMMs)
 R.ajust <- rbind(R.ajust, data.frame(Model=2, R2=R2[[1]]))
 
 
@@ -234,7 +234,7 @@ Cand.mod[[3]] <- glmmTMB::glmmTMB(formula = lreg_tarpedarea~obstacles + geomem
 # # Computing a pseudo-R2:
 1 - (as.numeric(-2 * stats::logLik(Cand.mod[[3]]))/as.numeric(-2 * stats::logLik(
   update(Cand.mod[[3]], ~1)))) # McFadden's pseudo-R2
-R2 <- performance::r2_nakagawa(Cand.mod[[3]]) # Nakagawa's (pseudo-R2 for GLMMs)
+R2 <- performance::r2_tjur(Cand.mod[[3]]) # tjur's (pseudo-R2 for GLMMs)
 R.ajust <- rbind(R.ajust, data.frame(Model=3, R2=R2[[1]]))
 
 
@@ -274,7 +274,7 @@ Cand.mod[[4]] <- glmmTMB::glmmTMB(formula = lreg_tarpedarea~obstacles + levellin
 # # Computing a pseudo-R2:
 1 - (as.numeric(-2 * stats::logLik(Cand.mod[[4]]))/as.numeric(-2 * stats::logLik(
   update(Cand.mod[[4]], ~1)))) # McFadden's pseudo-R2
-R2 <- performance::r2_nakagawa(Cand.mod[[4]]) # Nakagawa's (pseudo-R2 for GLMMs)
+R2 <- performance::r2_tjur(Cand.mod[[4]]) # tjur's (pseudo-R2 for GLMMs)
 R.ajust <- rbind(R.ajust, data.frame(Model=4, R2=R2[[1]]))
 
 
@@ -314,7 +314,7 @@ Cand.mod[[5]] <- glmmTMB::glmmTMB(formula = lreg_tarpedarea~obstacles + log2(sta
 # # Computing a pseudo-R2:
 1 - (as.numeric(-2 * stats::logLik(Cand.mod[[5]]))/as.numeric(-2 * stats::logLik(
   update(Cand.mod[[5]], ~1)))) # McFadden's pseudo-R2
-R2 <- performance::r2_nakagawa(Cand.mod[[5]]) # Nakagawa's (pseudo-R2 for GLMMs)
+R2 <- performance::r2_tjur(Cand.mod[[5]]) # tjur's (pseudo-R2 for GLMMs)
 R.ajust <- rbind(R.ajust, data.frame(Model=5, R2=R2[[1]]))
 
 
@@ -354,7 +354,7 @@ Cand.mod[[6]] <- glmmTMB::glmmTMB(formula = lreg_tarpedarea~obstacles + stripsov
 # # Computing a pseudo-R2:
 1 - (as.numeric(-2 * stats::logLik(Cand.mod[[6]]))/as.numeric(-2 * stats::logLik(
   update(Cand.mod[[6]], ~1)))) # McFadden's pseudo-R2
-R2 <- performance::r2_nakagawa(Cand.mod[[6]]) # Nakagawa's (pseudo-R2 for GLMMs)
+R2 <- performance::r2_tjur(Cand.mod[[6]]) # tjur's (pseudo-R2 for GLMMs)
 R.ajust <- rbind(R.ajust, data.frame(Model=6, R2=R2[[1]]))
 
 
@@ -395,7 +395,7 @@ Cand.mod[[7]] <- glmmTMB::glmmTMB(formula = lreg_tarpedarea~obstacles + pb_fixat
 # # Computing a pseudo-R2:
 1 - (as.numeric(-2 * stats::logLik(Cand.mod[[7]]))/as.numeric(-2 * stats::logLik(
   update(Cand.mod[[7]], ~1)))) # McFadden's pseudo-R2
-R2 <- performance::r2_nakagawa(Cand.mod[[7]]) # Nakagawa's (pseudo-R2 for GLMMs)
+R2 <- performance::r2_tjur(Cand.mod[[7]]) # tjur's (pseudo-R2 for GLMMs)
 R.ajust <- rbind(R.ajust, data.frame(Model=7, R2=R2[[1]]))
 
 
@@ -435,7 +435,7 @@ Cand.mod[[8]] <- glmmTMB::glmmTMB(formula = lreg_tarpedarea~obstacles + tarpfix_
 # # Computing a pseudo-R2:
 1 - (as.numeric(-2 * stats::logLik(Cand.mod[[8]]))/as.numeric(-2 * stats::logLik(
   update(Cand.mod[[8]], ~1)))) # McFadden's pseudo-R2
-R2 <- performance::r2_nakagawa(Cand.mod[[8]]) # Nakagawa's (pseudo-R2 for GLMMs)
+R2 <- performance::r2_tjur(Cand.mod[[8]]) # tjur's (pseudo-R2 for GLMMs)
 R.ajust <- rbind(R.ajust, data.frame(Model=8, R2=R2[[1]]))
 
 
@@ -474,7 +474,7 @@ Cand.mod[[9]] <- glmmTMB::glmmTMB(formula = lreg_tarpedarea~obstacles + woven_ge
 # # Computing a pseudo-R2:
 1 - (as.numeric(-2 * stats::logLik(Cand.mod[[9]]))/as.numeric(-2 * stats::logLik(
   update(Cand.mod[[9]], ~1)))) # McFadden's pseudo-R2
-R2 <- performance::r2_nakagawa(Cand.mod[[9]]) # Nakagawa's (pseudo-R2 for GLMMs)
+R2 <- performance::r2_tjur(Cand.mod[[9]]) # tjur's (pseudo-R2 for GLMMs)
 R.ajust <- rbind(R.ajust, data.frame(Model=9, R2=R2[[1]]))
 
 
@@ -515,7 +515,7 @@ Cand.mod[[10]] <- glmmTMB::glmmTMB(formula = lreg_tarpedarea~add_control + plant
 # # Computing a pseudo-R2:
 1 - (as.numeric(-2 * stats::logLik(Cand.mod[[10]]))/as.numeric(-2 * stats::logLik(
   update(Cand.mod[[10]], ~1)))) # McFadden's pseudo-R2
-R2 <- performance::r2_nakagawa(Cand.mod[[10]]) # Nakagawa's (pseudo-R2 for GLMMs)
+R2 <- performance::r2_tjur(Cand.mod[[10]]) # tjur's (pseudo-R2 for GLMMs)
 R.ajust <- rbind(R.ajust, data.frame(Model=10, R2=R2[[1]]))
 
 
@@ -556,7 +556,7 @@ Cand.mod[[11]] <- glmmTMB::glmmTMB(formula = lreg_tarpedarea~add_control + tarpf
 # # Computing a pseudo-R2:
 1 - (as.numeric(-2 * stats::logLik(Cand.mod[[11]]))/as.numeric(-2 * stats::logLik(
   update(Cand.mod[[11]], ~1)))) # McFadden's pseudo-R2
-R2 <- performance::r2_nakagawa(Cand.mod[[11]]) # Nakagawa's (pseudo-R2 for GLMMs)
+R2 <- performance::r2_tjur(Cand.mod[[11]]) # tjur's (pseudo-R2 for GLMMs)
 R.ajust <- rbind(R.ajust, data.frame(Model=11, R2=R2[[1]]))
 
 
@@ -597,7 +597,7 @@ Cand.mod[[12]] <- glmmTMB::glmmTMB(formula = lreg_tarpedarea~add_control + tarpi
 # # Computing a pseudo-R2:
 1 - (as.numeric(-2 * stats::logLik(Cand.mod[[12]]))/as.numeric(-2 * stats::logLik(
   update(Cand.mod[[12]], ~1)))) # McFadden's pseudo-R2
-R2 <- performance::r2_nakagawa(Cand.mod[[12]]) # Nakagawa's (pseudo-R2 for GLMMs)
+R2 <- performance::r2_tjur(Cand.mod[[12]]) # tjur's (pseudo-R2 for GLMMs)
 R.ajust <- rbind(R.ajust, data.frame(Model=12, R2=R2[[1]]))
 
 
@@ -636,7 +636,7 @@ Cand.mod[[13]] <- glmmTMB::glmmTMB(formula = lreg_tarpedarea~add_control + woven
 # # Computing a pseudo-R2:
 1 - (as.numeric(-2 * stats::logLik(Cand.mod[[13]]))/as.numeric(-2 * stats::logLik(
   update(Cand.mod[[13]], ~1)))) # McFadden's pseudo-R2
-R2 <- performance::r2_nakagawa(Cand.mod[[13]]) # Nakagawa's (pseudo-R2 for GLMMs)
+R2 <- performance::r2_tjur(Cand.mod[[13]]) # tjur's (pseudo-R2 for GLMMs)
 R.ajust <- rbind(R.ajust, data.frame(Model=13, R2=R2[[1]]))
 
 
@@ -675,7 +675,7 @@ Cand.mod[[14]] <- glmmTMB::glmmTMB(formula = lreg_tarpedarea~woven_geotex + leve
 # # Computing a pseudo-R2:
 1 - (as.numeric(-2 * stats::logLik(Cand.mod[[14]]))/as.numeric(-2 * stats::logLik(
   update(Cand.mod[[14]], ~1)))) # McFadden's pseudo-R2
-R2 <- performance::r2_nakagawa(Cand.mod[[14]]) # Nakagawa's (pseudo-R2 for GLMMs)
+R2 <- performance::r2_tjur(Cand.mod[[14]]) # tjur's (pseudo-R2 for GLMMs)
 R.ajust <- rbind(R.ajust, data.frame(Model=14, R2=R2[[1]]))
 
 
@@ -716,7 +716,7 @@ Cand.mod[[15]] <- glmmTMB::glmmTMB(formula = lreg_tarpedarea~woven_geotex + log2
 # # Computing a pseudo-R2:
 1 - (as.numeric(-2 * stats::logLik(Cand.mod[[15]]))/as.numeric(-2 * stats::logLik(
   update(Cand.mod[[15]], ~1)))) # McFadden's pseudo-R2
-R2 <- performance::r2_nakagawa(Cand.mod[[15]]) # Nakagawa's (pseudo-R2 for GLMMs)
+R2 <- performance::r2_tjur(Cand.mod[[15]]) # tjur's (pseudo-R2 for GLMMs)
 R.ajust <- rbind(R.ajust, data.frame(Model=15, R2=R2[[1]]))
 
 
@@ -755,7 +755,7 @@ Cand.mod[[16]] <- glmmTMB::glmmTMB(formula = lreg_tarpedarea~woven_geotex + pb_f
 # # Computing a pseudo-R2:
 1 - (as.numeric(-2 * stats::logLik(Cand.mod[[16]]))/as.numeric(-2 * stats::logLik(
   update(Cand.mod[[16]], ~1)))) # McFadden's pseudo-R2
-R2 <- performance::r2_nakagawa(Cand.mod[[16]]) # Nakagawa's (pseudo-R2 for GLMMs)
+R2 <- performance::r2_tjur(Cand.mod[[16]]) # tjur's (pseudo-R2 for GLMMs)
 R.ajust <- rbind(R.ajust, data.frame(Model=16, R2=R2[[1]]))
 
 
@@ -794,7 +794,7 @@ Cand.mod[[17]] <- glmmTMB::glmmTMB(formula = lreg_tarpedarea~woven_geotex + slop
 # # Computing a pseudo-R2:
 1 - (as.numeric(-2 * stats::logLik(Cand.mod[[17]]))/as.numeric(-2 * stats::logLik(
   update(Cand.mod[[17]], ~1)))) # McFadden's pseudo-R2
-R2 <- performance::r2_nakagawa(Cand.mod[[17]]) # Nakagawa's (pseudo-R2 for GLMMs)
+R2 <- performance::r2_tjur(Cand.mod[[17]]) # tjur's (pseudo-R2 for GLMMs)
 R.ajust <- rbind(R.ajust, data.frame(Model=17, R2=R2[[1]]))
 
 
@@ -833,7 +833,7 @@ Cand.mod[[18]] <- glmmTMB::glmmTMB(formula = lreg_tarpedarea~woven_geotex + tarp
 # # Computing a pseudo-R2:
 1 - (as.numeric(-2 * stats::logLik(Cand.mod[[18]]))/as.numeric(-2 * stats::logLik(
   update(Cand.mod[[18]], ~1)))) # McFadden's pseudo-R2
-R2 <- performance::r2_nakagawa(Cand.mod[[18]]) # Nakagawa's (pseudo-R2 for GLMMs)
+R2 <- performance::r2_tjur(Cand.mod[[18]]) # tjur's (pseudo-R2 for GLMMs)
 R.ajust <- rbind(R.ajust, data.frame(Model=18, R2=R2[[1]]))
 
 
@@ -872,7 +872,7 @@ Cand.mod[[19]] <- glmmTMB::glmmTMB(formula = lreg_tarpedarea~plantation + strips
 # # Computing a pseudo-R2:
 1 - (as.numeric(-2 * stats::logLik(Cand.mod[[19]]))/as.numeric(-2 * stats::logLik(
   update(Cand.mod[[19]], ~1)))) # McFadden's pseudo-R2
-R2 <- performance::r2_nakagawa(Cand.mod[[19]]) # Nakagawa's (pseudo-R2 for GLMMs)
+R2 <- performance::r2_tjur(Cand.mod[[19]]) # tjur's (pseudo-R2 for GLMMs)
 R.ajust <- rbind(R.ajust, data.frame(Model=19, R2=R2[[1]]))
 
 
@@ -911,7 +911,7 @@ Cand.mod[[20]] <- glmmTMB::glmmTMB(formula = lreg_tarpedarea~plantation + tarpin
 # # Computing a pseudo-R2:
 1 - (as.numeric(-2 * stats::logLik(Cand.mod[[20]]))/as.numeric(-2 * stats::logLik(
   update(Cand.mod[[20]], ~1)))) # McFadden's pseudo-R2
-R2 <- performance::r2_nakagawa(Cand.mod[[20]]) # Nakagawa's (pseudo-R2 for GLMMs)
+R2 <- performance::r2_tjur(Cand.mod[[20]]) # tjur's (pseudo-R2 for GLMMs)
 R.ajust <- rbind(R.ajust, data.frame(Model=20, R2=R2[[1]]))
 
 
@@ -950,7 +950,7 @@ Cand.mod[[21]] <- glmmTMB::glmmTMB(formula = lreg_tarpedarea~tarpfix_pierced + g
 # # Computing a pseudo-R2:
 1 - (as.numeric(-2 * stats::logLik(Cand.mod[[21]]))/as.numeric(-2 * stats::logLik(
   update(Cand.mod[[21]], ~1)))) # McFadden's pseudo-R2
-R2 <- performance::r2_nakagawa(Cand.mod[[21]]) # Nakagawa's (pseudo-R2 for GLMMs)
+R2 <- performance::r2_tjur(Cand.mod[[21]]) # tjur's (pseudo-R2 for GLMMs)
 R.ajust <- rbind(R.ajust, data.frame(Model=21, R2=R2[[1]]))
 
 
@@ -989,7 +989,7 @@ Cand.mod[[22]] <- glmmTMB::glmmTMB(formula = lreg_tarpedarea~tarpfix_pierced + l
 # # Computing a pseudo-R2:
 1 - (as.numeric(-2 * stats::logLik(Cand.mod[[22]]))/as.numeric(-2 * stats::logLik(
   update(Cand.mod[[22]], ~1)))) # McFadden's pseudo-R2
-R2 <- performance::r2_nakagawa(Cand.mod[[22]]) # Nakagawa's (pseudo-R2 for GLMMs)
+R2 <- performance::r2_tjur(Cand.mod[[22]]) # tjur's (pseudo-R2 for GLMMs)
 R.ajust <- rbind(R.ajust, data.frame(Model=22, R2=R2[[1]]))
 
 
@@ -1030,7 +1030,7 @@ Cand.mod[[23]] <- glmmTMB::glmmTMB(formula = lreg_tarpedarea~tarpfix_pierced + l
 # # Computing a pseudo-R2:
 1 - (as.numeric(-2 * stats::logLik(Cand.mod[[23]]))/as.numeric(-2 * stats::logLik(
   update(Cand.mod[[23]], ~1)))) # McFadden's pseudo-R2
-R2 <- performance::r2_nakagawa(Cand.mod[[23]]) # Nakagawa's (pseudo-R2 for GLMMs)
+R2 <- performance::r2_tjur(Cand.mod[[23]]) # tjur's (pseudo-R2 for GLMMs)
 R.ajust <- rbind(R.ajust, data.frame(Model=23, R2=R2[[1]]))
 
 
@@ -1069,7 +1069,7 @@ Cand.mod[[24]] <- glmmTMB::glmmTMB(formula = lreg_tarpedarea~tarpfix_pierced + s
 # # Computing a pseudo-R2:
 1 - (as.numeric(-2 * stats::logLik(Cand.mod[[24]]))/as.numeric(-2 * stats::logLik(
   update(Cand.mod[[24]], ~1)))) # McFadden's pseudo-R2
-R2 <- performance::r2_nakagawa(Cand.mod[[24]]) # Nakagawa's (pseudo-R2 for GLMMs)
+R2 <- performance::r2_tjur(Cand.mod[[24]]) # tjur's (pseudo-R2 for GLMMs)
 R.ajust <- rbind(R.ajust, data.frame(Model=24, R2=R2[[1]]))
 
 
@@ -1108,7 +1108,7 @@ Cand.mod[[25]] <- glmmTMB::glmmTMB(formula = lreg_tarpedarea~tarpfix_pierced + p
 # # Computing a pseudo-R2:
 1 - (as.numeric(-2 * stats::logLik(Cand.mod[[25]]))/as.numeric(-2 * stats::logLik(
   update(Cand.mod[[25]], ~1)))) # McFadden's pseudo-R2
-R2 <- performance::r2_nakagawa(Cand.mod[[25]]) # Nakagawa's (pseudo-R2 for GLMMs)
+R2 <- performance::r2_tjur(Cand.mod[[25]]) # tjur's (pseudo-R2 for GLMMs)
 R.ajust <- rbind(R.ajust, data.frame(Model=25, R2=R2[[1]]))
 
 
@@ -1147,7 +1147,7 @@ Cand.mod[[26]] <- glmmTMB::glmmTMB(formula = lreg_tarpedarea~tarpfix_pierced + t
 # # Computing a pseudo-R2:
 1 - (as.numeric(-2 * stats::logLik(Cand.mod[[26]]))/as.numeric(-2 * stats::logLik(
   update(Cand.mod[[26]], ~1)))) # McFadden's pseudo-R2
-R2 <- performance::r2_nakagawa(Cand.mod[[26]]) # Nakagawa's (pseudo-R2 for GLMMs)
+R2 <- performance::r2_tjur(Cand.mod[[26]]) # tjur's (pseudo-R2 for GLMMs)
 R.ajust <- rbind(R.ajust, data.frame(Model=26, R2=R2[[1]]))
 
 
@@ -1186,7 +1186,7 @@ Cand.mod[[27]] <- glmmTMB::glmmTMB(formula = lreg_tarpedarea~log2(sedicover_heig
 # # Computing a pseudo-R2:
 1 - (as.numeric(-2 * stats::logLik(Cand.mod[[27]]))/as.numeric(-2 * stats::logLik(
   update(Cand.mod[[27]], ~1)))) # McFadden's pseudo-R2
-R2 <- performance::r2_nakagawa(Cand.mod[[27]]) # Nakagawa's (pseudo-R2 for GLMMs)
+R2 <- performance::r2_tjur(Cand.mod[[27]]) # tjur's (pseudo-R2 for GLMMs)
 R.ajust <- rbind(R.ajust, data.frame(Model=27, R2=R2[[1]]))
 
 
@@ -1225,7 +1225,7 @@ Cand.mod[[28]] <- glmmTMB::glmmTMB(formula = lreg_tarpedarea~log2(sedicover_heig
 # # Computing a pseudo-R2:
 1 - (as.numeric(-2 * stats::logLik(Cand.mod[[28]]))/as.numeric(-2 * stats::logLik(
   update(Cand.mod[[28]], ~1)))) # McFadden's pseudo-R2
-R2 <- performance::r2_nakagawa(Cand.mod[[28]]) # Nakagawa's (pseudo-R2 for GLMMs)
+R2 <- performance::r2_tjur(Cand.mod[[28]]) # tjur's (pseudo-R2 for GLMMs)
 R.ajust <- rbind(R.ajust, data.frame(Model=28, R2=R2[[1]]))
 
 
@@ -1264,7 +1264,7 @@ Cand.mod[[29]] <- glmmTMB::glmmTMB(formula = lreg_tarpedarea~log2(sedicover_heig
 # # Computing a pseudo-R2:
 1 - (as.numeric(-2 * stats::logLik(Cand.mod[[29]]))/as.numeric(-2 * stats::logLik(
   update(Cand.mod[[29]], ~1)))) # McFadden's pseudo-R2
-R2 <- performance::r2_nakagawa(Cand.mod[[29]]) # Nakagawa's (pseudo-R2 for GLMMs)
+R2 <- performance::r2_tjur(Cand.mod[[29]]) # tjur's (pseudo-R2 for GLMMs)
 R.ajust <- rbind(R.ajust, data.frame(Model=29, R2=R2[[1]]))
 
 
@@ -1303,7 +1303,7 @@ Cand.mod[[30]] <- glmmTMB::glmmTMB(formula = lreg_tarpedarea~stripsoverlap_ok + 
 # # Computing a pseudo-R2:
 1 - (as.numeric(-2 * stats::logLik(Cand.mod[[30]]))/as.numeric(-2 * stats::logLik(
   update(Cand.mod[[30]], ~1)))) # McFadden's pseudo-R2
-R2 <- performance::r2_nakagawa(Cand.mod[[30]]) # Nakagawa's (pseudo-R2 for GLMMs)
+R2 <- performance::r2_tjur(Cand.mod[[30]]) # tjur's (pseudo-R2 for GLMMs)
 R.ajust <- rbind(R.ajust, data.frame(Model=30, R2=R2[[1]]))
 
 
@@ -1342,7 +1342,7 @@ Cand.mod[[31]] <- glmmTMB::glmmTMB(formula = lreg_tarpedarea~stripsoverlap_ok + 
 # # Computing a pseudo-R2:
 1 - (as.numeric(-2 * stats::logLik(Cand.mod[[31]]))/as.numeric(-2 * stats::logLik(
   update(Cand.mod[[31]], ~1)))) # McFadden's pseudo-R2
-R2 <- performance::r2_nakagawa(Cand.mod[[31]]) # Nakagawa's (pseudo-R2 for GLMMs)
+R2 <- performance::r2_tjur(Cand.mod[[31]]) # tjur's (pseudo-R2 for GLMMs)
 R.ajust <- rbind(R.ajust, data.frame(Model=31, R2=R2[[1]]))
 
 
@@ -1382,7 +1382,7 @@ Cand.mod[[32]] <- glmmTMB::glmmTMB(formula = lreg_tarpedarea~obstacles + add_con
 # # Computing a pseudo-R2:
 1 - (as.numeric(-2 * stats::logLik(Cand.mod[[32]]))/as.numeric(-2 * stats::logLik(
   update(Cand.mod[[32]], ~1)))) # McFadden's pseudo-R2
-R2 <- performance::r2_nakagawa(Cand.mod[[32]]) # Nakagawa's (pseudo-R2 for GLMMs)
+R2 <- performance::r2_tjur(Cand.mod[[32]]) # tjur's (pseudo-R2 for GLMMs)
 R.ajust <- rbind(R.ajust, data.frame(Model=32, R2=R2[[1]]))
 
 
@@ -1422,7 +1422,7 @@ Cand.mod[[33]] <- glmmTMB::glmmTMB(formula = lreg_tarpedarea~obstacles + add_con
 # # Computing a pseudo-R2:
 1 - (as.numeric(-2 * stats::logLik(Cand.mod[[33]]))/as.numeric(-2 * stats::logLik(
   update(Cand.mod[[33]], ~1)))) # McFadden's pseudo-R2
-R2 <- performance::r2_nakagawa(Cand.mod[[33]]) # Nakagawa's (pseudo-R2 for GLMMs)
+R2 <- performance::r2_tjur(Cand.mod[[33]]) # tjur's (pseudo-R2 for GLMMs)
 R.ajust <- rbind(R.ajust, data.frame(Model=33, R2=R2[[1]]))
 
 
@@ -1462,7 +1462,7 @@ Cand.mod[[34]] <- glmmTMB::glmmTMB(formula = lreg_tarpedarea~obstacles + add_con
 # # Computing a pseudo-R2:
 1 - (as.numeric(-2 * stats::logLik(Cand.mod[[34]]))/as.numeric(-2 * stats::logLik(
   update(Cand.mod[[34]], ~1)))) # McFadden's pseudo-R2
-R2 <- performance::r2_nakagawa(Cand.mod[[34]]) # Nakagawa's (pseudo-R2 for GLMMs)
+R2 <- performance::r2_tjur(Cand.mod[[34]]) # tjur's (pseudo-R2 for GLMMs)
 R.ajust <- rbind(R.ajust, data.frame(Model=34, R2=R2[[1]]))
 
 
@@ -1502,7 +1502,7 @@ Cand.mod[[35]] <- glmmTMB::glmmTMB(formula = lreg_tarpedarea~obstacles + add_con
 # # Computing a pseudo-R2:
 1 - (as.numeric(-2 * stats::logLik(Cand.mod[[35]]))/as.numeric(-2 * stats::logLik(
   update(Cand.mod[[35]], ~1)))) # McFadden's pseudo-R2
-R2 <- performance::r2_nakagawa(Cand.mod[[35]]) # Nakagawa's (pseudo-R2 for GLMMs)
+R2 <- performance::r2_tjur(Cand.mod[[35]]) # tjur's (pseudo-R2 for GLMMs)
 R.ajust <- rbind(R.ajust, data.frame(Model=35, R2=R2[[1]]))
 
 
@@ -1542,7 +1542,7 @@ Cand.mod[[36]] <- glmmTMB::glmmTMB(formula = lreg_tarpedarea~obstacles + add_con
 # # Computing a pseudo-R2:
 1 - (as.numeric(-2 * stats::logLik(Cand.mod[[36]]))/as.numeric(-2 * stats::logLik(
   update(Cand.mod[[36]], ~1)))) # McFadden's pseudo-R2
-R2 <- performance::r2_nakagawa(Cand.mod[[36]]) # Nakagawa's (pseudo-R2 for GLMMs)
+R2 <- performance::r2_tjur(Cand.mod[[36]]) # tjur's (pseudo-R2 for GLMMs)
 R.ajust <- rbind(R.ajust, data.frame(Model=36, R2=R2[[1]]))
 
 
@@ -1582,7 +1582,7 @@ Cand.mod[[37]] <- glmmTMB::glmmTMB(formula = lreg_tarpedarea~obstacles + woven_g
 # # Computing a pseudo-R2:
 1 - (as.numeric(-2 * stats::logLik(Cand.mod[[37]]))/as.numeric(-2 * stats::logLik(
   update(Cand.mod[[37]], ~1)))) # McFadden's pseudo-R2
-R2 <- performance::r2_nakagawa(Cand.mod[[37]]) # Nakagawa's (pseudo-R2 for GLMMs)
+R2 <- performance::r2_tjur(Cand.mod[[37]]) # tjur's (pseudo-R2 for GLMMs)
 R.ajust <- rbind(R.ajust, data.frame(Model=37, R2=R2[[1]]))
 
 
@@ -1622,7 +1622,7 @@ Cand.mod[[38]] <- glmmTMB::glmmTMB(formula = lreg_tarpedarea~obstacles + woven_g
 # # Computing a pseudo-R2:
 1 - (as.numeric(-2 * stats::logLik(Cand.mod[[38]]))/as.numeric(-2 * stats::logLik(
   update(Cand.mod[[38]], ~1)))) # McFadden's pseudo-R2
-R2 <- performance::r2_nakagawa(Cand.mod[[38]]) # Nakagawa's (pseudo-R2 for GLMMs)
+R2 <- performance::r2_tjur(Cand.mod[[38]]) # tjur's (pseudo-R2 for GLMMs)
 R.ajust <- rbind(R.ajust, data.frame(Model=38, R2=R2[[1]]))
 
 
@@ -1662,7 +1662,7 @@ Cand.mod[[39]] <- glmmTMB::glmmTMB(formula = lreg_tarpedarea~obstacles + woven_g
 # # Computing a pseudo-R2:
 1 - (as.numeric(-2 * stats::logLik(Cand.mod[[39]]))/as.numeric(-2 * stats::logLik(
   update(Cand.mod[[39]], ~1)))) # McFadden's pseudo-R2
-R2 <- performance::r2_nakagawa(Cand.mod[[39]]) # Nakagawa's (pseudo-R2 for GLMMs)
+R2 <- performance::r2_tjur(Cand.mod[[39]]) # tjur's (pseudo-R2 for GLMMs)
 R.ajust <- rbind(R.ajust, data.frame(Model=39, R2=R2[[1]]))
 
 
@@ -1702,7 +1702,7 @@ Cand.mod[[40]] <- glmmTMB::glmmTMB(formula = lreg_tarpedarea~obstacles + woven_g
 # # Computing a pseudo-R2:
 1 - (as.numeric(-2 * stats::logLik(Cand.mod[[40]]))/as.numeric(-2 * stats::logLik(
   update(Cand.mod[[40]], ~1)))) # McFadden's pseudo-R2
-R2 <- performance::r2_nakagawa(Cand.mod[[40]]) # Nakagawa's (pseudo-R2 for GLMMs)
+R2 <- performance::r2_tjur(Cand.mod[[40]]) # tjur's (pseudo-R2 for GLMMs)
 R.ajust <- rbind(R.ajust, data.frame(Model=40, R2=R2[[1]]))
 
 
@@ -1742,7 +1742,7 @@ Cand.mod[[41]] <- glmmTMB::glmmTMB(formula = lreg_tarpedarea~obstacles + tarpfix
 # # Computing a pseudo-R2:
 1 - (as.numeric(-2 * stats::logLik(Cand.mod[[41]]))/as.numeric(-2 * stats::logLik(
   update(Cand.mod[[41]], ~1)))) # McFadden's pseudo-R2
-R2 <- performance::r2_nakagawa(Cand.mod[[41]]) # Nakagawa's (pseudo-R2 for GLMMs)
+R2 <- performance::r2_tjur(Cand.mod[[41]]) # tjur's (pseudo-R2 for GLMMs)
 R.ajust <- rbind(R.ajust, data.frame(Model=41, R2=R2[[1]]))
 
 
@@ -1782,7 +1782,7 @@ Cand.mod[[42]] <- glmmTMB::glmmTMB(formula = lreg_tarpedarea~obstacles + tarpfix
 # # Computing a pseudo-R2:
 1 - (as.numeric(-2 * stats::logLik(Cand.mod[[42]]))/as.numeric(-2 * stats::logLik(
   update(Cand.mod[[42]], ~1)))) # McFadden's pseudo-R2
-R2 <- performance::r2_nakagawa(Cand.mod[[42]]) # Nakagawa's (pseudo-R2 for GLMMs)
+R2 <- performance::r2_tjur(Cand.mod[[42]]) # tjur's (pseudo-R2 for GLMMs)
 R.ajust <- rbind(R.ajust, data.frame(Model=42, R2=R2[[1]]))
 
 
@@ -1822,7 +1822,7 @@ Cand.mod[[43]] <- glmmTMB::glmmTMB(formula = lreg_tarpedarea~obstacles + tarpfix
 # # Computing a pseudo-R2:
 1 - (as.numeric(-2 * stats::logLik(Cand.mod[[43]]))/as.numeric(-2 * stats::logLik(
   update(Cand.mod[[43]], ~1)))) # McFadden's pseudo-R2
-R2 <- performance::r2_nakagawa(Cand.mod[[43]]) # Nakagawa's (pseudo-R2 for GLMMs)
+R2 <- performance::r2_tjur(Cand.mod[[43]]) # tjur's (pseudo-R2 for GLMMs)
 R.ajust <- rbind(R.ajust, data.frame(Model=43, R2=R2[[1]]))
 
 
@@ -1862,7 +1862,7 @@ Cand.mod[[44]] <- glmmTMB::glmmTMB(formula = lreg_tarpedarea~obstacles + tarpfix
 # # Computing a pseudo-R2:
 1 - (as.numeric(-2 * stats::logLik(Cand.mod[[44]]))/as.numeric(-2 * stats::logLik(
   update(Cand.mod[[44]], ~1)))) # McFadden's pseudo-R2
-R2 <- performance::r2_nakagawa(Cand.mod[[44]]) # Nakagawa's (pseudo-R2 for GLMMs)
+R2 <- performance::r2_tjur(Cand.mod[[44]]) # tjur's (pseudo-R2 for GLMMs)
 R.ajust <- rbind(R.ajust, data.frame(Model=44, R2=R2[[1]]))
 
 
@@ -1902,7 +1902,7 @@ Cand.mod[[45]] <- glmmTMB::glmmTMB(formula = lreg_tarpedarea~obstacles + stripso
 # # Computing a pseudo-R2:
 1 - (as.numeric(-2 * stats::logLik(Cand.mod[[45]]))/as.numeric(-2 * stats::logLik(
   update(Cand.mod[[45]], ~1)))) # McFadden's pseudo-R2
-R2 <- performance::r2_nakagawa(Cand.mod[[45]]) # Nakagawa's (pseudo-R2 for GLMMs)
+R2 <- performance::r2_tjur(Cand.mod[[45]]) # tjur's (pseudo-R2 for GLMMs)
 R.ajust <- rbind(R.ajust, data.frame(Model=45, R2=R2[[1]]))
 
 
@@ -1942,7 +1942,7 @@ Cand.mod[[46]] <- glmmTMB::glmmTMB(formula = lreg_tarpedarea~obstacles + stripso
 # # Computing a pseudo-R2:
 1 - (as.numeric(-2 * stats::logLik(Cand.mod[[46]]))/as.numeric(-2 * stats::logLik(
   update(Cand.mod[[46]], ~1)))) # McFadden's pseudo-R2
-R2 <- performance::r2_nakagawa(Cand.mod[[46]]) # Nakagawa's (pseudo-R2 for GLMMs)
+R2 <- performance::r2_tjur(Cand.mod[[46]]) # tjur's (pseudo-R2 for GLMMs)
 R.ajust <- rbind(R.ajust, data.frame(Model=46, R2=R2[[1]]))
 
 
@@ -1982,7 +1982,7 @@ Cand.mod[[47]] <- glmmTMB::glmmTMB(formula = lreg_tarpedarea~obstacles + log2(se
 # # Computing a pseudo-R2:
 1 - (as.numeric(-2 * stats::logLik(Cand.mod[[47]]))/as.numeric(-2 * stats::logLik(
   update(Cand.mod[[47]], ~1)))) # McFadden's pseudo-R2
-R2 <- performance::r2_nakagawa(Cand.mod[[47]]) # Nakagawa's (pseudo-R2 for GLMMs)
+R2 <- performance::r2_tjur(Cand.mod[[47]]) # tjur's (pseudo-R2 for GLMMs)
 R.ajust <- rbind(R.ajust, data.frame(Model=47, R2=R2[[1]]))
 
 
@@ -2022,7 +2022,7 @@ Cand.mod[[48]] <- glmmTMB::glmmTMB(formula = lreg_tarpedarea~add_control + woven
 # # Computing a pseudo-R2:
 1 - (as.numeric(-2 * stats::logLik(Cand.mod[[48]]))/as.numeric(-2 * stats::logLik(
   update(Cand.mod[[48]], ~1)))) # McFadden's pseudo-R2
-R2 <- performance::r2_nakagawa(Cand.mod[[48]]) # Nakagawa's (pseudo-R2 for GLMMs)
+R2 <- performance::r2_tjur(Cand.mod[[48]]) # tjur's (pseudo-R2 for GLMMs)
 R.ajust <- rbind(R.ajust, data.frame(Model=48, R2=R2[[1]]))
 
 
@@ -2062,7 +2062,7 @@ Cand.mod[[49]] <- glmmTMB::glmmTMB(formula = lreg_tarpedarea~add_control + woven
 # # Computing a pseudo-R2:
 1 - (as.numeric(-2 * stats::logLik(Cand.mod[[49]]))/as.numeric(-2 * stats::logLik(
   update(Cand.mod[[49]], ~1)))) # McFadden's pseudo-R2
-R2 <- performance::r2_nakagawa(Cand.mod[[49]]) # Nakagawa's (pseudo-R2 for GLMMs)
+R2 <- performance::r2_tjur(Cand.mod[[49]]) # tjur's (pseudo-R2 for GLMMs)
 R.ajust <- rbind(R.ajust, data.frame(Model=49, R2=R2[[1]]))
 
 
@@ -2102,7 +2102,7 @@ Cand.mod[[50]] <- glmmTMB::glmmTMB(formula = lreg_tarpedarea~add_control + woven
 # # Computing a pseudo-R2:
 1 - (as.numeric(-2 * stats::logLik(Cand.mod[[50]]))/as.numeric(-2 * stats::logLik(
   update(Cand.mod[[50]], ~1)))) # McFadden's pseudo-R2
-R2 <- performance::r2_nakagawa(Cand.mod[[50]]) # Nakagawa's (pseudo-R2 for GLMMs)
+R2 <- performance::r2_tjur(Cand.mod[[50]]) # tjur's (pseudo-R2 for GLMMs)
 R.ajust <- rbind(R.ajust, data.frame(Model=50, R2=R2[[1]]))
 
 
@@ -2142,7 +2142,7 @@ Cand.mod[[51]] <- glmmTMB::glmmTMB(formula = lreg_tarpedarea~add_control + tarpf
 # # Computing a pseudo-R2:
 1 - (as.numeric(-2 * stats::logLik(Cand.mod[[51]]))/as.numeric(-2 * stats::logLik(
   update(Cand.mod[[51]], ~1)))) # McFadden's pseudo-R2
-R2 <- performance::r2_nakagawa(Cand.mod[[51]]) # Nakagawa's (pseudo-R2 for GLMMs)
+R2 <- performance::r2_tjur(Cand.mod[[51]]) # tjur's (pseudo-R2 for GLMMs)
 R.ajust <- rbind(R.ajust, data.frame(Model=51, R2=R2[[1]]))
 
 
@@ -2182,7 +2182,7 @@ Cand.mod[[52]] <- glmmTMB::glmmTMB(formula = lreg_tarpedarea~add_control + tarpf
 # # Computing a pseudo-R2:
 1 - (as.numeric(-2 * stats::logLik(Cand.mod[[52]]))/as.numeric(-2 * stats::logLik(
   update(Cand.mod[[52]], ~1)))) # McFadden's pseudo-R2
-R2 <- performance::r2_nakagawa(Cand.mod[[52]]) # Nakagawa's (pseudo-R2 for GLMMs)
+R2 <- performance::r2_tjur(Cand.mod[[52]]) # tjur's (pseudo-R2 for GLMMs)
 R.ajust <- rbind(R.ajust, data.frame(Model=52, R2=R2[[1]]))
 
 
@@ -2222,7 +2222,7 @@ Cand.mod[[53]] <- glmmTMB::glmmTMB(formula = lreg_tarpedarea~add_control + tarpf
 # # Computing a pseudo-R2:
 1 - (as.numeric(-2 * stats::logLik(Cand.mod[[53]]))/as.numeric(-2 * stats::logLik(
   update(Cand.mod[[53]], ~1)))) # McFadden's pseudo-R2
-R2 <- performance::r2_nakagawa(Cand.mod[[53]]) # Nakagawa's (pseudo-R2 for GLMMs)
+R2 <- performance::r2_tjur(Cand.mod[[53]]) # tjur's (pseudo-R2 for GLMMs)
 R.ajust <- rbind(R.ajust, data.frame(Model=53, R2=R2[[1]]))
 
 
@@ -2262,7 +2262,7 @@ Cand.mod[[54]] <- glmmTMB::glmmTMB(formula = lreg_tarpedarea~add_control + tarpf
 # # Computing a pseudo-R2:
 1 - (as.numeric(-2 * stats::logLik(Cand.mod[[54]]))/as.numeric(-2 * stats::logLik(
   update(Cand.mod[[54]], ~1)))) # McFadden's pseudo-R2
-R2 <- performance::r2_nakagawa(Cand.mod[[54]]) # Nakagawa's (pseudo-R2 for GLMMs)
+R2 <- performance::r2_tjur(Cand.mod[[54]]) # tjur's (pseudo-R2 for GLMMs)
 R.ajust <- rbind(R.ajust, data.frame(Model=54, R2=R2[[1]]))
 
 
@@ -2302,7 +2302,7 @@ Cand.mod[[55]] <- glmmTMB::glmmTMB(formula = lreg_tarpedarea~add_control + plant
 # # Computing a pseudo-R2:
 1 - (as.numeric(-2 * stats::logLik(Cand.mod[[55]]))/as.numeric(-2 * stats::logLik(
   update(Cand.mod[[55]], ~1)))) # McFadden's pseudo-R2
-R2 <- performance::r2_nakagawa(Cand.mod[[55]]) # Nakagawa's (pseudo-R2 for GLMMs)
+R2 <- performance::r2_tjur(Cand.mod[[55]]) # tjur's (pseudo-R2 for GLMMs)
 R.ajust <- rbind(R.ajust, data.frame(Model=55, R2=R2[[1]]))
 
 
@@ -2342,7 +2342,7 @@ Cand.mod[[56]] <- glmmTMB::glmmTMB(formula = lreg_tarpedarea~add_control + plant
 # # Computing a pseudo-R2:
 1 - (as.numeric(-2 * stats::logLik(Cand.mod[[56]]))/as.numeric(-2 * stats::logLik(
   update(Cand.mod[[56]], ~1)))) # McFadden's pseudo-R2
-R2 <- performance::r2_nakagawa(Cand.mod[[56]]) # Nakagawa's (pseudo-R2 for GLMMs)
+R2 <- performance::r2_tjur(Cand.mod[[56]]) # tjur's (pseudo-R2 for GLMMs)
 R.ajust <- rbind(R.ajust, data.frame(Model=56, R2=R2[[1]]))
 
 
@@ -2382,7 +2382,7 @@ Cand.mod[[57]] <- glmmTMB::glmmTMB(formula = lreg_tarpedarea~add_control + log2(
 # # Computing a pseudo-R2:
 1 - (as.numeric(-2 * stats::logLik(Cand.mod[[57]]))/as.numeric(-2 * stats::logLik(
   update(Cand.mod[[57]], ~1)))) # McFadden's pseudo-R2
-R2 <- performance::r2_nakagawa(Cand.mod[[57]]) # Nakagawa's (pseudo-R2 for GLMMs)
+R2 <- performance::r2_tjur(Cand.mod[[57]]) # tjur's (pseudo-R2 for GLMMs)
 R.ajust <- rbind(R.ajust, data.frame(Model=57, R2=R2[[1]]))
 
 
@@ -2422,7 +2422,7 @@ Cand.mod[[58]] <- glmmTMB::glmmTMB(formula = lreg_tarpedarea~add_control + log2(
 # # Computing a pseudo-R2:
 1 - (as.numeric(-2 * stats::logLik(Cand.mod[[58]]))/as.numeric(-2 * stats::logLik(
   update(Cand.mod[[58]], ~1)))) # McFadden's pseudo-R2
-R2 <- performance::r2_nakagawa(Cand.mod[[58]]) # Nakagawa's (pseudo-R2 for GLMMs)
+R2 <- performance::r2_tjur(Cand.mod[[58]]) # tjur's (pseudo-R2 for GLMMs)
 R.ajust <- rbind(R.ajust, data.frame(Model=58, R2=R2[[1]]))
 
 
@@ -2462,7 +2462,7 @@ Cand.mod[[59]] <- glmmTMB::glmmTMB(formula = lreg_tarpedarea~add_control + log2(
 # # Computing a pseudo-R2:
 1 - (as.numeric(-2 * stats::logLik(Cand.mod[[59]]))/as.numeric(-2 * stats::logLik(
   update(Cand.mod[[59]], ~1)))) # McFadden's pseudo-R2
-R2 <- performance::r2_nakagawa(Cand.mod[[59]]) # Nakagawa's (pseudo-R2 for GLMMs)
+R2 <- performance::r2_tjur(Cand.mod[[59]]) # tjur's (pseudo-R2 for GLMMs)
 R.ajust <- rbind(R.ajust, data.frame(Model=59, R2=R2[[1]]))
 
 
@@ -2502,7 +2502,7 @@ Cand.mod[[60]] <- glmmTMB::glmmTMB(formula = lreg_tarpedarea~woven_geotex + tarp
 # # Computing a pseudo-R2:
 1 - (as.numeric(-2 * stats::logLik(Cand.mod[[60]]))/as.numeric(-2 * stats::logLik(
   update(Cand.mod[[60]], ~1)))) # McFadden's pseudo-R2
-R2 <- performance::r2_nakagawa(Cand.mod[[60]]) # Nakagawa's (pseudo-R2 for GLMMs)
+R2 <- performance::r2_tjur(Cand.mod[[60]]) # tjur's (pseudo-R2 for GLMMs)
 R.ajust <- rbind(R.ajust, data.frame(Model=60, R2=R2[[1]]))
 
 
@@ -2542,7 +2542,7 @@ Cand.mod[[61]] <- glmmTMB::glmmTMB(formula = lreg_tarpedarea~woven_geotex + tarp
 # # Computing a pseudo-R2:
 1 - (as.numeric(-2 * stats::logLik(Cand.mod[[61]]))/as.numeric(-2 * stats::logLik(
   update(Cand.mod[[61]], ~1)))) # McFadden's pseudo-R2
-R2 <- performance::r2_nakagawa(Cand.mod[[61]]) # Nakagawa's (pseudo-R2 for GLMMs)
+R2 <- performance::r2_tjur(Cand.mod[[61]]) # tjur's (pseudo-R2 for GLMMs)
 R.ajust <- rbind(R.ajust, data.frame(Model=61, R2=R2[[1]]))
 
 
@@ -2582,7 +2582,7 @@ Cand.mod[[62]] <- glmmTMB::glmmTMB(formula = lreg_tarpedarea~log2(stand_surface)
 # # Computing a pseudo-R2:
 1 - (as.numeric(-2 * stats::logLik(Cand.mod[[62]]))/as.numeric(-2 * stats::logLik(
   update(Cand.mod[[62]], ~1)))) # McFadden's pseudo-R2
-R2 <- performance::r2_nakagawa(Cand.mod[[62]]) # Nakagawa's (pseudo-R2 for GLMMs)
+R2 <- performance::r2_tjur(Cand.mod[[62]]) # tjur's (pseudo-R2 for GLMMs)
 R.ajust <- rbind(R.ajust, data.frame(Model=62, R2=R2[[1]]))
 
 
@@ -2622,7 +2622,7 @@ Cand.mod[[63]] <- glmmTMB::glmmTMB(formula = lreg_tarpedarea~woven_geotex + log2
 # # Computing a pseudo-R2:
 1 - (as.numeric(-2 * stats::logLik(Cand.mod[[63]]))/as.numeric(-2 * stats::logLik(
   update(Cand.mod[[63]], ~1)))) # McFadden's pseudo-R2
-R2 <- performance::r2_nakagawa(Cand.mod[[63]]) # Nakagawa's (pseudo-R2 for GLMMs)
+R2 <- performance::r2_tjur(Cand.mod[[63]]) # tjur's (pseudo-R2 for GLMMs)
 R.ajust <- rbind(R.ajust, data.frame(Model=63, R2=R2[[1]]))
 
 
@@ -2662,7 +2662,7 @@ Cand.mod[[64]] <- glmmTMB::glmmTMB(formula = lreg_tarpedarea~woven_geotex + log2
 # # Computing a pseudo-R2:
 1 - (as.numeric(-2 * stats::logLik(Cand.mod[[64]]))/as.numeric(-2 * stats::logLik(
   update(Cand.mod[[64]], ~1)))) # McFadden's pseudo-R2
-R2 <- performance::r2_nakagawa(Cand.mod[[64]]) # Nakagawa's (pseudo-R2 for GLMMs)
+R2 <- performance::r2_tjur(Cand.mod[[64]]) # tjur's (pseudo-R2 for GLMMs)
 R.ajust <- rbind(R.ajust, data.frame(Model=64, R2=R2[[1]]))
 
 
@@ -2738,7 +2738,7 @@ colnames(AICc.model)[colnames(AICc.model) == 'Candidate'] <- 'Candidate model'
 colnames(AICc.model)[colnames(AICc.model) == 'df'] <- 'k'
 colnames(AICc.model)[colnames(AICc.model) == 'delta'] <- 'delta AICc'
 colnames(AICc.model)[colnames(AICc.model) == 'weight'] <- 'W'
-colnames(AICc.model)[colnames(AICc.model) == 'R2'] <- 'R2glmm'
+colnames(AICc.model)[colnames(AICc.model) == 'R2'] <- 'pseudo-R2'
 
 ### Table export:
 readr::write_csv2(x = AICc.model, file = here::here("output", "tables", "Models_lreg_tarpedarea.csv"))
@@ -2764,19 +2764,24 @@ Var.Imp <- c("cond((Int))", "cond(add_control)", "cond(geomem)", "cond(obstacles
 Para.model <- data.frame(Parameters, Var, Var.Imp)
 
 ### Select the top models:
-#top.models <- MuMIn::get.models(AICc, cumsum(weight) <= 0.95) # To take those with a cumulated sum of
+#top.models <- MuMIn::get.models(AICc, cumsum(weight) <= 0.95) # To take those with a cumulative sum of
 # AICc weights <= 0.95
-top.models <- MuMIn::get.models(AICc, cumsum(weight) <= 1) # To take them all
+top.models <- MuMIn::get.models(AICc, cumsum(weight) <= 1) # To take them all (we chose this option because
+# it was equally interesting to highlight the explanatory variables whose "importance" was supported
+# by the data and those that were not)!
 # We could also select models according to their delta AICc (see Burnham & Anderson, 2002)!
 
 ### Actual model parameters averaging:
 Parameter <- MuMIn::model.avg(top.models, revised.var=T, adjusted=T, fit=T)
-Parameter.model <- as.data.frame(cbind(MuMIn::coefTable(Parameter), stats::confint(Parameter)))
+Parameter.model <- as.data.frame(cbind(MuMIn::coefTable(Parameter), stats::confint(Parameter))) # Reports
+# the conditional averaged parameters with their 95% confidence interval
 
 ### Improved formating:
 Parameter.model$Var <- row.names(Parameter.model)
 Parameter.model <- merge(Parameter.model, Para.model, by="Var", all=TRUE)
-Imp <- as.data.frame(format(round(MuMIn::importance(Parameter), digits=2)))
+Imp <- as.data.frame(format(round(MuMIn::importance(Parameter), digits=2))) # Gives each predictor a
+# relative "importance" value based on the sum of the model weights of the models in which the variable
+# is included as a predictor
 colnames(Imp) <- "Imp."
 Imp$Var.Imp <- row.names(Imp)
 Parameter.model <- merge(Parameter.model, Imp, by="Var.Imp", all=TRUE)

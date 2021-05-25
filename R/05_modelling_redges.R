@@ -65,21 +65,21 @@ R.ajust <- data.frame(Model=integer(0), R2=numeric(0)) # Creates an empty data.f
 
 
 
-### Testing the relevance of the random effect structure:
-m0.glm <- glmmTMB::glmmTMB(formula = lreg_edges~1, data = redges,
-                           family = stats::binomial(link = "logit"), REML = FALSE)
-m0.glmer <- glmmTMB::glmmTMB(formula = lreg_edges~(1|manager_id), data = redges,
-                             family = stats::binomial(link = "logit"), REML = FALSE)
-aic.glm <- AIC(logLik(m0.glm))
-aic.glmer <- AIC(logLik(m0.glmer))
-
-# Likelihood Ratio Test:
-null.id <- -2 * logLik(m0.glm) + 2 * logLik(m0.glmer)
-pchisq(as.numeric(null.id), df=1, lower.tail=F) # The Likelihood Ratio Test is NOT significant suggesting
-# that the use of the random effect structure is not necessary! HOWEVER, model diagnostics for subsequent
-# models have shown that failing to include "manager_id" as a random effect leads to model misspecification.
-# Consequently, and as initially planned, we included a random structure within our candiate models.
-rm(m0.glm, m0.glmer, aic.glm, aic.glmer, null.id)
+# ### Testing the relevance of the random effect structure:
+# m0.glm <- glmmTMB::glmmTMB(formula = lreg_edges~1, data = redges,
+#                            family = stats::binomial(link = "logit"), REML = FALSE)
+# m0.glmer <- glmmTMB::glmmTMB(formula = lreg_edges~(1|manager_id), data = redges,
+#                              family = stats::binomial(link = "logit"), REML = FALSE)
+# aic.glm <- AIC(logLik(m0.glm))
+# aic.glmer <- AIC(logLik(m0.glmer))
+#
+# # Likelihood Ratio Test:
+# null.id <- -2 * logLik(m0.glm) + 2 * logLik(m0.glmer)
+# pchisq(as.numeric(null.id), df=1, lower.tail=F) # The Likelihood Ratio Test is NOT significant suggesting
+# # that the use of the random effect structure is not necessary! HOWEVER, model diagnostics for subsequent
+# # models have shown that failing to include "manager_id" as a random effect leads to model misspecification.
+# # Consequently, and as initially planned, we included a random structure within our candiate models.
+# rm(m0.glm, m0.glmer, aic.glm, aic.glmer, null.id)
 
 
 
@@ -153,7 +153,7 @@ Cand.mod[[2]] <- glmmTMB::glmmTMB(formula = lreg_edges~log2(distance+1) + add_co
 # # Computing a pseudo-R2:
 1 - (as.numeric(-2 * stats::logLik(Cand.mod[[2]]))/as.numeric(-2 * stats::logLik(
   update(Cand.mod[[2]], ~1)))) # McFadden's pseudo-R2
-R2 <- performance::r2_tjur(Cand.mod[[2]], tolerance = 1e-08) # tjur's (pseudo-R2 for GLMMs)
+R2 <- performance::r2_tjur(Cand.mod[[2]]) # tjur's (pseudo-R2 for GLMMs)
 R.ajust <- rbind(R.ajust, data.frame(Model=2, R2=R2[[1]]))
 
 
@@ -349,7 +349,7 @@ Cand.mod[[7]] <- glmmTMB::glmmTMB(formula = lreg_edges~log2(distance+1) + geomem
 # # Computing a pseudo-R2:
 1 - (as.numeric(-2 * stats::logLik(Cand.mod[[7]]))/as.numeric(-2 * stats::logLik(
   update(Cand.mod[[7]], ~1)))) # McFadden's pseudo-R2
-R2 <- performance::r2_tjur(Cand.mod[[7]], tolerance = 1e-08) # tjur's (pseudo-R2 for GLMMs)
+R2 <- performance::r2_tjur(Cand.mod[[7]]) # tjur's (pseudo-R2 for GLMMs)
 R.ajust <- rbind(R.ajust, data.frame(Model=7, R2=R2[[1]]))
 
 
@@ -506,7 +506,7 @@ Cand.mod[[11]] <- glmmTMB::glmmTMB(formula = lreg_edges~log2(trench_depth+1) + a
 # # Computing a pseudo-R2:
 1 - (as.numeric(-2 * stats::logLik(Cand.mod[[11]]))/as.numeric(-2 * stats::logLik(
   update(Cand.mod[[11]], ~1)))) # McFadden's pseudo-R2
-R2 <- performance::r2_tjur(Cand.mod[[11]], tolerance = 1e-08) # tjur's (pseudo-R2 for GLMMs)
+R2 <- performance::r2_tjur(Cand.mod[[11]]) # tjur's (pseudo-R2 for GLMMs)
 R.ajust <- rbind(R.ajust, data.frame(Model=11, R2=R2[[1]]))
 
 
@@ -584,7 +584,7 @@ Cand.mod[[13]] <- glmmTMB::glmmTMB(formula = lreg_edges~log2(trench_depth+1) + l
 # # Computing a pseudo-R2:
 1 - (as.numeric(-2 * stats::logLik(Cand.mod[[13]]))/as.numeric(-2 * stats::logLik(
   update(Cand.mod[[13]], ~1)))) # McFadden's pseudo-R2
-R2 <- performance::r2_tjur(Cand.mod[[13]], tolerance = 1e-08) # tjur's (pseudo-R2 for GLMMs)
+R2 <- performance::r2_tjur(Cand.mod[[13]]) # tjur's (pseudo-R2 for GLMMs)
 R.ajust <- rbind(R.ajust, data.frame(Model=13, R2=R2[[1]]))
 
 
@@ -623,7 +623,7 @@ Cand.mod[[14]] <- glmmTMB::glmmTMB(formula = lreg_edges~log2(stand_surface) + ad
 # # Computing a pseudo-R2:
 1 - (as.numeric(-2 * stats::logLik(Cand.mod[[14]]))/as.numeric(-2 * stats::logLik(
   update(Cand.mod[[14]], ~1)))) # McFadden's pseudo-R2
-R2 <- performance::r2_tjur(Cand.mod[[14]], tolerance = 1e-08) # tjur's (pseudo-R2 for GLMMs)
+R2 <- performance::r2_tjur(Cand.mod[[14]]) # tjur's (pseudo-R2 for GLMMs)
 R.ajust <- rbind(R.ajust, data.frame(Model=14, R2=R2[[1]]))
 
 
@@ -782,7 +782,7 @@ Cand.mod[[18]] <- glmmTMB::glmmTMB(formula = lreg_edges~log2(trench_depth+1) + r
 # # Computing a pseudo-R2:
 1 - (as.numeric(-2 * stats::logLik(Cand.mod[[18]]))/as.numeric(-2 * stats::logLik(
   update(Cand.mod[[18]], ~1)))) # McFadden's pseudo-R2
-R2 <- performance::r2_tjur(Cand.mod[[18]], tolerance = 1e-08) # tjur's (pseudo-R2 for GLMMs)
+R2 <- performance::r2_tjur(Cand.mod[[18]]) # tjur's (pseudo-R2 for GLMMs)
 R.ajust <- rbind(R.ajust, data.frame(Model=18, R2=R2[[1]]))
 
 
@@ -821,7 +821,7 @@ Cand.mod[[19]] <- glmmTMB::glmmTMB(formula = lreg_edges~log2(trench_depth+1) + s
 # # Computing a pseudo-R2:
 1 - (as.numeric(-2 * stats::logLik(Cand.mod[[19]]))/as.numeric(-2 * stats::logLik(
   update(Cand.mod[[19]], ~1)))) # McFadden's pseudo-R2
-R2 <- performance::r2_tjur(Cand.mod[[19]], tolerance = 1e-08) # tjur's (pseudo-R2 for GLMMs)
+R2 <- performance::r2_tjur(Cand.mod[[19]]) # tjur's (pseudo-R2 for GLMMs)
 R.ajust <- rbind(R.ajust, data.frame(Model=19, R2=R2[[1]]))
 
 
@@ -899,7 +899,7 @@ Cand.mod[[21]] <- glmmTMB::glmmTMB(formula = lreg_edges~add_control + pb_fixatio
 # # Computing a pseudo-R2:
 1 - (as.numeric(-2 * stats::logLik(Cand.mod[[21]]))/as.numeric(-2 * stats::logLik(
   update(Cand.mod[[21]], ~1)))) # McFadden's pseudo-R2
-R2 <- performance::r2_tjur(Cand.mod[[21]], tolerance = 1e-08) # tjur's (pseudo-R2 for GLMMs)
+R2 <- performance::r2_tjur(Cand.mod[[21]]) # tjur's (pseudo-R2 for GLMMs)
 R.ajust <- rbind(R.ajust, data.frame(Model=21, R2=R2[[1]]))
 
 
@@ -938,7 +938,7 @@ Cand.mod[[22]] <- glmmTMB::glmmTMB(formula = lreg_edges~add_control + slope + (1
 # # Computing a pseudo-R2:
 1 - (as.numeric(-2 * stats::logLik(Cand.mod[[22]]))/as.numeric(-2 * stats::logLik(
   update(Cand.mod[[22]], ~1)))) # McFadden's pseudo-R2
-R2 <- performance::r2_tjur(Cand.mod[[22]], tolerance = 1e-08) # tjur's (pseudo-R2 for GLMMs)
+R2 <- performance::r2_tjur(Cand.mod[[22]]) # tjur's (pseudo-R2 for GLMMs)
 R.ajust <- rbind(R.ajust, data.frame(Model=22, R2=R2[[1]]))
 
 
@@ -977,7 +977,7 @@ Cand.mod[[23]] <- glmmTMB::glmmTMB(formula = lreg_edges~add_control + tarping_du
 # # Computing a pseudo-R2:
 1 - (as.numeric(-2 * stats::logLik(Cand.mod[[23]]))/as.numeric(-2 * stats::logLik(
   update(Cand.mod[[23]], ~1)))) # McFadden's pseudo-R2
-R2 <- performance::r2_tjur(Cand.mod[[23]], tolerance = 1e-08) # tjur's (pseudo-R2 for GLMMs)
+R2 <- performance::r2_tjur(Cand.mod[[23]]) # tjur's (pseudo-R2 for GLMMs)
 R.ajust <- rbind(R.ajust, data.frame(Model=23, R2=R2[[1]]))
 
 
@@ -1055,7 +1055,7 @@ Cand.mod[[25]] <- glmmTMB::glmmTMB(formula = lreg_edges~obstacles + geomem + (1|
 # # Computing a pseudo-R2:
 1 - (as.numeric(-2 * stats::logLik(Cand.mod[[25]]))/as.numeric(-2 * stats::logLik(
   update(Cand.mod[[25]], ~1)))) # McFadden's pseudo-R2
-R2 <- performance::r2_tjur(Cand.mod[[25]], tolerance = 1e-08) # tjur's (pseudo-R2 for GLMMs)
+R2 <- performance::r2_tjur(Cand.mod[[25]]) # tjur's (pseudo-R2 for GLMMs)
 R.ajust <- rbind(R.ajust, data.frame(Model=25, R2=R2[[1]]))
 
 
@@ -1133,7 +1133,7 @@ Cand.mod[[27]] <- glmmTMB::glmmTMB(formula = lreg_edges~slope + geomem + (1|mana
 # # Computing a pseudo-R2:
 1 - (as.numeric(-2 * stats::logLik(Cand.mod[[27]]))/as.numeric(-2 * stats::logLik(
   update(Cand.mod[[27]], ~1)))) # McFadden's pseudo-R2
-R2 <- performance::r2_tjur(Cand.mod[[27]], tolerance = 1e-08) # tjur's (pseudo-R2 for GLMMs)
+R2 <- performance::r2_tjur(Cand.mod[[27]]) # tjur's (pseudo-R2 for GLMMs)
 R.ajust <- rbind(R.ajust, data.frame(Model=27, R2=R2[[1]]))
 
 
@@ -1252,7 +1252,7 @@ Cand.mod[[30]] <- glmmTMB::glmmTMB(formula = lreg_edges~log2(distance+1) + log2(
 # # Computing a pseudo-R2:
 1 - (as.numeric(-2 * stats::logLik(Cand.mod[[30]]))/as.numeric(-2 * stats::logLik(
   update(Cand.mod[[30]], ~1)))) # McFadden's pseudo-R2
-R2 <- performance::r2_tjur(Cand.mod[[30]], tolerance = 1e-07) # tjur's (pseudo-R2 for GLMMs)
+R2 <- performance::r2_tjur(Cand.mod[[30]]) # tjur's (pseudo-R2 for GLMMs)
 R.ajust <- rbind(R.ajust, data.frame(Model=30, R2=R2[[1]]))
 
 
@@ -1334,7 +1334,7 @@ Cand.mod[[32]] <- glmmTMB::glmmTMB(formula = lreg_edges~log2(distance+1) + log2(
 # # Computing a pseudo-R2:
 1 - (as.numeric(-2 * stats::logLik(Cand.mod[[32]]))/as.numeric(-2 * stats::logLik(
   update(Cand.mod[[32]], ~1)))) # McFadden's pseudo-R2
-R2 <- performance::r2_tjur(Cand.mod[[32]], tolerance = 1e-08) # tjur's (pseudo-R2 for GLMMs)
+R2 <- performance::r2_tjur(Cand.mod[[32]]) # tjur's (pseudo-R2 for GLMMs)
 R.ajust <- rbind(R.ajust, data.frame(Model=32, R2=R2[[1]]))
 
 
@@ -1456,7 +1456,7 @@ Cand.mod[[35]] <- glmmTMB::glmmTMB(formula = lreg_edges~log2(distance+1) + log2(
 # # Computing a pseudo-R2:
 1 - (as.numeric(-2 * stats::logLik(Cand.mod[[35]]))/as.numeric(-2 * stats::logLik(
   update(Cand.mod[[35]], ~1)))) # McFadden's pseudo-R2
-R2 <- performance::r2_tjur(Cand.mod[[35]], tolerance = 1e-08) # tjur's (pseudo-R2 for GLMMs)
+R2 <- performance::r2_tjur(Cand.mod[[35]]) # tjur's (pseudo-R2 for GLMMs)
 R.ajust <- rbind(R.ajust, data.frame(Model=35, R2=R2[[1]]))
 
 
@@ -1579,7 +1579,7 @@ Cand.mod[[38]] <- glmmTMB::glmmTMB(formula = lreg_edges~log2(distance+1) + geome
 # # Computing a pseudo-R2:
 1 - (as.numeric(-2 * stats::logLik(Cand.mod[[38]]))/as.numeric(-2 * stats::logLik(
   update(Cand.mod[[38]], ~1)))) # McFadden's pseudo-R2
-R2 <- performance::r2_tjur(Cand.mod[[38]], tolerance = 1e-08) # tjur's (pseudo-R2 for GLMMs)
+R2 <- performance::r2_tjur(Cand.mod[[38]]) # tjur's (pseudo-R2 for GLMMs)
 R.ajust <- rbind(R.ajust, data.frame(Model=38, R2=R2[[1]]))
 
 
@@ -1702,7 +1702,7 @@ Cand.mod[[41]] <- glmmTMB::glmmTMB(formula = lreg_edges~log2(distance+1) + tarpi
 # # Computing a pseudo-R2:
 1 - (as.numeric(-2 * stats::logLik(Cand.mod[[41]]))/as.numeric(-2 * stats::logLik(
   update(Cand.mod[[41]], ~1)))) # McFadden's pseudo-R2
-R2 <- performance::r2_tjur(Cand.mod[[41]], tolerance = 1e-08) # tjur's (pseudo-R2 for GLMMs)
+R2 <- performance::r2_tjur(Cand.mod[[41]]) # tjur's (pseudo-R2 for GLMMs)
 R.ajust <- rbind(R.ajust, data.frame(Model=41, R2=R2[[1]]))
 
 
@@ -1784,7 +1784,7 @@ Cand.mod[[43]] <- glmmTMB::glmmTMB(formula = lreg_edges~obstacles + add_control 
 # # Computing a pseudo-R2:
 1 - (as.numeric(-2 * stats::logLik(Cand.mod[[43]]))/as.numeric(-2 * stats::logLik(
   update(Cand.mod[[43]], ~1)))) # McFadden's pseudo-R2
-R2 <- performance::r2_tjur(Cand.mod[[43]], tolerance = 1e-08) # tjur's (pseudo-R2 for GLMMs)
+R2 <- performance::r2_tjur(Cand.mod[[43]]) # tjur's (pseudo-R2 for GLMMs)
 R.ajust <- rbind(R.ajust, data.frame(Model=43, R2=R2[[1]]))
 
 
@@ -2071,7 +2071,7 @@ Cand.mod[[50]] <- glmmTMB::glmmTMB(formula = lreg_edges~log2(trench_depth+1) + o
 # # Computing a pseudo-R2:
 1 - (as.numeric(-2 * stats::logLik(Cand.mod[[50]]))/as.numeric(-2 * stats::logLik(
   update(Cand.mod[[50]], ~1)))) # McFadden's pseudo-R2
-R2 <- performance::r2_tjur(Cand.mod[[50]], tolerance = 1e-08) # tjur's (pseudo-R2 for GLMMs)
+R2 <- performance::r2_tjur(Cand.mod[[50]]) # tjur's (pseudo-R2 for GLMMs)
 R.ajust <- rbind(R.ajust, data.frame(Model=50, R2=R2[[1]]))
 
 
@@ -2139,7 +2139,7 @@ colnames(AICc.model)[colnames(AICc.model) == 'Candidate'] <- 'Candidate model'
 colnames(AICc.model)[colnames(AICc.model) == 'df'] <- 'k'
 colnames(AICc.model)[colnames(AICc.model) == 'delta'] <- 'delta AICc'
 colnames(AICc.model)[colnames(AICc.model) == 'weight'] <- 'W'
-colnames(AICc.model)[colnames(AICc.model) == 'R2'] <- 'R2glmm'
+colnames(AICc.model)[colnames(AICc.model) == 'R2'] <- 'pseudo-R2'
 
 ### Table export:
 readr::write_csv2(x = AICc.model, file = here::here("output", "tables", "Models_lreg_edges.csv"))
