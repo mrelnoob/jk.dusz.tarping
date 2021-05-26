@@ -56,45 +56,40 @@ summary(eff)
 # --------------------------------------------- #
 
 # ### Testing the relevance of the random effect structure:
-# m0.glm <- stats::glm(reg_stripsoverlap ~ sqrt(strips_overlap), data = roverlaps, family = binomial)
-# m0.glmer <- lme4::glmer(reg_stripsoverlap ~ sqrt(strips_overlap) + (1|manager_id), data = roverlaps, family = binomial)
-# m0.glmer2 <- lme4::glmer(reg_stripsoverlap ~ sqrt(strips_overlap) + (1|manager_id) + (1|xp_id), data = roverlaps, family = binomial)
+# m0.glm <- stats::glm(high_eff ~ fully_tarped, data = eff, family = binomial)
+# m0.glmer <- lme4::glmer(high_eff ~ fully_tarped + (1|manager_id), data = eff, family = binomial)
 # aic.glm <- AIC(logLik(m0.glm))
 # aic.glmer <- AIC(logLik(m0.glmer))
-# aic.glmer2 <- AIC(logLik(m0.glmer2))
 #
 # # Likelihood Ratio Test:
 # null.id <- -2 * logLik(m0.glm) + 2 * logLik(m0.glmer)
 # pchisq(as.numeric(null.id), df=1, lower.tail=F)
-# null.id <- -2 * logLik(m0.glm) + 2 * logLik(m0.glmer2)
-# pchisq(as.numeric(null.id), df=1, lower.tail=F)
-# rm(m0.glm, m0.glmer, m0.glmer2, aic.glm, aic.glmer, aic.glmer2, null.id)
-# The Likelihood Ratio Tests are NOT significant so the use of the random effect structure may not be
-# necessary! However, further tests on the model residuals may indicate otherwise.
+# rm(m0.glm, m0.glmer, aic.glm, aic.glmer, null.id)
+# # The Likelihood Ratio Tests are NOT significant so the use of the random effect structure may not be
+# # necessary! However, further tests on the model residuals may indicate otherwise.
 
 
 # IMPORTANT NOTE:
-# We decided to go with a regularization modelling method (i.e. penalized regression) to avoid
-# overfitting so we will likely not use model selection and multimodel inference for this response variable.
+# Since we'll use a regularization modelling method (i.e. penalized regression) to avoid overfitting
+# and deal with our "complete separation" problem, we will not use model selection and multimodel inference
+# for this response variable.
 # Consequently, we will assess further logistic regression assumptions using the most parsimonious full model
 # we could think of, i.e. including all the available predictors we thought should be important to explain
-# our outcome (i.e. the presence of knotweed regrowths at tarping strip overlaps) based on our knowledge.
+# our outcome (i.e. the eradication or near-eradication of knotweeds after tarping) based on our knowledge.
 
 
 # ### (Re-)Assessing the linearity assumption:
-# rov <- roverlaps[,c("reg_stripsoverlap", "fully_tarped", "levelling", "plantation", "obstacles",
-#                     "sedicover_height", "stand_surface", "strips_overlap",
-#                     "stripfix_taped", "tarpfix_multimethod")]
-# model <- glm(reg_stripsoverlap ~., data = rov, family = binomial)
-# # Predict the probability (p) of regrowths at strip overlaps:
+# eff2 <- eff[,c("high_eff", "add_control", "distance", "elevation", "fully_tarped", "geomem", "obstacles",
+#                "plantation", "pb_fixation", "pb_durability", "repairs", "slope", "stand_surface",
+#                "stripsoverlap_ok", "tarping_duration", "uprootexcav")]
+# model <- glm(high_eff ~., data = eff2, family = binomial)
+# # Predict the probability (p) of high efficacy:
 # probabilities <- predict(model, type = "response")
 # # Transforming predictors
-# mydata <- rov %>%
+# mydata <- eff2 %>%
 #   dplyr::select_if(is.numeric) %>%
 #   dplyr::mutate("stand_surface (log)" = log(stand_surface)) %>%
-#   dplyr::mutate("sedicover_height (log+1)" = log(sedicover_height+1)) %>%
-#   dplyr::mutate("strips_overlap (sqrt)" = sqrt(strips_overlap)) # These transformations were made to
-# # linearize the relationships although they may not be necessary for sedicover_height and strips_overlap.
+#   dplyr::mutate("distance (log+1)" = log(distance+1)) # These transformations were made to linearize the relationships
 # predictors <- colnames(mydata)
 # # Bind the logit and tidying the data for plot (ggplot2, so long format)
 # mydata <- mydata %>%
@@ -106,25 +101,25 @@ summary(eff)
 #   ggplot2::geom_smooth(method = "loess") +
 #   ggplot2::theme_bw() +
 #   ggplot2::facet_wrap(~predictors, scales = "free_x")
-#
-#
+# # It appears that including binary variables in the model impedes the linearity assessment as logit values
+# # become bimodal. However, penalized regression methods such as Ridge or LASSO do not explicitly assume
+# # the same assumptions as un-penalized models. Moreover, all variables are standardized before performing
+# # Ridge or LASSO regressions and it would be quite odd to transform (e.g. log) prior to standardize them and
+# # it would surely highly complicate interpretations. Therefore, we will fit the model with non-transformed
+# # variables.
+
+
 # ### Assessing multicollinearity:
-# car::vif(mod = model) # There is no signs of multicollinearity as all GVIF value are under 1.65.
-# rm(rov, model, probabilities, predictors, mydata)
+# car::vif(mod = model) # There is no signs of strong multicollinearity as all GVIF value are under 2.1
+# rm(eff2, model, probabilities, predictors, mydata)
 
 
 
 
 
-
-
-########################################@#@
-########################################@#@
-########################################@#@
-########################################@#@
-
-##### Test of cross-validated penalized logistic regressions (Ridge, LASSO and elastic net) #####
-# --------------------------------------------------------------------------------------------- #
+# --------------------------------------------------------------------------- #
+##### Cross-validated Ridge logistic regression with bootstrap validation #####
+# --------------------------------------------------------------------------- #
 
 
 # TO IMPROVE RESULTS: standardiser (manuellement), pas via glmnet() (qui marche mal apparemment); tester
@@ -132,8 +127,9 @@ summary(eff)
 
 
 ### Data preparation
-mydata <- eff[ ,c("eff_eradication", "distance", "fully_tarped", "followups", "obstacles",
-                  "slope", "stand_surface", "tarping_duration")]
+mydata <- eff[,c("high_eff", "add_control", "distance", "elevation", "fully_tarped", "geomem", "obstacles",
+                 "plantation", "pb_fixation", "pb_durability", "repairs", "slope", "stand_surface",
+                 "stripsoverlap_ok", "tarping_duration", "uprootexcav")]
 mydata %>%
   dplyr::mutate(distance = log2(distance+1)) %>%
   dplyr::mutate(stand_surface = log2(stand_surface)) -> mydata
