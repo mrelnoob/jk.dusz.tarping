@@ -600,5 +600,4 @@ head(new.surf)
 # Predictions for a range of distance values
 pred.prob_dist  <- predict(ridge.model_int, newx = new.dist, s = min(ridge.model_int$lambda), type = "response")
 
-# Predictions for a range of stand_surface values
-pred.prob_surf  <- predict(ridge.model_int, newx = new.surf, s = min(ridge.model_int$lambda), type = "response")
+# INSTEAD: faire distance avec plusieurs valeurs de surface !!!! Et fully tarped ????
