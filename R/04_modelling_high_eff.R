@@ -128,17 +128,16 @@ summary(eff)
 # =========================================================================== #
 
 
-1) Faire un autre modèle ridge TOUTES les interactions (voir Favoris SO).
-2) Implémenter la procédure d'enhanced bootstrap' (bootstrapping optimism) avec les deux types de modèles
-ridge, i.e. avec et sans interactions (voir Favoris RStudio & Freerangestats).
-3) Comparer les résultats !
-
-4) Refaire tourner ça, mais en comparant si la standardisation manuelle marche mieux en utilisant le meilleur
-modèle (voir Favoris CV).
-5) Faire des prédictions avec des valeurs moyennes pour tous les prédicteurs et des plages de valeurs
-pour distance et stand_surface!
-6) Plotter les résultats.
-7) Enjoy!
+# 1) Faire un autre modèle ridge TOUTES les interactions (voir Favoris SO).
+# 2) Implémenter la procédure d'enhanced bootstrap' (bootstrapping optimism) avec les deux types de modèles
+# ridge, i.e. avec et sans interactions (voir Favoris RStudio & Freerangestats).
+# 3) Comparer les résultats !
+# 4) Refaire tourner ça, mais en comparant si la standardisation manuelle marche mieux en utilisant le meilleur
+# modèle (voir Favoris CV).
+# 5) Faire des prédictions avec des valeurs moyennes pour tous les prédicteurs et des plages de valeurs
+# pour distance et stand_surface!
+# 6) Plotter les résultats.
+# 7) Enjoy!
 
 
 ##### Comparing Ridge model with and without interactions #####
@@ -153,9 +152,13 @@ mydata <- eff[,c("high_eff", "add_control", "distance", "fully_tarped", "geomem"
 x <- stats::model.matrix(high_eff~., mydata)[,-1] # Matrix of potential predictors (WITHOUT interactions)
 f <- as.formula(high_eff~add_control+distance+fully_tarped+geomem+obstacles+plantation+pb_fixation
                 +pb_durability+repairs+slope+stand_surface+stripsoverlap_ok+sedicover_height+tarping_duration
-                +uprootexcav+distance*stand_surface+pb_fixation*repairs+obstacles*add_control+0)
+                +uprootexcav+pb_fixation*repairs+pb_fixation*add_control+add_control*fully_tarped
+                +distance*fully_tarped+distance*uprootexcav+fully_tarped*geomem+stripsoverlap_ok*pb_durability
+                +uprootexcav*pb_fixation+pb_fixation*pb_durability+uprootexcav*plantation+repairs*plantation+0)
 x_int <- stats::model.matrix(f, mydata)[,-1] # Matrix of potential predictors (WITH interactions)
-y <- jk.dusz.tarping::as.numfactor(x = mydata$high_eff) %>% as.matrix() # Same for Y
+y <- jk.dusz.tarping::as.numfactor(x = mydata$high_eff) %>% as.matrix()
+# NOTE: to create all possible interactions, the formula should be: f <- high_eff~.^2 (for second-order
+# interactions, or ^3 for third order)!
 
 
 
@@ -166,32 +169,32 @@ cv.ridge <- glmnet::cv.glmnet(x = x, y = y, alpha = 0, family = "binomial",
                               type.measure = "deviance", nfolds = 10)
 cv.ridge_int <- glmnet::cv.glmnet(x = x_int, y = y, alpha = 0, family = "binomial",
                               type.measure = "deviance", nfolds = 10)
-# plot(cv.ridge)
-# plot(cv.ridge_int)
+plot(cv.ridge)
+plot(cv.ridge_int)
 # glmnet::coef.glmnet(object = cv.ridge, s = cv.ridge$lambda.min) # To have look at the coefficients
 # glmnet::coef.glmnet(object = cv.ridge_int, s = cv.ridge$lambda.min) # To have look at the coefficients
 
 # Compute the full Ridge model:
-ridge.model <- glmnet::glmnet(x = x, y = y, alpha = 0, family = "binomial", lambda = cv.ridge$lambda.min)
-ridge.model_int <- glmnet::glmnet(x = x_int, y = y, alpha = 0, family = "binomial", lambda = cv.ridge$lambda.min)
+ridge.model <- glmnet::glmnet(x = x, y = y, alpha = 0, family = "binomial")
+ridge.model_int <- glmnet::glmnet(x = x_int, y = y, alpha = 0, family = "binomial")
 
 
 
 ### Evaluate the performance of the full Ridge model (WITHOUT interactions):
 pred.class <- predict(object = ridge.model, newx = x,
-                         s = cv.ridge$lambda.min, type = "class") %>% as.factor()
-pred.prob  <- predict(ridge.model, newx = x, s = cv.ridge$lambda.min, type = "response")
+                         s = min(ridge.model$lambda), type = "class") %>% as.factor()
+pred.prob  <- predict(ridge.model, newx = x, s = min(ridge.model$lambda), type = "response")
 
-MLmetrics::LogLoss(y_pred = pred.prob, y_true = y) # 0.472
-MLmetrics::AUC(y_pred = pred.prob, y_true = y) # 0.859
-MLmetrics::R2_Score(y_pred = pred.prob, y_true = y) # 0.316
-stats::deviance(ridge.model) # 80.268
+MLmetrics::LogLoss(y_pred = pred.prob, y_true = y) # 0.447
+MLmetrics::AUC(y_pred = pred.prob, y_true = y) # 0.865
+MLmetrics::R2_Score(y_pred = pred.prob, y_true = y) # 0.352
+stats::deviance(ridge.model) # 75.95
 
 conf.mat <- MLmetrics::ConfusionMatrix(y_pred = pred.class, y_true = y) # Or table(y, pred.class)
 error_rate <- (conf.mat[2]+conf.mat[3])/length(y)
-error_rate # Mean error rate = 0.223
+error_rate # Mean error rate = 0.188
 tpr <- (conf.mat[4])/(conf.mat[2]+conf.mat[4])
-tpr # True positive rate = 0.567 (not so good)
+tpr # True positive rate = 0.7
 
 # # To plot the ROC curve:
 # pred <- ROCR::prediction(predictions = pred.prob, labels = mydata$high_eff)
@@ -205,19 +208,19 @@ tpr # True positive rate = 0.567 (not so good)
 
 ### Evaluate the performance of the full Ridge model (WITH interactions):
 pred.class_int <- predict(object = ridge.model_int, newx = x_int,
-                         s = cv.ridge_int$lambda.min, type = "class") %>% as.factor()
-pred.prob_int  <- predict(ridge.model_int, newx = x_int, s = cv.ridge$lambda.min, type = "response")
+                         s = min(ridge.model_int$lambda), type = "class") %>% as.factor()
+pred.prob_int  <- predict(ridge.model_int, newx = x_int, s = min(ridge.model_int$lambda), type = "response")
 
-MLmetrics::LogLoss(y_pred = pred.prob_int, y_true = y) # 0.469
-MLmetrics::AUC(y_pred = pred.prob_int, y_true = y) # 0.86
-MLmetrics::R2_Score(y_pred = pred.prob_int, y_true = y) # 0.321
-stats::deviance(ridge.model_int) # 79.678
+MLmetrics::LogLoss(y_pred = pred.prob_int, y_true = y) # 0.399
+MLmetrics::AUC(y_pred = pred.prob_int, y_true = y) # 0.894
+MLmetrics::R2_Score(y_pred = pred.prob_int, y_true = y) # 0.43
+stats::deviance(ridge.model_int) # 67.878
 
 conf.mat_int <- MLmetrics::ConfusionMatrix(y_pred = pred.class_int, y_true = y) # Or table(y, pred.class_int)
 error_rate_int <- (conf.mat_int[2]+conf.mat_int[3])/length(y)
-error_rate_int # Mean error rate = 0.212
+error_rate_int # Mean error rate = 0.176
 tpr_int <- (conf.mat_int[4])/(conf.mat_int[2]+conf.mat_int[4])
-tpr_int # True positive rate = 0.567 (not so good)
+tpr_int # True positive rate = 0.73
 
 # # To plot the ROC curve:
 # pred <- ROCR::prediction(predictions = pred.prob_int, labels = mydata$high_eff)
@@ -239,37 +242,35 @@ compare_opt <- function(orig_data, i){
   x.train <- stats::model.matrix(high_eff~., train_data)[,-1] # Matrix of potential predictors (WITHOUT interactions)
   f <- as.formula(high_eff~add_control+distance+fully_tarped+geomem+obstacles+plantation+pb_fixation
                   +pb_durability+repairs+slope+stand_surface+stripsoverlap_ok+sedicover_height+tarping_duration
-                  +uprootexcav+distance*stand_surface+pb_fixation*repairs+obstacles*add_control+0)
+                  +uprootexcav+pb_fixation*repairs+pb_fixation*add_control+add_control*fully_tarped
+                  +distance*fully_tarped+distance*uprootexcav+fully_tarped*geomem+stripsoverlap_ok*pb_durability
+                  +uprootexcav*pb_fixation+pb_fixation*pb_durability+uprootexcav*plantation+repairs*plantation+0)
   x.train_int <- stats::model.matrix(f, train_data)[,-1] # Matrix of potential predictors (WITH interactions)
   y.train <- jk.dusz.tarping::as.numfactor(x = train_data$high_eff) %>% as.matrix() # Same for Y
 
   # Run the entire modelling process:
-  cv.lambda <- glmnet::cv.glmnet(x = x.train, y = y.train, alpha = 0, family = "binomial",
-                                type.measure = "deviance", nfolds = 10)
-  model_full <- glmnet::glmnet(x = x.train, y = y.train, alpha = 0, family = "binomial", lambda = cv.lambda$lambda.min)
-  cv.lambda_int <- glmnet::cv.glmnet(x = x.train_int, y = y.train, alpha = 0, family = "binomial",
-                                type.measure = "deviance", nfolds = 10)
-  model_full_int <- glmnet::glmnet(x = x.train_int, y = y.train, alpha = 0, family = "binomial", lambda = cv.lambda_int$lambda.min)
+  model_full <- glmnet::glmnet(x = x.train, y = y.train, alpha = 0, family = "binomial")
+  model_full_int <- glmnet::glmnet(x = x.train_int, y = y.train, alpha = 0, family = "binomial")
 
   # Predict the values on the trained, resampled data
   train_pred.class <- predict(object = model_full, newx = x.train,
-                              s = cv.lambda$lambda.min, type = "class") %>% as.factor()
+                              s = min(model_full$lambda), type = "class") %>% as.factor()
   train_pred.prob  <- predict(object = model_full, newx = x.train,
-                              s = cv.lambda$lambda.min, type = "response")
+                              s = min(model_full$lambda), type = "response")
   train_pred.class_int <- predict(object = model_full_int, newx = x.train_int,
-                              s = cv.lambda_int$lambda.min, type = "class") %>% as.factor()
+                              s = min(model_full_int$lambda), type = "class") %>% as.factor()
   train_pred.prob_int  <- predict(object = model_full_int, newx = x.train_int,
-                              s = cv.lambda_int$lambda.min, type = "response")
+                              s = min(model_full_int$lambda), type = "response")
 
   # Predict the values on the original, unresampled data
   full_pred.class <- predict(object = model_full, newx = x,
-                             s = cv.lambda$lambda.min, type = "class") %>% as.factor()
+                             s = min(model_full$lambda), type = "class") %>% as.factor()
   full_pred.prob  <- predict(object = model_full, newx = x,
-                             s = cv.lambda$lambda.min, type = "response")
+                             s = min(model_full$lambda), type = "response")
   full_pred.class_int <- predict(object = model_full_int, newx = x_int,
-                             s = cv.lambda_int$lambda.min, type = "class") %>% as.factor()
+                             s = min(model_full_int$lambda), type = "class") %>% as.factor()
   full_pred.prob_int  <- predict(object = model_full_int, newx = x_int,
-                             s = cv.lambda_int$lambda.min, type = "response")
+                             s = min(model_full_int$lambda), type = "response")
 
   train_conf.mat <- MLmetrics::ConfusionMatrix(y_pred = train_pred.class, y_true = y.train)
   train_error_rate <- (train_conf.mat[2]+train_conf.mat[3])/length(y.train)
@@ -327,6 +328,12 @@ original <- c(
   error_rate_int,
   tpr_int
 )
+res_original <- as.data.frame(x = original, row.names = c("LogLoss", "AUC",
+                                            "R2", "Mean Error Rate", "True Positive Rate",
+                                            "LogLoss (w/ inter.)", "AUC (w/ inter.)",
+                                            "R2 (w/ inter.)", "Mean Error Rate (w/ inter.)",
+                                            "True Positive Rate (w/ inter.)")) %>%
+  dplyr::rename("Initial value" = original)
 
 # Compute the mean bootstrapped results and the enhanced results:
 optimism <- apply(na.omit(res_opt$t), 2, mean)
@@ -335,66 +342,263 @@ corrected_results <- original - optimism %>% as.data.frame(row.names = c("LogLos
                                                           "LogLoss (w/ inter.)", "AUC (w/ inter.)",
                                                           "R2 (w/ inter.)", "Mean Error Rate (w/ inter.)",
                                                           "True Positive Rate (w/ inter.)"))
-print(corrected_results <- dplyr::rename(.data = corrected_results, "Optimism-corrected value" = .))
-
-
-### NUL!
+res_corrected <- dplyr::rename(.data = corrected_results, "Optimism-corrected value" = .)
 
 
 
-
-
-
+### Export result tables
+readr::write_csv2(x = res_original, file = here::here("output", "tables", "Orig.predic.metrics_high_eff.csv"))
+readr::write_csv2(x = res_corrected, file = here::here("output", "tables", "Correct.predic.metrics_high_eff.csv"))
 
 
 
 
 
-# ############## Elastic Net avec caret tuning ! #################
-# ################################################################
-# # To prepare for a 10-fold cross validation with 5 repeats:
-# train.control <- caret::trainControl(method = "repeatedcv", number = 10, repeats = 5)
+##### Comparing Ridge model (with interactions) with and without manual standardisation #####
+# ----------------------------------------------------------------------------------------- #
+
+# ### Data preparation:
 #
-# # To convert the data to a matrix format accepted by glmnet:
-# x <- stats::model.matrix(high_eff~., mydata)[,-1] # Creates a matrix of the potential predictors
-# y <- jk.dusz.tarping::as.numfactor(x = mydata$high_eff) %>% as.matrix() # Same for Y
+# mydata <- eff[,c("high_eff", "add_control", "distance", "fully_tarped", "geomem", "obstacles",
+#                  "plantation", "pb_fixation", "pb_durability", "repairs", "slope", "stand_surface",
+#                  "stripsoverlap_ok", "sedicover_height", "tarping_duration", "uprootexcav")]
+# # Create data matrices (as accepted by glmnet):
+# f <- as.formula(high_eff~add_control+distance+fully_tarped+geomem+obstacles+plantation+pb_fixation
+#                 +pb_durability+repairs+slope+stand_surface+stripsoverlap_ok+sedicover_height+tarping_duration
+#                 +uprootexcav+pb_fixation*repairs+pb_fixation*add_control+add_control*fully_tarped
+#                 +distance*fully_tarped+distance*uprootexcav+fully_tarped*geomem+stripsoverlap_ok*pb_durability
+#                 +uprootexcav*pb_fixation+pb_fixation*pb_durability+uprootexcav*plantation+repairs*plantation+0)
+# x <- stats::model.matrix(f, mydata)[,-1] # Matrix of potential predictors (WITHOUT manual standardisation)
+# x_stdz <- apply(x, 2, scale) # Matrix of potential predictors (WITH manual standardisation)
+#
+# y <- jk.dusz.tarping::as.numfactor(x = mydata$high_eff) %>% as.matrix()
+# # NOTE: to create all possible interactions, the formula should be: f <- high_eff~.^2 (for second-order
+# # interactions, or ^3 for third order)!
 #
 #
-# ### Train a model using the repeated 10-fold cross validation to find the best hyperparameters:
-# set.seed(21)
-# trained.mod <- caret::train(high_eff~., data = mydata, method = "glmnet", family = "binomial",
-#                                trControl = train.control,
-#                                tuneLength = 15)
 #
-# # To extract the best hyperparameters:
-# get_best_result <- function(caret_fit) {
-#   best = which(rownames(caret_fit$results) == rownames(caret_fit$bestTune))
-#   best_result = caret_fit$results[best, ]
-#   rownames(best_result) = NULL
-#   best_result
+# ### Ridge regression:
+# # Find the optimal value of lambda that minimizes the cross-validation error:
+# set.seed(653)
+# cv.ridge <- glmnet::cv.glmnet(x = x, y = y, alpha = 0, family = "binomial",
+#                               type.measure = "deviance", nfolds = 10)
+# cv.ridge_stdz <- glmnet::cv.glmnet(x = x_stdz, y = y, alpha = 0, family = "binomial",
+#                                   type.measure = "deviance", nfolds = 10)
+# plot(cv.ridge)
+# plot(cv.ridge_stdz)
+# # glmnet::coef.glmnet(object = cv.ridge, s = cv.ridge$lambda.min) # To have look at the coefficients
+# # glmnet::coef.glmnet(object = cv.ridge_stdz, s = cv.ridge$lambda.min) # To have look at the coefficients
+#
+# # Compute the full Ridge model:
+# ridge.model <- glmnet::glmnet(x = x, y = y, alpha = 0, family = "binomial")
+# ridge.model_stdz <- glmnet::glmnet(x = x_stdz, y = y, alpha = 0, family = "binomial")
+#
+#
+#
+# ### Evaluate the performance of the full Ridge model (WITHOUT manual standardisation):
+# pred.class <- predict(object = ridge.model, newx = x,
+#                       s = min(ridge.model$lambda), type = "class") %>% as.factor()
+# pred.prob  <- predict(ridge.model, newx = x, s = min(ridge.model$lambda), type = "response")
+#
+# MLmetrics::LogLoss(y_pred = pred.prob, y_true = y) # 0.399
+# MLmetrics::AUC(y_pred = pred.prob, y_true = y) # 0.894
+# MLmetrics::R2_Score(y_pred = pred.prob, y_true = y) # 0.43
+# stats::deviance(ridge.model) # 67.88
+#
+# conf.mat <- MLmetrics::ConfusionMatrix(y_pred = pred.class, y_true = y) # Or table(y, pred.class)
+# error_rate <- (conf.mat[2]+conf.mat[3])/length(y)
+# error_rate # Mean error rate = 0.176
+# tpr <- (conf.mat[4])/(conf.mat[2]+conf.mat[4])
+# tpr # True positive rate = 0.73
+#
+# # # To plot the ROC curve:
+# # pred <- ROCR::prediction(predictions = pred.prob, labels = mydata$high_eff)
+# # auc <- ROCR::performance(prediction.obj = pred, measure = "auc")@y.values[[1]][1]
+# # perf <- ROCR::performance(prediction.obj = pred, measure = "tpr","fpr")
+# # plot(perf, col="navyblue", cex.main=1,
+# #      main= paste("Logistic Regression ROC Curve: AUC =", round(auc,3)))
+# # abline(a=0, b = 1, col='darkorange1')
+#
+#
+#
+# ### Evaluate the performance of the full Ridge model (WITH interactions):
+# pred.class_stdz <- predict(object = ridge.model_stdz, newx = x_stdz,
+#                           s = min(ridge.model_stdz$lambda), type = "class") %>% as.factor()
+# pred.prob_stdz  <- predict(ridge.model_stdz, newx = x_stdz, s = min(ridge.model_stdz$lambda), type = "response")
+#
+# MLmetrics::LogLoss(y_pred = pred.prob_stdz, y_true = y) # 0.399
+# MLmetrics::AUC(y_pred = pred.prob_stdz, y_true = y) # 0.894
+# MLmetrics::R2_Score(y_pred = pred.prob_stdz, y_true = y) # 0.43
+# stats::deviance(ridge.model_stdz) # 67.878
+#
+# conf.mat_stdz <- MLmetrics::ConfusionMatrix(y_pred = pred.class_stdz, y_true = y) # Or table(y, pred.class_stdz)
+# error_rate_stdz <- (conf.mat_stdz[2]+conf.mat_stdz[3])/length(y)
+# error_rate_stdz # Mean error rate = 0.176
+# tpr_stdz <- (conf.mat_stdz[4])/(conf.mat_stdz[2]+conf.mat_stdz[4])
+# tpr_stdz # True positive rate = 0.73
+#
+# # # To plot the ROC curve:
+# # pred <- ROCR::prediction(predictions = pred.prob_stdz, labels = mydata$high_eff)
+# # auc <- ROCR::performance(prediction.obj = pred, measure = "auc")@y.values[[1]][1]
+# # perf <- ROCR::performance(prediction.obj = pred, measure = "tpr","fpr")
+# # plot(perf, col="navyblue", cex.main=1,
+# #      main= paste("Logistic Regression ROC Curve: AUC =", round(auc,3)))
+# # abline(a=0, b = 1, col='darkorange1')
+#
+#
+#
+# ### Enhanced (optimism) bootstrap comparison:
+# # Create a function suitable for boot that will return the optimism estimates for statistics testing
+# # models against the full original sample:
+# compare_opt <- function(orig_data, i){
+#   # Create the resampled data
+#   train_data <- orig_data[i, ]
+#
+#   # Create data matrices (as accepted by glmnet):
+#   f <- as.formula(high_eff~add_control+distance+fully_tarped+geomem+obstacles+plantation+pb_fixation
+#                   +pb_durability+repairs+slope+stand_surface+stripsoverlap_ok+sedicover_height+tarping_duration
+#                   +uprootexcav+pb_fixation*repairs+pb_fixation*add_control+add_control*fully_tarped
+#                   +distance*fully_tarped+distance*uprootexcav+fully_tarped*geomem+stripsoverlap_ok*pb_durability
+#                   +uprootexcav*pb_fixation+pb_fixation*pb_durability+uprootexcav*plantation+repairs*plantation+0)
+#   x.train <- stats::model.matrix(f, train_data)[,-1] # Matrix of potential predictors (WITHOUT manual standardisation)
+#   x.train_stdz <- apply(x, 2, scale) # Matrix of potential predictors (WITH manual standardisation)
+#
+#   y.train <- jk.dusz.tarping::as.numfactor(x = train_data$high_eff) %>% as.matrix()
+#
+#   # Run the entire modelling process:
+#   model_full <- glmnet::glmnet(x = x.train, y = y.train, alpha = 0, family = "binomial")
+#   model_full_stdz <- glmnet::glmnet(x = x.train_stdz, y = y.train, alpha = 0, family = "binomial")
+#
+#   # Predict the values on the trained, resampled data
+#   train_pred.class <- predict(object = model_full, newx = x.train,
+#                               s = min(model_full$lambda), type = "class") %>% as.factor()
+#   train_pred.prob  <- predict(object = model_full, newx = x.train,
+#                               s = min(model_full$lambda), type = "response")
+#   train_pred.class_stdz <- predict(object = model_full_stdz, newx = x.train_stdz,
+#                                   s = min(model_full_stdz$lambda), type = "class") %>% as.factor()
+#   train_pred.prob_stdz  <- predict(object = model_full_stdz, newx = x.train_stdz,
+#                                   s = min(model_full_stdz$lambda), type = "response")
+#
+#   # Predict the values on the original, unresampled data
+#   full_pred.class <- predict(object = model_full, newx = x,
+#                              s = min(model_full$lambda), type = "class") %>% as.factor()
+#   full_pred.prob  <- predict(object = model_full, newx = x,
+#                              s = min(model_full$lambda), type = "response")
+#   full_pred.class_stdz <- predict(object = model_full_stdz, newx = x_stdz,
+#                                  s = min(model_full_stdz$lambda), type = "class") %>% as.factor()
+#   full_pred.prob_stdz  <- predict(object = model_full_stdz, newx = x_stdz,
+#                                  s = min(model_full_stdz$lambda), type = "response")
+#
+#   train_conf.mat <- MLmetrics::ConfusionMatrix(y_pred = train_pred.class, y_true = y.train)
+#   train_error_rate <- (train_conf.mat[2]+train_conf.mat[3])/length(y.train)
+#   train_tpr <- (train_conf.mat[4])/(train_conf.mat[2]+train_conf.mat[4])
+#   full_conf.mat <- MLmetrics::ConfusionMatrix(y_pred = full_pred.class, y_true = y)
+#   full_error_rate <- (full_conf.mat[2]+full_conf.mat[3])/length(y)
+#   full_tpr <- (full_conf.mat[4])/(full_conf.mat[2]+full_conf.mat[4])
+#
+#   train_conf.mat_stdz <- MLmetrics::ConfusionMatrix(y_pred = train_pred.class_stdz, y_true = y.train)
+#   train_error_rate_stdz <- (train_conf.mat_stdz[2]+train_conf.mat_stdz[3])/length(y.train)
+#   train_tpr_stdz <- (train_conf.mat_stdz[4])/(train_conf.mat_stdz[2]+train_conf.mat_stdz[4])
+#   full_conf.mat_stdz <- MLmetrics::ConfusionMatrix(y_pred = full_pred.class_stdz, y_true = y)
+#   full_error_rate_stdz <- (full_conf.mat_stdz[2]+full_conf.mat_stdz[3])/length(y)
+#   full_tpr_stdz <- (full_conf.mat_stdz[4])/(full_conf.mat_stdz[2]+full_conf.mat_stdz[4])
+#
+#
+#   # Return a vector of summary optimism results
+#   results <- c(
+#     boot_LogLoss = MLmetrics::LogLoss(y_pred = train_pred.prob, y_true = y.train) -
+#       MLmetrics::LogLoss(y_pred = full_pred.prob, y_true = y),
+#     boot_AUC = MLmetrics::AUC(y_pred = train_pred.prob, y_true = y.train) -
+#       MLmetrics::AUC(y_pred = full_pred.prob, y_true = y),
+#     boot_R2 = MLmetrics::R2_Score(y_pred = train_pred.prob, y_true = y.train) -
+#       MLmetrics::R2_Score(y_pred = full_pred.prob, y_true = y),
+#     boot_m.error = train_error_rate - full_error_rate,
+#     boot_tpr = train_tpr - full_tpr,
+#     boot_LogLoss_stdz = MLmetrics::LogLoss(y_pred = train_pred.prob_stdz, y_true = y.train) -
+#       MLmetrics::LogLoss(y_pred = full_pred.prob_stdz, y_true = y),
+#     boot_AUC_stdz = MLmetrics::AUC(y_pred = train_pred.prob_stdz, y_true = y.train) -
+#       MLmetrics::AUC(y_pred = full_pred.prob_stdz, y_true = y),
+#     boot_R2_stdz = MLmetrics::R2_Score(y_pred = train_pred.prob_stdz, y_true = y.train) -
+#       MLmetrics::R2_Score(y_pred = full_pred.prob_stdz, y_true = y),
+#     boot_m.error_stdz = train_error_rate_stdz - full_error_rate_stdz,
+#     boot_tpr_stdz = train_tpr_stdz - full_tpr_stdz
+#   )
+#   return(results)
 # }
-# best_param <- get_best_result(caret_fit = trained.mod)
-# best_param
-# #      alpha       lambda  Accuracy     Kappa AccuracySD   KappaSD
-# #1 0.9357143 0.0008972655 0.7420556 0.2757236  0.1260169 0.3631528 # Some other tuning gave slightly better
-# # results but I'm having trouble with reproducibility here...
-#
-# # Final elastic-net model (to observe what variables are kept and their associated coefficients):
-# elasticnet.model <- glmnet::glmnet(x = x, y = y, alpha = best_param$alpha,
-#                                    lambda = best_param$lambda,
-#                                    family = "binomial")
-# glmnet::coef.glmnet(object = elasticnet.model, s = best_param$lambda)
 #
 #
-# ### Make predictions using the final elastic net model (glmnet):
-# predic.glmnet <- predict(object = elasticnet.model, newx = x,
-#                        s = best_param$lambda, type = "class") %>% as.factor()
-# mean(predic.glmnet == mydata$high_eff) # 0.776 ±= Accuracy?
-# pred.obs <- data.frame(cbind(predic.glmnet, mydata[,1]))
-# sum(pred.obs$predic.glmnet == pred.obs$high_eff) # 66 out of 85 observations
-# sum(pred.obs$predic.glmnet == 1 & pred.obs$high_eff == 1) # Correctly predicted eradication 10 times
-# # out of 23 eradication events (not very good)!
 #
-# #foldid <- sample(1:10, size = length(y), replace = TRUE)
+# ### Perform bootstrapping and return optimism-corrected results:
+# res_opt <- boot::boot(data = mydata, statistic = compare_opt, R = 1000) # For large datasets, use a parallel
+# # cluster computing (it's quite straightforward)
+#
+# # Calculate the results for the original model:
+# original <- c(
+#   MLmetrics::LogLoss(y_pred = pred.prob, y_true = y),
+#   MLmetrics::AUC(y_pred = pred.prob, y_true = y),
+#   MLmetrics::R2_Score(y_pred = pred.prob, y_true = y),
+#   error_rate,
+#   tpr,
+#   MLmetrics::LogLoss(y_pred = pred.prob_stdz, y_true = y),
+#   MLmetrics::AUC(y_pred = pred.prob_stdz, y_true = y),
+#   MLmetrics::R2_Score(y_pred = pred.prob_stdz, y_true = y),
+#   error_rate_stdz,
+#   tpr_stdz
+# )
+#
+# # Compute the mean bootstrapped results and the enhanced results:
+# optimism <- apply(na.omit(res_opt$t), 2, mean)
+# corrected_results <- original - optimism %>% as.data.frame(row.names = c("LogLoss", "AUC",
+#                                                                          "R2", "Mean Error Rate", "True Positive Rate",
+#                                                                          "LogLoss (w/ man. stdz.)", "AUC (w/ man. stdz.)",
+#                                                                          "R2 (w/ man. stdz.)", "Mean Error Rate (w/ man. stdz.)",
+#                                                                          "True Positive Rate (w/ man. stdz.)"))
+# print(corrected_results <- dplyr::rename(.data = corrected_results, "Optimism-corrected value" = .))
+
+# CONCLUSION: contrarily to what I read online, manual standardisation does not improve results and the
+# 'standardize = TRUE' argument in 'glmnet::glmnet' seems to work properly! Therefore, we will use the full
+# model that includes interactions to make predictions regarding the probability of (near-) eradication for
+# differing values of distance, stand_surface, etc.
 
 
+
+
+
+##### Predicting new (near-)eradication events #####
+# ------------------------------------------------ #
+
+### Generate new data
+new.dat <- mydata %>%
+  dplyr::mutate_if(is.numeric, mean) %>%
+  dplyr::mutate(add_control = 1) %>%
+  dplyr::mutate(fully_tarped = 1) %>%
+  dplyr::mutate(geomem = 1) %>%
+  dplyr::mutate(plantation = 0) %>%
+  dplyr::mutate(pb_fixation = 0) %>%
+  dplyr::mutate(pb_durability = 0) %>%
+  dplyr::mutate(repairs = 1) %>%
+  dplyr::mutate(stripsoverlap_ok = 1) %>%
+  dplyr::mutate(uprootexcav = 1)
+new.dat <- new.dat[1:50,]
+summary(new.dat) # Generated a new dataset simulating knotweed stands with average values for numeric
+# variables and that was fully covered by a geomembrane after having been uprooted and with at least 40cm
+# of fabric strips overlap, the presence of additional control, repairs, no plantation, and no particular
+# problems.
+distance <- seq(0.1, 5, length.out = 50)
+new.dist <- new.dat
+new.dist$distance <- distance
+new.dist <- stats::model.matrix(f, new.dist) # Matrix of potential predictors to be used by predict()
+head(new.dist)
+
+stand_surface <- seq(1, 500, length.out = 50)
+new.surf <- new.dat
+new.surf$stand_surface <- stand_surface
+new.surf <- stats::model.matrix(f, new.surf) # Matrix of potential predictors to be used by predict()
+head(new.surf)
+
+### Predict probabilities of (near-)eradication for the new data:
+# Predictions for a range of distance values
+pred.prob_dist  <- predict(ridge.model_int, newx = new.dist, s = min(ridge.model_int$lambda), type = "response")
+
+# Predictions for a range of stand_surface values
+pred.prob_surf  <- predict(ridge.model_int, newx = new.surf, s = min(ridge.model_int$lambda), type = "response")

@@ -281,7 +281,7 @@ usethis::use_package("gridExtra")
 file.create(... = "output/texts/jk.d.tarp.data_preparation_report.Rmd") # Using this command, the .Rmd file
 # will be created but will lack the YAML header skeleton that should thus be manually placed at the top of
 # the document.
-usethis::use_git(message = ":boom: Saved progresses on high_eff modelling")
+usethis::use_git(message = ":metal: Exported first results from high_eff modelling")
 system("git push")
 
 
