@@ -2766,15 +2766,13 @@ Para.model <- data.frame(Parameters, Var, Var.Imp)
 ### Select the top models:
 #top.models <- MuMIn::get.models(AICc, cumsum(weight) <= 0.95) # To take those with a cumulative sum of
 # AICc weights <= 0.95
-top.models <- MuMIn::get.models(AICc, cumsum(weight) <= 1) # To take them all (we chose this option because
-# it was equally interesting to highlight the explanatory variables whose "importance" was supported
-# by the data and those that were not)!
-# We could also select models according to their delta AICc (see Burnham & Anderson, 2002)!
+top.models <- MuMIn::get.models(AICc, delta <= 4)
 
 ### Actual model parameters averaging:
 Parameter <- MuMIn::model.avg(top.models, revised.var=T, adjusted=T, fit=T)
-Parameter.model <- as.data.frame(cbind(MuMIn::coefTable(Parameter), stats::confint(Parameter))) # Reports
-# the conditional averaged parameters with their 95% confidence interval
+Parameter.model <- as.data.frame(cbind(MuMIn::coefTable(Parameter, full=T),
+                                       stats::confint(Parameter, full=T))) # Reports the unconditional
+# averaged parameters with their 95% confidence interval (to get the conditional ones, set full = FALSE)
 
 ### Improved formating:
 Parameter.model$Var <- row.names(Parameter.model)
@@ -2798,4 +2796,4 @@ Parameter.model <- Parameter.model[,c("Response", "Parameters", "Imp.", "Estimat
 Parameter.model <- Parameter.model[!is.na(Parameter.model$Imp.), ]
 
 ### Table export:
-readr::write_csv2(x = Parameter.model, file = here::here("output", "tables", "Parameters_lreg_tarpedarea.csv"))
+readr::write_csv2(x = Parameter.model, file = here::here("output", "tables", "Param.full.lreg_tarpedarea.csv"))
