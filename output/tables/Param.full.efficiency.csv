@@ -1,0 +1,7 @@
+Response;Parameters;Imp.;Estimate (±SE);(95% CI);N model
+efficiency;fully_tarped;1.00;1.065 (±0.281);"(0.514; 1.617)";5
+efficiency;log2(distance + 1);0.51;0.206 (±0.245);"(-0.274; 0.686)";5
+efficiency;obstacles;1.00;-0.141 (±0.036);"(-0.212; -0.070)";5
+efficiency;pb_fixation;0.10;-0.030 (±0.124);"(-0.273; 0.213)";5
+efficiency;slope;0.13;-0.006 (±0.020);"(-0.045; 0.033)";5
+efficiency;uprootexcav;0.09;-0.017 (±0.086);"(-0.187; 0.152)";5

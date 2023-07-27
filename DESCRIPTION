@@ -13,22 +13,13 @@ License: MIT + file LICENSE
 Encoding: UTF-8
 LazyData: true
 Roxygen: list(markdown = TRUE)
-RoxygenNote: 7.1.1
+RoxygenNote: 7.2.3
 Imports: 
     magrittr,
     readr,
     here,
-    drake,
     dplyr,
-    ggplot2,
-    forcats,
     stringr,
-    Hmisc,
-    ggcorrplot,
-    ade4,
-    FactoMineR,
-    factoextra,
-    gridExtra,
     fields
 Suggests: 
     testthat

@@ -6,9 +6,7 @@
 \alias{jk.dusz.tarping-package}
 \title{jk.dusz.tarping: Prepare and Analyse the Tarping Survey Data}
 \description{
-This package project is meant to clean, prepare, and statistically analyse the data from 
-    the 2020 Survey on tarping as a control method for Japanese knotweed s.l. (Reynoutria spp.), launched
-    by Marie-Anne Dusz, André Evette, Fanny Dommanget and me.
+This package project is meant to clean, prepare, and statistically analyse the data from the 2020 Survey on tarping as a control method for Japanese knotweed s.l. (Reynoutria spp.), launched by Marie-Anne Dusz, André Evette, Fanny Dommanget and me.
 }
 \seealso{
 Useful links:
